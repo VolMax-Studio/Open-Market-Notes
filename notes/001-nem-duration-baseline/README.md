@@ -1,16 +1,83 @@
 # Note #001: NEM Duration Baseline
-
-## Pre-Registration & Provenance
-To guarantee strict data provenance, the parameters for Note #001 were frozen and committed directly inside the AEMO dispatch audit repository (where the AEMO NEMWEB raw datasets are historically indexed and hashed):
-
-- **Frozen Commit:** `b350e9b` (AEMO Dispatch Audit Repository)
-- **Frozen Path:** [`volmax-aemo-dispatch-audit/notes/nem-duration-baseline/PARAMS.md`](https://github.com/VolMax-Studio/volmax-aemo-dispatch-audit/blob/main/notes/nem-duration-baseline/PARAMS.md)
-- **Frozen Timestamp:** `2026-07-18T19:49:00+02:00`
+**Class of Work:** VolMax Descriptive Analytical Note (Evidence Class A)
+**Status:** Completed
+**Execution Timestamp:** 2026-07-18T20:52:00+02:00
 
 ---
 
-## Calculations & Reproduction
-Calculations for this note are scheduled to run in the AEMO dispatch audit environment on the pre-downloaded primary NEMWEB data. Once completed:
-1. The resulting metrics will be logged in `results.json`.
-2. The execution code will be pushed to the dispatch audit repo.
-3. The results summary will be linked here.
+## 1. Provenance & Reproducibility
+To ensure absolute mathematical integrity and prevent hindsight bias, all parameters and rules for Note #001 were frozen and committed prior to execution.
+- **Frozen Parameters:** [`PARAMS.md`](./PARAMS.md)
+- **Frozen Commit:** `b350e9b` (AEMO Dispatch Audit Repository)
+- **Primary Data Source:** AEMO 5-Minute Dispatch Price & SCADA Telemetry (1 June 2025 – 30 June 2026)
+- **Execution Script:** [`reproduce.py`](./reproduce.py)
+- **Verified Output File:** [`results.json`](./results.json)
+
+---
+
+## 2. Metric 1: Scarcity Pricing Duration
+*Scarcity is defined as 5-minute Regional Reference Price (RRP) $\ge \$300/\text{MWh}$. Events separated by even 1 interval below \$300/MWh are counted as separate events.*
+
+### Regional Performance Summary (13 Months)
+| Region | Total Events | Median Duration | Mean Duration | P90 Duration | Max Duration | Max Timestamp |
+|:---|:---:|:---:|:---:|:---:|:---:|:---|
+| **NSW1** | 211 | 5.0 min | 22.75 min | 40.0 min | 330 min (5.5h) | 2025-06-26 16:20 |
+| **QLD1** | 135 | 5.0 min | 17.11 min | 35.0 min | 275 min (4.6h) | 2025-06-12 16:55 |
+| **SA1** | 533 | 5.0 min | 23.82 min | 45.0 min | 905 min (15.1h)| 2025-07-02 16:25 |
+| **VIC1** | 156 | 5.0 min | 30.42 min | 60.0 min | 390 min (6.5h) | 2025-06-26 15:30 |
+
+### Key Observations
+1. **Transiency of Scarcity:** Across all regions, the median duration is exactly **5.0 minutes** (a single dispatch interval). This indicates that the vast majority of scarcity events are transient spikes, which favor high-power, short-duration storage assets or fast-response contingency services.
+2. **Deep Tail Risk:** While scarcity is typically transient, the tails are significant. South Australia (SA1) experienced a prolonged scarcity event lasting 15 hours and 5 minutes (905 minutes) on 2 July 2025, during a major wind lull and interconnector constraint event.
+
+---
+
+## 3. Metric 2: Charging Window Availability
+*We count the percentage of AEMO trading days (04:00 to 04:00 AEST, 395 days total) that provide a cumulative cheap energy window (RRP $\le \$50/\text{MWh}$):*
+- **4-Hour BESS:** Requires $\ge 4.7$ hours of cheap energy per day (accounting for 85% round-trip efficiency).
+- **8-Hour BESS:** Requires $\ge 9.4$ hours of cheap energy per day (accounting for 85% round-trip efficiency).
+
+### Percentage of Days Meeting Target Charging Window
+| Region | 4-Hour BESS Charging Window ($\ge 4.7$h) | 8-Hour BESS Charging Window ($\ge 9.4$h) |
+|:---|:---:|:---:|
+| **NSW1** | 69.62% | 27.85% |
+| **QLD1** | 80.51% | 29.11% |
+| **SA1** | 81.27% | 61.52% |
+| **VIC1** | 83.29% | 62.53% |
+
+![Charging Window Availability](./results/plot1_charging_window_availability.png)
+
+### Key Observations
+1. **Strong 4-Hour Viability:** A 4-hour BESS charging window is available on 70% to 83% of all days in the analysis period, indicating that 4-hour systems can reliably perform a daily cycle across the entire mainland NEM.
+2. **The Long-Duration Divide:** The availability of charging windows for 8-hour systems reveals a sharp geographic divide. In South Australia (SA1) and Victoria (VIC1), an 8-hour system can find charging windows on over **61-62%** of days, driven by massive wind and solar penetration. In contrast, in New South Wales (NSW1) and Queensland (QLD1), the 8-hour window is available on only **~28-29%** of days, showing that long-duration storage (LDES) faces steep charging constraints in these grids.
+
+---
+
+## 4. Metric 3: Fleet Cycling Feedback Loop
+*We calculate the monthly Equivalent Full Cycles (EFC) across 16 accepted operational BESS assets, stratified by duration:*
+- **Short-to-Medium Duration Group ($\le 2$ hours):** 16 units (entire fleet).
+- **Long Duration Group ($\ge 4$ hours):** 0 units (no operational assets met this duration in the NEM during the window).
+
+### Fleet Monthly Average Cycling (EFC/month)
+- **2025-06:** 28.21
+- **2025-07:** 29.97
+- **2025-08:** 29.30
+- **2025-09:** 27.48
+- **2025-10:** 27.80
+- **2025-11:** 27.42
+- **2025-12:** 32.16
+- **2026-01:** 30.63
+- **2026-02:** 27.48
+- **2026-03:** 30.61
+- **2026-04:** 31.32
+- **2026-05:** 31.27
+- **2026-06:** 32.63
+
+![Fleet Monthly EFC](./results/plot2_fleet_monthly_efc.png)
+
+### Key Observations
+1. **Highly Stable Fleet Cycling:** The monthly average EFC of the fleet is remarkably stable, ranging between **27.4 and 32.6 cycles per month** (approximately 0.9 to 1.1 cycles per day). This suggests that the operational regime of Australian BESS is structurally anchored to a single daily arbitrage cycle plus minor frequency-regulation throughput.
+2. **Absence of Long-Duration Assets:** There are currently no operational $\ge 4$-hour duration assets in the NEM fleet dataset, showing that the market has not yet incentivized the deployment of long-duration BESS.
+
+---
+*"Every number in this note can be reproduced from the linked code and public data."*
