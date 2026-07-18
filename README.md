@@ -1,5 +1,5 @@
 # VolMax Open Market Notes
-> **Independent, reproducible measurements of public electricity markets using frozen parameters defined before analysis.**
+> **Independent measurements of public electricity markets.**
 
 ---
 
@@ -63,6 +63,12 @@ Instead, they maintain a **Parametric Changelog** in this repository. If a froze
    * *Scope:* ERCOT Hubs (West, North, South, Houston) from 1 Jun 2025 – 30 Jun 2026.
    * *Focus:* Scarcity pricing duration ($100/MWh & $250/MWh thresholds) and charging window availability (8h BESS at 0.85 RTE).
    * *Status:* Draft (pending ERCOT documentation citations).
+
+3. **Note #003: European Negative Price Baseline**
+   * *Scope:* European bidding zones (e.g., DE-LU, FR, ES, IT-North, NL, BE, DK1, DK2) from 1 Jun 2025 – 30 Jun 2026.
+   * *Focus:* Cumulative negative price hours, extreme pricing intervals (< -€50/MWh), and charging window suitability.
+   * *Status:* Scoping (ENTSO-E API discovery phase).
+
 
 ---
 *Developed by VolMax Studio Lab | [volmax-studio.rs](https://www.volmax-studio.rs) | Because trust should be verifiable.*
