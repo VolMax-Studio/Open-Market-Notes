@@ -56,13 +56,13 @@ Instead, they maintain a **Parametric Changelog** in this repository. If a froze
 1. **[Note #001: NEM Duration Baseline](https://github.com/VolMax-Studio/volmax-aemo-dispatch-audit/tree/main/notes/nem-duration-baseline)**
    * *Scope:* Mainland Australia NEM (NSW1, QLD1, SA1, VIC1) from 1 Jun 2025 – 30 Jun 2026.
    * *Focus:* Scarcity price duration ($300/MWh threshold) and charging window availability (8h BESS at 0.85 RTE).
-   * *Status:* Parameters Frozen (Timestamp: `2026-07-18T19:49:00Z`). Analysis pending.
+   * *Status:* Parameters Frozen (Timestamp: `2026-07-18T19:49:00+02:00`). Analysis pending.
    * *Note:* Initialized in the AEMO dispatch audit repository to preserve dataset provenance.
 
 2. **Note #002: ERCOT Duration Baseline**
    * *Scope:* ERCOT Hubs (West, North, South, Houston) from 1 Jun 2025 – 30 Jun 2026.
    * *Focus:* Scarcity pricing duration ($100/MWh & $250/MWh thresholds) and charging window availability (8h BESS at 0.85 RTE).
-   * *Status:* Parameter Formulation.
+   * *Status:* Draft (pending ERCOT documentation citations).
 
 ---
 *Developed by VolMax Studio Lab | [volmax-studio.rs](https://www.volmax-studio.rs) | Because trust should be verifiable.*

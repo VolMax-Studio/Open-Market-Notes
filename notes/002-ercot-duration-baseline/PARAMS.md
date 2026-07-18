@@ -1,6 +1,6 @@
 # VolMax Note #2: ERCOT Duration Baseline — Frozen Parameters
 **Class of Work:** VolMax Descriptive Analytical Note (Not a P10 Audit)
-**Status:** Frozen (Committed prior to running calculations)
+**Status:** Draft (pending ERCOT documentation citations)
 **Frozen Timestamp:** 2026-07-18T20:10:00+02:00
 
 ---
@@ -37,8 +37,5 @@ ERCOT's West Hub frequently sees low, zero, or negative pricing due to wind curt
 - **Primary Metric:** Percentage of days in the analysis period meeting the cumulative window requirements per Hub.
 
 ### Metric 3 (M3): Fleet Cycling Feedback Loop
-- **Data Source:** Monthly Equivalent Full Cycles (EFC) from the ERCOT BESS audit datasets.
-- **Stratification Groups:**
-  - Short-to-Medium Duration: $\le 2\text{ hours}$ registered capacity duration (e.g., Bat Cave 1h, Anole 2h).
-  - Long Duration: $\ge 4\text{ hours}$ registered capacity duration (if any operational assets exist in the database for the period).
-- **Analysis:** Compare monthly EFC trends between groups. If no long-duration assets are operational, the baseline will record only the short-to-medium duration baseline to serve as the pre-transition reference.
+M3 (fleet cycling) deferred — current ERCOT holdings (60 days, 2 units) cannot support a 13-month fleet analysis; will be added when a longer holding exists.
+
