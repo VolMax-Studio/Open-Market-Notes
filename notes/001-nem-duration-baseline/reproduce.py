@@ -296,6 +296,22 @@ def main():
     plt.close()
     print(f"Saved plot: {plot2_path}")
 
+    print("\n--- GENERATED MARKDOWN TABLES ---")
+    print("### Metric 1: Scarcity Pricing Duration")
+    print("| Region | Total Events | Median Duration | Mean Duration | P90 Duration | Max Duration | Max Timestamp |")
+    print("|:---|:---:|:---:|:---:|:---:|:---:|:---|")
+    for r in regions:
+        m1 = results["Metric_1_Scarcity_Pricing_Duration"][r]
+        print(f"| **{r}** | {m1['Total_Events']} | {m1['Median_Duration_Minutes']:.1f} min | {m1['Mean_Duration_Minutes']:.2f} min | {m1['P90_Duration_Minutes']:.1f} min | {m1['Max_Duration_Minutes']} min ({m1['Max_Duration_Minutes']/60:.1f}h) | {m1['Max_Duration_Timestamp']} |")
+    
+    print("\n### Metric 2: Charging Window Availability")
+    print("| Region | 4-Hour BESS Charging Window (\\ge 4.7h) | 8-Hour BESS Charging Window (\\ge 9.4h) |")
+    print("|:---|:---:|:---:|")
+    for r in regions:
+        m2 = results["Metric_2_Charging_Window_Availability"][r]
+        print(f"| **{r}** | {m2['Pct_Days_Met_4h_BESS']:.2f}% | {m2['Pct_Days_Met_8h_BESS']:.2f}% |")
+    print("---------------------------------\n")
+
     print("\n======================================================================")
     print("SUCCESS: Note #1 reproduction calculations completed.")
     print("======================================================================")

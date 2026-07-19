@@ -21,13 +21,13 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 ### Regional Performance Summary (13 Months)
 | Region | Total Events | Median Duration | Mean Duration | P90 Duration | Max Duration | Max Timestamp |
 |:---|:---:|:---:|:---:|:---:|:---:|:---|
-| **NSW1** | 211 | 5.0 min | 22.75 min | 40.0 min | 330 min (5.5h) | 2025-06-26 16:20 |
-| **QLD1** | 135 | 5.0 min | 17.11 min | 35.0 min | 275 min (4.6h) | 2025-06-12 16:55 |
-| **SA1** | 533 | 5.0 min | 23.82 min | 45.0 min | 905 min (15.1h)| 2025-07-02 16:25 |
-| **VIC1** | 156 | 5.0 min | 30.42 min | 60.0 min | 390 min (6.5h) | 2025-06-26 15:30 |
+| **NSW1** | 211 | 5.0 min | 22.75 min | 40.0 min | 330 min (5.5h) | 2025-06-26 16:20:00 |
+| **QLD1** | 135 | 5.0 min | 17.11 min | 33.0 min | 275 min (4.6h) | 2025-06-12 16:55:00 |
+| **SA1** | 533 | 5.0 min | 23.75 min | 29.0 min | 905 min (15.1h) | 2025-07-02 16:25:00 |
+| **VIC1** | 156 | 10.0 min | 30.38 min | 62.5 min | 390 min (6.5h) | 2025-06-26 15:30:00 |
 
 ### Key Observations
-1. **Transiency of Scarcity:** Across all regions, the median duration is exactly **5.0 minutes** (a single dispatch interval). This indicates that the vast majority of scarcity events are transient spikes, which favor high-power, short-duration storage assets or fast-response contingency services.
+1. **Transiency of Scarcity:** In NSW1, QLD1, and SA1, the median duration is exactly **5.0 minutes** (a single dispatch interval), while in VIC1 the median rises to **10.0 minutes** (two dispatch intervals). This indicates that the vast majority of scarcity events are transient spikes, which favor high-power, short-duration storage assets or fast-response contingency services.
 2. **Deep Tail Risk:** While scarcity is typically transient, the tails are significant. South Australia (SA1) experienced a prolonged scarcity event lasting 15 hours and 5 minutes (905 minutes) on 2 July 2025, during a major wind lull and interconnector constraint event.
 
 ---
@@ -49,7 +49,7 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 
 ### Key Observations
 1. **Strong 4-Hour Viability:** A 4-hour BESS charging window is available on 70% to 83% of all days in the analysis period, indicating that 4-hour systems can reliably perform a daily cycle across the entire mainland NEM.
-2. **The Long-Duration Divide:** The availability of charging windows for 8-hour systems reveals a sharp geographic divide. In South Australia (SA1) and Victoria (VIC1), an 8-hour system can find charging windows on over **61-62%** of days, driven by massive wind and solar penetration. In contrast, in New South Wales (NSW1) and Queensland (QLD1), the 8-hour window is available on only **~28-29%** of days, showing that long-duration storage (LDES) faces steep charging constraints in these grids.
+2. **The Long-Duration Divide:** The availability of charging windows for 8-hour systems reveals a sharp geographic divide. In South Australia (SA1) and Victoria (VIC1), an 8-hour system can find charging windows on over **61-62%** of days, observed alongside high wind and solar penetration. In contrast, in New South Wales (NSW1) and Queensland (QLD1), the 8-hour window is available on only **~28-29%** of days, showing that long-duration storage (LDES) faces steep charging constraints in these grids.
 
 ---
 
@@ -77,7 +77,16 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 
 ### Key Observations
 1. **Highly Stable Fleet Cycling:** The monthly average EFC of the fleet is remarkably stable, ranging between **27.4 and 32.6 cycles per month** (approximately 0.9 to 1.1 cycles per day). This suggests that the operational regime of Australian BESS is structurally anchored to a single daily arbitrage cycle plus minor frequency-regulation throughput.
-2. **Absence of Long-Duration Assets:** There are currently no operational $\ge 4$-hour duration assets in the NEM fleet dataset, showing that the market has not yet incentivized the deployment of long-duration BESS.
+2. **Absence of Long-Duration Assets:** There are currently no operational $\ge 4$-hour duration BESS assets in our filtered 16-unit analysis subsample, meaning long-duration cycling is not yet represented in our active fleet metrics.
+
+---
+
+## 5. Parametric & Note Changelog
+- **Version 1.0.1** (2026-07-19):
+  - Corrected Metric 1 summary table in README.md to match the final `results.json` output. (An earlier draft table was hand-transcribed from a superseded, timezone-unfiltered execution run).
+  - Clarified Section 4 (Metric 3) observation to note that the absence of long-duration assets applies strictly to our filtered 16-unit analysis subsample rather than the entire market.
+  - Aligned causal language in Section 3 (Metric 2) observations to "observed alongside" to comply with VolMax style rules.
+  - Added automated Markdown table printing to `reproduce.py` to prevent future transcription discrepancies.
 
 ---
 *"Every number in this note can be reproduced from the linked code and public data."*
