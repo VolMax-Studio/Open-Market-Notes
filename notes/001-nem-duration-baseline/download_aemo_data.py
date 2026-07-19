@@ -146,41 +146,9 @@ def download_month(year, month):
     except Exception as e:
         print(f"Error processing SCADA for {year}-{month:02d}: {e}")
 
-    # 2. DISPATCHLOAD
-    print(f"\n--- Downloading DISPATCHLOAD ---")
-    try:
-        dispatch_df = dynamic_data_compiler(
-            start_time=start_time,
-            end_time=end_time,
-            table_name='DISPATCHLOAD',
-            raw_data_location=raw_dir
-        )
-        
-        # Find raw CSV file in raw_dir
-        csv_files = glob.glob(os.path.join(raw_dir, f"*DISPATCHLOAD*{year}{month:02d}*.CSV"))
-        if csv_files:
-            raw_csv = csv_files[0]
-            print(f"Computing hash for raw CSV: {raw_csv}")
-            file_hash = compute_sha256(raw_csv)
-            update_manifest(raw_csv, file_hash)
-            
-        # Filter BESS units
-        print("Filtering and processing DISPATCHLOAD...")
-        for col in ['TOTALCLEARED', 'INITIALMW', 'RAMPDOWNRATE', 'RAMPUPRATE']:
-            if col in dispatch_df.columns:
-                dispatch_df[col] = pd.to_numeric(dispatch_df[col], errors='coerce')
-        dispatch_df['SETTLEMENTDATE'] = pd.to_datetime(dispatch_df['SETTLEMENTDATE'])
-        filtered_dispatch = dispatch_df[dispatch_df['DUID'].isin(ALL_BESS_DUIDS)].copy()
-        
-        out_path = os.path.join(proc_dir, f"dispatch_{year}{month:02d}.feather")
-        filtered_dispatch.reset_index(drop=True).to_feather(out_path)
-        print(f"Saved processed DISPATCHLOAD to {out_path} ({len(filtered_dispatch)} rows)")
-        
-        # Purge raw files
-        purge_cache('DISPATCHLOAD', year, month)
-        
-    except Exception as e:
-        print(f"Error processing DISPATCHLOAD for {year}-{month:02d}: {e}")
+    # 2. DISPATCHLOAD (Bypassed: not needed for Note #001 duration baseline analysis)
+    print(f"\n--- Skipping DISPATCHLOAD (Bypassed) ---")
+
 
     # 3. DISPATCHPRICE
     print(f"\n--- Downloading DISPATCHPRICE ---")
