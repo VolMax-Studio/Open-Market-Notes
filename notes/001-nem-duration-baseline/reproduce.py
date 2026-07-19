@@ -24,18 +24,16 @@ BESS_ENERGY_CAPACITY = {
     'HPR1': 193.5,      # Hornsdale Power Reserve
     'VBB1': 450.0,      # Victorian Big Battery
     'WANDB1': 150.0,    # Wandoan South BESS
-    'WDBESS1': 512.0,   # Western Downs BESS
+    'WDBESS1': 540.0,   # Western Downs BESS
     'TIB1': 250.0,      # Torrens Island BESS
-    'HBESS1': 200.0,    # Hazelwood BESS
+    'HBESS1': 150.0,    # Hazelwood BESS
     'RANGEB1': 400.0,   # Rangebank BESS
-    'TARBESS1': 300.0,  # Tarong BESS
-    'TEMPB1': 330.0,    # Templers BESS
     'CHBESS1': 200.0,   # Chinchilla BESS
-    'BLYTHB1': 476.0,   # Blyth BESS
-    'BHB1': 34.0,       # Bulgana BESS
+    'BLYTHB1': 477.0,   # Blyth BESS
+    'BHB1': 50.0,       # Broken Hill Battery
     'BBATTERY1': 100.0, # Bouldercombe BESS
-    'ULPBESS1': 100.0,  # Ulinda Park BESS
-    'WALGRV1': 100.0,   # Wallaroo BESS
+    'ULPBESS1': 298.0,  # Ulinda Park BESS
+    'WALGRV1': 75.0,    # Wallgrove Grid Battery
     'RESS1': 120.0,     # Riverina BESS 1
     'RIVNB2': 130.0,    # Riverina BESS 2
     'CAPBES1': 200.0,   # Capital BESS
