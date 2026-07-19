@@ -12,6 +12,7 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 - **Primary Data Source:** AEMO 5-Minute Dispatch Price & SCADA Telemetry (1 June 2025 – 30 June 2026)
 - **Execution Script:** [`reproduce.py`](./reproduce.py)
 - **Verified Output File:** [`results.json`](./results.json)
+- **Independent Execution:** [Independently re-executed on GitHub Actions: identical results (run #29683583017)](https://github.com/VolMax-Studio/Open-Market-Notes/actions/runs/29683583017)
 
 ---
 
