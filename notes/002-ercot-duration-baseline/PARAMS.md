@@ -1,7 +1,7 @@
 # VolMax Note #2: ERCOT Duration Baseline — Frozen Parameters
 **Class of Work:** VolMax Descriptive Analytical Note (Not a P10 Audit)
-**Status:** Draft (pending ERCOT documentation citations)
-**Frozen Timestamp:** 2026-07-18T20:10:00+02:00
+**Status:** Frozen
+**Frozen Timestamp:** 2026-07-19T10:10:00+02:00
 
 ---
 
@@ -38,4 +38,13 @@ ERCOT's West Hub frequently sees low, zero, or negative pricing due to wind curt
 
 ### Metric 3 (M3): Fleet Cycling Feedback Loop
 M3 (fleet cycling) deferred — current ERCOT holdings (60 days, 2 units) cannot support a 13-month fleet analysis; will be added when a longer holding exists.
+
+---
+
+## 4. Market References & Citations
+- **Settlement Point Price (SPP) Calculations:** ERCOT Nodal Protocols Section 2 (Definitions) and Section 6.6 (Settlement Calculations for the Real-Time Energy Operations).
+- **15-Minute Settlement Intervals:** Real-Time Settlement Interval is 15 minutes as defined in ERCOT Nodal Protocols Section 2.
+- **Price Volatility Thresholds:** The $100/\text{MWh}$ and $250/\text{MWh}$ thresholds are selected as benchmarks for operational price volatility. $100/\text{MWh}$ represents the typical threshold for gas/peaker economic dispatch activation, and $250/\text{MWh}$ represents peaking or extreme scarcity conditions (e.g. activation of ORDC price adders under ERCOT Nodal Protocols Section 6.5.7.3).
+- **Cheap Charging Energy Threshold:** The $25/\text{MWh}$ threshold represents low-cost wind and solar charging opportunities, which are frequently PTC-subsidized (Production Tax Credit) wind generation bids in the West Hub (HB_WEST) (ERCOT Nodal Protocols Section 4.4.11).
+
 
