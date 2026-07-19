@@ -43,7 +43,8 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 ---
 
 ## 3. Metric 2: Charging Window Availability
-*We count the percentage of calendar days (00:00 to 00:00 Central Time, 395 days total) that provide a cumulative cheap energy window (SPP $\le \$25/\text{MWh}$):*
+*We count the percentage of calendar days (395 days total) that provide a cumulative cheap energy window (SPP $\le \$25/\text{MWh}$):*
+- **Operating Day Timezone:** Operating days are defined strictly from 00:00 to 00:00 Central Time (US/Central / `America/Chicago`). The raw `interval_start_utc` timestamps from the dataset are explicitly converted to Central Time to align each interval with its correct local operating day.
 - **4-Hour BESS:** Requires $\ge 4.7$ hours of cheap energy per day (accounting for 85% round-trip efficiency).
 - **8-Hour BESS:** Requires $\ge 9.4$ hours of cheap energy per day (accounting for 85% round-trip efficiency).
 
