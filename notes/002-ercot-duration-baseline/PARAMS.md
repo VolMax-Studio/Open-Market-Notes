@@ -47,5 +47,13 @@ M3 (fleet cycling) deferred — current ERCOT holdings (60 days, 2 units) cannot
 - **Price Volatility Thresholds:** The $100/\text{MWh}$ and $250/\text{MWh}$ thresholds are selected as benchmarks for operational price volatility. $100/\text{MWh}$ represents the typical threshold for gas/peaker economic dispatch activation, and $250/\text{MWh}$ represents peaking or extreme scarcity conditions (e.g. activation of ORDC price adders under ERCOT Nodal Protocols Section 6.5.7.3).
 - **Cheap Charging Energy Threshold:** The $25/\text{MWh}$ threshold represents low-cost wind and solar charging opportunities, which are frequently driven by negative or near-zero pricing regimes in the West Hub (HB_WEST) (ERCOT Nodal Protocols Section 4.4.11 System-Wide Offer Caps).
 
+---
+
+## 4. Implementation Deviation Report (2026-07-19)
+- **Data Access Path:** The primary ERCOT MIS direct download (Path 1) returned HTTP 403 Forbidden due to WAF geoblocking of the local residential IP, and the configured proxy was inactive.
+- **Realized Path:** Executed Path 2 (GridStatus API fallback). Consequently, the note is classified as **Evidence Class B** (Third-Party API Ingestion), matching the Bat Cave audit protocol.
+- **Redistribution Decision:** To comply with GridStatus Terms of Use, the raw 15-minute SPP dataset is not committed to the public repository. Instead, it is hosted in a private repository for independent GHA execution, with public verification restricted to SHA-256 hashes inside `data_manifest.json`.
+
+
 
 

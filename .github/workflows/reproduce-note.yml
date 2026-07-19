@@ -65,11 +65,28 @@ jobs:
       - name: Data Acquisition & Integrity Verification
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRIVATE_DATA_TOKEN: ${{ secrets.PRIVATE_DATA_TOKEN }}
         run: |
           cd "$NOTE_DIR"
           if [ -f "download_aemo_data.py" ]; then
             echo "Direct data pull script found (NEMWEB). Running data download and verification..."
             python download_aemo_data.py
+          elif [ "$NOTE_NUM" = "002" ] && [ -n "$PRIVATE_DATA_TOKEN" ]; then
+            echo "ERCOT Price Data: Cloning private data repository..."
+            git clone https://x-access-token:${PRIVATE_DATA_TOKEN}@github.com/VolMax-Studio/open-market-data-private.git /tmp/open-market-data-private
+            mkdir -p data/processed
+            cp /tmp/open-market-data-private/ercot_spp_202506_202606.csv ./data/processed/
+            echo "Private data file copied successfully. Verifying SHA-256..."
+            
+            EXPECTED_HASH=$(python3 -c "import json; print(json.load(open('data/data_manifest.json'))['files'][0]['sha256'])")
+            ACTUAL_HASH=$(sha256sum ./data/processed/ercot_spp_202506_202606.csv | cut -d' ' -f1)
+            echo "Expected: $EXPECTED_HASH"
+            echo "Actual:   $ACTUAL_HASH"
+            if [ "$EXPECTED_HASH" != "$ACTUAL_HASH" ]; then
+              echo "Error: Data integrity verification failed!"
+              exit 1
+            fi
+            echo "✅ Data integrity verified successfully."
           else
             echo "Direct download script not found (ERCOT/Data Center Blocked). Checking for pre-packaged release assets..."
             # Check if a release asset for the corresponding data exists and download it

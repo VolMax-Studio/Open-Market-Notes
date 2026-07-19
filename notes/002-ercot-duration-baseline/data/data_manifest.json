@@ -1,0 +1,13 @@
+{
+  "note": "Note #002: ERCOT Duration Baseline",
+  "evidence_class": "Class B (Third-Party GridStatus API)",
+  "analysis_period": "2025-06-01 to 2026-06-30",
+  "downloaded_at_utc": "2026-07-19T12:14:27.854026+00:00",
+  "files": [
+    {
+      "filename": "ercot_spp_202506_202606.csv",
+      "sha256": "a3f5ba37b59c78205c7747f69be45df9aa38f665ffa4900d9575242bbcd9147e",
+      "row_count": 151672
+    }
+  ]
+}
