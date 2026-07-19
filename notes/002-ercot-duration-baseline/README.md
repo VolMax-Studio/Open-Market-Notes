@@ -12,6 +12,7 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 - **Execution Script:** [`reproduce.py`](./reproduce.py)
 - **Verified Output File:** [`results.json`](./results.json)
 - **Data Ingestion Script:** [`download_ercot_data.py`](./download_ercot_data.py)
+- **Independent Execution:** [Independently re-executed on GitHub Actions: identical results (run #29687353696)](https://github.com/VolMax-Studio/Open-Market-Notes/actions/runs/29687353696)
 
 ---
 
