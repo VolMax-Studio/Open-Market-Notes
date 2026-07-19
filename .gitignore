@@ -1,0 +1,21 @@
+# Ignore all raw and compiled data files
+**/data/raw_cache/
+**/data/processed/
+**/data/*.CSV
+**/data/*.csv
+**/data/*.feather
+**/data/*.zip
+
+# Python temporary files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# OS specific files
+.DS_Store
+Thumbs.db

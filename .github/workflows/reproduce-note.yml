@@ -52,6 +52,16 @@ jobs:
             pip install -r "$NOTE_DIR/requirements.txt"
           fi
 
+      - name: Cache raw and processed data
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.NOTE_DIR }}/data/raw_cache
+            ${{ env.NOTE_DIR }}/data/processed
+          key: data-cache-${{ env.NOTE_NUM }}-${{ hashFiles('**/data_manifest.json') }}
+          restore-keys: |
+            data-cache-${{ env.NOTE_NUM }}-
+
       - name: Data Acquisition & Integrity Verification
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -106,3 +116,7 @@ jobs:
           labels: |
             reproduction
             automated-pr
+          add-paths: |
+            ${{ env.NOTE_DIR }}/results.json
+            ${{ env.NOTE_DIR }}/results/**
+            ${{ env.NOTE_DIR }}/README.md
