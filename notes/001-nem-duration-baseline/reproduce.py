@@ -224,9 +224,19 @@ def main():
             row['DUID']: round(row['EFC'], 4) for _, row in group.iterrows()
         }
         
-    print("  Monthly average EFC (Short-to-Medium Duration Group):")
+    print("\n### Metric 3: Fleet Monthly Average Cycling")
+    print("| Month | EFC/month | EFC/day |")
+    print("|:---|:---:|:---:|")
+    days_in_month = {
+        '2025-06': 30, '2025-07': 31, '2025-08': 31, '2025-09': 30,
+        '2025-10': 31, '2025-11': 30, '2025-12': 31, '2026-01': 31,
+        '2026-02': 28, '2026-03': 31, '2026-04': 30, '2026-05': 31,
+        '2026-06': 30
+    }
     for ym, val in short_medium_monthly.items():
-        print(f"    {ym}: {val:.3f} EFC/month")
+        days = days_in_month.get(ym, 30)
+        daily_efc = val / days
+        print(f"| **{ym}** | {val:.2f} | {daily_efc:.2f} |")
 
     # ==========================================================================
     # SAVE OUTPUTS AND GENERATE PLOTS

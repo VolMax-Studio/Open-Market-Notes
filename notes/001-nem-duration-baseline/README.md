@@ -1,7 +1,7 @@
 # Note #001: NEM Duration Baseline
 **Class of Work:** VolMax Descriptive Analytical Note (Evidence Class A)
 **Status:** Completed
-**Execution Timestamp:** 2026-07-18T20:52:00+02:00
+**Last Recalculated:** 2026-07-19T09:44:00+02:00
 
 ---
 
@@ -58,33 +58,38 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 - **Short-to-Medium Duration Group ($\le 2$ hours):** 16 units (entire fleet).
 - **Long Duration Group ($\ge 4$ hours):** 0 units (no operational assets met this duration in the NEM during the window).
 
-### Fleet Monthly Average Cycling (EFC/month)
-- **2025-06:** 31.67
-- **2025-07:** 32.82
-- **2025-08:** 32.84
-- **2025-09:** 28.02
-- **2025-10:** 28.77
-- **2025-11:** 26.57
-- **2025-12:** 28.09
-- **2026-01:** 25.51
-- **2026-02:** 22.93
-- **2026-03:** 25.25
-- **2026-04:** 25.32
-- **2026-05:** 26.67
-- **2026-06:** 27.20
+### Fleet Monthly Average Cycling
+| Month | EFC/month | EFC/day |
+|:---|:---:|:---:|
+| **2025-06** | 31.67 | 1.06 |
+| **2025-07** | 32.82 | 1.06 |
+| **2025-08** | 32.84 | 1.06 |
+| **2025-09** | 28.02 | 0.93 |
+| **2025-10** | 28.77 | 0.93 |
+| **2025-11** | 26.57 | 0.89 |
+| **2025-12** | 28.09 | 0.91 |
+| **2026-01** | 25.51 | 0.82 |
+| **2026-02** | 22.93 | 0.82 |
+| **2026-03** | 25.25 | 0.81 |
+| **2026-04** | 25.32 | 0.84 |
+| **2026-05** | 26.67 | 0.86 |
+| **2026-06** | 27.20 | 0.91 |
 
 ![Fleet Monthly EFC](./results/plot2_fleet_monthly_efc.png)
 
 ### Key Observations
-1. **Highly Stable Fleet Cycling:** The monthly average EFC of the fleet ranges between **22.9 and 32.8 cycles per month** (approximately 0.76 to 1.1 cycles per day). This suggests that the operational regime of Australian BESS is structurally anchored to a daily arbitrage cycle plus minor frequency-regulation throughput.
+1. **Fleet Cycling Decline:** The monthly average EFC per unit shows a visible decline over the 13-month window. Comparing June 2025 vs June 2026 (the only same-month pair in our analysis window to control for seasonality), the cycling intensity fell from **1.06 → 0.91 EFC/day per unit (−14%)**, observed alongside fleet capacity growth over the period.
 2. **Absence of Long-Duration Assets:** There are currently no operational $\ge 4$-hour duration BESS assets in our filtered 16-unit analysis subsample, meaning long-duration cycling is not yet represented in our active fleet metrics.
 
 ---
 
 ## 5. Parametric & Note Changelog
-- **Version 1.0.2** (2026-07-19):
+- **Version 1.0.3** (2026-07-19T09:44:00+02:00):
+  - Formatted Metric 3 (Fleet Cycling) EFC values as a table and added a normalized `EFC/day` column to remove month-length biases (e.g. February).
+  - Rewrote Observation 1 under Metric 3 to highlight the same-month seasonal comparison (June 2025 vs June 2026), documenting a 14% drop in daily cycling per unit observed alongside fleet capacity growth.
+- **Version 1.0.2** (2026-07-19T07:40:00+02:00):
   - Aligned Metric 3 (Fleet Cycling) asset selection strictly to the 16 accepted operational units from `l1_integrity_report.json` (removing `TARBESS1` and `TEMPB1`, which were rejected due to mid-window commissioning).
-  - Verified and corrected BESS nameplate energy capacities (MWh denominators) against the AEMO Registration and Exemption List:
+  - Verified and corrected BESS nameplate energy capacities (MWh denominators) against the AEMO National Electricity Market Registration and Exemption List (published on 15 May 2026):
     - Corrected `BHB1` (Broken Hill BESS) to 50.0 MWh (previously incorrectly mapped to Bulgana's 34.0 MWh).
     - Corrected `WALGRV1` (Wallgrove Grid Battery) to 75.0 MWh (previously listed as 100.0 MWh).
     - Corrected `ULPBESS1` (Ulinda Park BESS) to 298.0 MWh (previously listed as 100.0 MWh).
@@ -92,7 +97,7 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
     - Corrected `WDBESS1` (Western Downs BESS) to 540.0 MWh (previously listed as 512.0 MWh).
     - Corrected `BLYTHB1` (Blyth BESS) to 477.0 MWh (previously listed as 476.0 MWh).
   - Regenerated all Metric 3 fleet cycling values, monthly averages, and plots using the updated 16-unit registry.
-- **Version 1.0.1** (2026-07-19):
+- **Version 1.0.1** (2026-07-19T07:22:00+02:00):
   - Corrected Metric 1 summary table in README.md to match the final `results.json` output. (An earlier draft table was hand-transcribed from a superseded, timezone-unfiltered execution run).
   - Clarified Section 4 (Metric 3) observation to note that the absence of long-duration assets applies strictly to our filtered 16-unit analysis subsample rather than the entire market.
   - Aligned causal language in Section 3 (Metric 2) observations to "observed alongside" to comply with VolMax style rules.
