@@ -59,10 +59,10 @@ Instead, they maintain a **Parametric Changelog** in this repository. If a froze
    * *Status:* Completed (Timestamp: `2026-07-18T20:52:00+02:00`).
    * *Note:* Contains full empirical statistics, execution script, and visualizations.
 
-2. **Note #002: ERCOT Duration Baseline**
+2. **[Note #002: ERCOT Duration Baseline](./notes/002-ercot-duration-baseline)**
    * *Scope:* ERCOT Hubs (West, North, South, Houston) from 1 Jun 2025 – 30 Jun 2026.
    * *Focus:* Scarcity pricing duration ($100/MWh & $250/MWh thresholds) and charging window availability (8h BESS at 0.85 RTE).
-   * *Status:* Draft (pending ERCOT documentation citations).
+   * *Status:* Completed (Timestamp: `2026-07-19T13:48:00+02:00`).
 
 3. **Note #003: European Negative Price Baseline**
    * *Scope:* European bidding zones (e.g., DE-LU, FR, ES, IT-North, NL, BE, DK1, DK2) from 1 Jun 2025 – 30 Jun 2026.
