@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'note-*-run'
-      - 'note-*-params-frozen'
 
 permissions:
   contents: write
@@ -52,8 +51,30 @@ jobs:
           if [ -f "$NOTE_DIR/requirements.txt" ]; then
             pip install -r "$NOTE_DIR/requirements.txt"
           fi
-          # Ensure core libraries are installed
-          pip install numpy pandas matplotlib seaborn requests jinja2
+
+      - name: Data Acquisition & Integrity Verification
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd "$NOTE_DIR"
+          if [ -f "download_aemo_data.py" ]; then
+            echo "Direct data pull script found (NEMWEB). Running data download and verification..."
+            python download_aemo_data.py
+          else
+            echo "Direct download script not found (ERCOT/Data Center Blocked). Checking for pre-packaged release assets..."
+            # Check if a release asset for the corresponding data exists and download it
+            # e.g., using GitHub CLI to download the release asset with tag and verify
+            TAG_NAME="${{ github.ref_name }}"
+            DATA_TAG="${TAG_NAME}-data"
+            echo "Attempting to download data from release tag: $DATA_TAG"
+            if gh release view "$DATA_TAG" >/dev/null 2>&1; then
+              gh release download "$DATA_TAG" --pattern "*.zip" --dir ./data
+              unzip -o ./data/*.zip -d ./data/processed/
+              echo "Release data downloaded and extracted successfully."
+            else
+              echo "No data release tag found for $DATA_TAG. Skipping download."
+            fi
+          fi
 
       - name: Run Note Reproduction Script
         run: |
@@ -61,7 +82,8 @@ jobs:
           if [ -f "reproduce.py" ]; then
             python reproduce.py
           else
-            echo "reproduce.py not found in $NOTE_DIR. Skipping execution step."
+            echo "Error: reproduce.py not found in $NOTE_DIR."
+            exit 1
           fi
 
       - name: Create Pull Request
