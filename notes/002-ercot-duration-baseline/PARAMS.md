@@ -45,7 +45,7 @@ M3 (fleet cycling) deferred — current ERCOT holdings (60 days, 2 units) cannot
 - **Settlement Point Price (SPP) Calculations:** ERCOT Nodal Protocols Section 2, Definitions and Acronyms, and Section 6.6, Settlement Calculations for the Real-Time Energy Operations.
 - **15-Minute Settlement Intervals:** Real-Time Settlement Interval is 15 minutes as defined in ERCOT Nodal Protocols Section 2, Definitions and Acronyms.
 - **Price Volatility Thresholds:** The $100/\text{MWh}$ and $250/\text{MWh}$ thresholds are selected as benchmarks for operational price volatility. $100/\text{MWh}$ represents the typical threshold for gas/peaker economic dispatch activation, and $250/\text{MWh}$ represents peaking or extreme scarcity conditions (e.g. activation of ORDC price adders under ERCOT Nodal Protocols Section 6.5.7.3, Security Constrained Economic Dispatch).
-- **Cheap Charging Energy Threshold:** The $25/\text{MWh}$ threshold represents low-cost wind and solar charging opportunities, which are frequently driven by negative or near-zero pricing regimes in the West Hub (HB_WEST) (governed by Energy Offer Curves under ERCOT Nodal Protocols Section 4.4.9.3.1, Energy Offer Curve Criteria; URL: https://www.ercot.com/mktrules/nprotocols/current, accessed 2026-07-19).
+- **Cheap Charging Energy Threshold:** The $25/\text{MWh}$ threshold is a VolMax operational benchmark selected to capture low-cost wind and solar charging opportunities. In ERCOT, negative and near-zero pricing regimes in the West Hub (HB_WEST) are bounded by the minimum Energy Offer Curve floor (-$250/MWh) defined in ERCOT Nodal Protocols Section 4.4.9.3.1 (Energy Offer Curve Criteria; URL: https://www.ercot.com/mktrules/nprotocols/current, accessed 2026-07-19).
 
 ---
 
