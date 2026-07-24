@@ -8,7 +8,10 @@
 ## 1. Scope & Datasets
 - **Analysis Period:** 1 June 2025 – 30 June 2026 (13 months).
 - **Bidding Zones:** DE-LU (Germany/Luxembourg), FR (France), BE (Belgium), NL (Netherlands).
-- **Data Source:** Primary ENTSO-E Transparency Platform (Imbalance prices [17.1.g / 17.2.f]). Selected because it represents the actual financial settlement interval for BESS imbalance arbitrage in European markets. Verified as available for free re-use (CC-BY 4.0).
+- **Data Source:** Primary ENTSO-E Transparency Platform (Imbalance prices [17.1.g / 17.2.f]). Selected because it represents the actual financial settlement interval for BESS imbalance arbitrage in European markets. Formally listed on the CC BY 4.0 free re-use list (item #27, "Imbalance prices"), version 18 October 2023, accessed 2026-07-24.
+- **Evidence Anchors:**
+  - Page 1 License: `PORTFOLIO/VolMax_Lineage_Credit_Sandbox/evidence/ENTSOE_FreeReuse_Page1_License_2026-07-24.png`
+  - Page 4 Row 27 Listing: `PORTFOLIO/VolMax_Lineage_Credit_Sandbox/evidence/ENTSOE_FreeReuse_Page4_Row27_ImbalancePrices_2026-07-24.png`
 - **BESS Fleet Subsample:** N/A for baseline pricing duration.
 
 ---
@@ -25,9 +28,9 @@
 ### Metric 2 (M2): Charging Window Availability
 - **Cheap Energy Threshold:** 15-minute Imbalance Price $\le €25/\text{MWh}$.
 - **Accumulation Rule:** Cumulative hours within a single calendar day. Continuous blocks are *not* required.
-- **Target Thresholds:**
-  - **8-Hour BESS:** Requires $\ge 9.4\text{ hours}$ cumulative cheap pricing (8 hours discharge $\div$ 0.85 Round-Trip Efficiency $\approx$ 9.4 hours charging).
-  - **4-Hour BESS:** Requires $\ge 4.7\text{ hours}$ cumulative cheap pricing (4 hours discharge $\div$ 0.85 Round-Trip Efficiency $\approx$ 4.7 hours charging).
+- **Target Thresholds (Conservative Ceiling Rounding):**
+  - **8-Hour BESS:** Requires $\ge 9.5\text{ hours}$ cumulative cheap pricing ($8\text{ hours} \div 0.85\text{ Round-Trip Efficiency} = 9.412\text{ hours}$, rounded conservatively up to $9.5\text{ hours}$).
+  - **4-Hour BESS:** Requires $\ge 4.8\text{ hours}$ cumulative cheap pricing ($4\text{ hours} \div 0.85\text{ Round-Trip Efficiency} = 4.706\text{ hours}$, rounded conservatively up to $4.8\text{ hours}$).
 - **Primary Metric:** Percentage of days in the analysis period meeting the cumulative window requirements per Zone.
 
 ### Metric 3 (M3): Fleet Cycling Feedback Loop
@@ -37,4 +40,5 @@ M3 (fleet cycling) deferred (requires matched operational asset telemetry not co
 
 ## 3. Market References & Citations
 - **ENTSO-E Transparency Platform:** Regulation (EU) No 543/2013, Article 17.1.g and 17.2.f.
-- **Imbalance Pricing:** Represents the settlement price for energy imbalances in the respective bidding zones. Verified as free for re-use without restrictions under CC-BY 4.0 on 2026-07-24.
+- **Imbalance Pricing:** Represents the settlement price for energy imbalances in the respective bidding zones. Listed on the ENTSO-E "List of Data available for free re-use" under CC-BY 4.0 (Item #27, document modified 18 Oct 2023, captured 2026-07-24).
+
