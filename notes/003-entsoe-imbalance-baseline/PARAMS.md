@@ -19,10 +19,12 @@
 
 ## 2. Parameter Definitions
 
-### Schema & Price Column Mapping Rules
-- **Dual-Pricing vs Single-Pricing Architecture:** ENTSO-E publishes `Long` (excess system state / TSO payment to market) and `Short` (deficit system state / market payment to TSO) imbalance prices in dual-pricing markets, or a single unified imbalance price column in single-pricing markets.
-- **Metric 1 Mapping (Scarcity / Discharge):** Evaluated against the `Short` imbalance price (deficit settlement) in dual-pricing regimes, or the single imbalance price in single-pricing regimes.
-- **Metric 2 Mapping (Cheap Energy / Charge):** Evaluated against the `Long` imbalance price (surplus settlement) in dual-pricing regimes, or the single imbalance price in single-pricing regimes.
+### Schema & Empirical Price Column Mapping Rules
+- **Single-Pricing Regime (Confirmed in DE-LU):** ENTSO-E DE-LU operates under Single Imbalance Pricing, where $+ \text{Imbalance Price}$ and $- \text{Imbalance Price}$ are identical ($P_{imb}^+ = P_{imb}^- = P_{imb}$).
+- **Empirical Column Mapping:**
+  - **Single-Pricing Zones (DE-LU, FR, BE):** Both M1 (Scarcity $\ge €100/\text{MWh}$ / $\ge €250/\text{MWh}$) and M2 (Cheap Energy $\le €25/\text{MWh}$) evaluate directly on the single unified imbalance price series $P_{imb}$.
+  - **Dual-Pricing Regimes (e.g. NL in dual state):** M1 (scarcity/discharge) and M2 (cheap energy/charge) are mapped empirically based on column distributions during ingestion: M1 maps to the deficit/scarcity distribution (higher positive price spikes), and M2 maps to the surplus/cheap energy distribution.
+
 
 ### Metric 1 (M1): Scarcity Pricing Duration
 - **Threshold A (Volatility):** 15-minute Imbalance Price $\ge €100/\text{MWh}$.
