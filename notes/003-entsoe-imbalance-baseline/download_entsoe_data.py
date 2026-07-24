@@ -70,9 +70,13 @@ def analyze_regime_classification(df, zone_code):
     
     if len(cols) == 1:
         regime = "SINGLE_PRICING"
-        match_pct = 100.0
-        print(f"Outcome: {regime} (Single unified price column '{cols[0]}')")
-        return {"zone": zone_code, "regime": regime, "match_pct": match_pct, "cols": cols}
+        print(f"Outcome: {regime} (Single unified price column '{cols[0]}' by source data construction)")
+        return {
+            "zone": zone_code, 
+            "regime": regime, 
+            "single_column_source": True,
+            "col_name": cols[0]
+        }
     
     # If multiple price columns exist (e.g. Long and Short or + and -)
     if 'Long' in cols and 'Short' in cols:
@@ -83,13 +87,14 @@ def analyze_regime_classification(df, zone_code):
         p_minus = df.iloc[:, 1]
         
     valid_mask = p_plus.notna() & p_minus.notna()
-    total_valid = valid_mask.sum()
+    total_valid = int(valid_mask.sum())
     diff = (p_plus[valid_mask] - p_minus[valid_mask]).abs()
-    matches = (diff < 1e-4).sum()
+    matches = int((diff < 1e-4).sum())
     match_pct = (matches / total_valid * 100.0) if total_valid > 0 else 0.0
-    max_diff = diff.max() if total_valid > 0 else 0.0
+    max_diff = float(diff.max()) if total_valid > 0 else 0.0
     
-    if match_pct == 100.0:
+    # Integer check for exact 100% pairwise match across all valid intervals
+    if matches == total_valid and total_valid > 0:
         regime = "SINGLE_PRICING"
     else:
         regime = "DUAL_PRICING"
@@ -102,10 +107,11 @@ def analyze_regime_classification(df, zone_code):
     return {
         "zone": zone_code,
         "regime": regime,
-        "total_valid": int(total_valid),
-        "matching_intervals": int(matches),
+        "single_column_source": False,
+        "total_valid": total_valid,
+        "matching_intervals": matches,
         "match_pct": round(match_pct, 4),
-        "max_diff": float(max_diff)
+        "max_diff": max_diff
     }
 
 def download_entsoe_imbalance(api_key=None):
