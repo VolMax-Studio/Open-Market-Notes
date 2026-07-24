@@ -19,11 +19,13 @@
 
 ## 2. Parameter Definitions
 
-### Schema & Empirical Price Column Mapping Rules
-- **Single-Pricing Regime (Confirmed in DE-LU):** ENTSO-E DE-LU operates under Single Imbalance Pricing, where $+ \text{Imbalance Price}$ and $- \text{Imbalance Price}$ are identical ($P_{imb}^+ = P_{imb}^- = P_{imb}$).
-- **Empirical Column Mapping:**
-  - **Single-Pricing Zones (DE-LU, FR, BE):** Both M1 (Scarcity $\ge €100/\text{MWh}$ / $\ge €250/\text{MWh}$) and M2 (Cheap Energy $\le €25/\text{MWh}$) evaluate directly on the single unified imbalance price series $P_{imb}$.
-  - **Dual-Pricing Regimes (e.g. NL in dual state):** M1 (scarcity/discharge) and M2 (cheap energy/charge) are mapped empirically based on column distributions during ingestion: M1 maps to the deficit/scarcity distribution (higher positive price spikes), and M2 maps to the surplus/cheap energy distribution.
+### Schema & Procedural Regime Detection Rules
+- **Procedural Regime Classification:** The imbalance settlement regime for each bidding zone is determined empirically during data ingestion by evaluating the pairwise relation between `+ Imbalance Price` ($P_{imb}^+$) and `- Imbalance Price` ($P_{imb}^-$) across all 15-minute intervals over the full 13-month analysis period:
+  - **Single-Pricing Regime:** If $P_{imb}^+ == P_{imb}^-$ for 100% of valid settlement intervals $\rightarrow$ Zone is empirically classified as **Single-Pricing**. Both M1 (Scarcity $\ge €100/\text{MWh}$ / $\ge €250/\text{MWh}$) and M2 (Cheap Energy $\le €25/\text{MWh}$) evaluate directly on the single unified price time-series $P_{imb}$.
+  - **Dual-Pricing Regime:** If $P_{imb}^+ \neq P_{imb}^-$ for any valid interval $\rightarrow$ Zone is empirically classified as **Dual-Pricing**. Column mapping is assigned dynamically based on full-period distribution metrics: M1 (discharge / scarcity value) maps to the deficit settlement distribution (higher positive price spikes), and M2 (charge / cheap energy cost) maps to the surplus settlement distribution.
+- **Reporting Rule:** The final regime classification, total valid intervals, pairwise equality percentage, and distribution metrics for each zone are reported as empirical pipeline measurements in Note #003, not pre-assigned in parameter declarations.
+- **Co-Measurement Clarification:** In single-pricing regimes, M1 and M2 are co-measured on the same underlying price time series ($P_{imb}$). While a single 15-minute interval cannot meet both thresholds simultaneously ($€100 > €25$), M1 continuous event separation ($<30\text{ minutes}$) and M2 daily cumulative window tracking ($\le €25/\text{MWh}$) operate on the same daily time series independently.
+
 
 
 ### Metric 1 (M1): Scarcity Pricing Duration

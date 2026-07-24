@@ -59,6 +59,55 @@ def update_manifest(filepath, file_hash, source_url, acquisition_mode):
         with open(manifest_path, 'w') as f:
             json.dump(manifest, f, indent=4)
 
+def analyze_regime_classification(df, zone_code):
+    """
+    Procedural Pricing Regime Detection Algorithm:
+    Evaluates pairwise relation between '+' and '-' imbalance price columns across full time series.
+    """
+    cols = list(df.columns)
+    print(f"\n--- PROCEDURAL REGIME ANALYSIS: {zone_code} ---")
+    print(f"Columns present: {cols}")
+    
+    if len(cols) == 1:
+        regime = "SINGLE_PRICING"
+        match_pct = 100.0
+        print(f"Outcome: {regime} (Single unified price column '{cols[0]}')")
+        return {"zone": zone_code, "regime": regime, "match_pct": match_pct, "cols": cols}
+    
+    # If multiple price columns exist (e.g. Long and Short or + and -)
+    if 'Long' in cols and 'Short' in cols:
+        p_plus = df['Long']
+        p_minus = df['Short']
+    else:
+        p_plus = df.iloc[:, 0]
+        p_minus = df.iloc[:, 1]
+        
+    valid_mask = p_plus.notna() & p_minus.notna()
+    total_valid = valid_mask.sum()
+    diff = (p_plus[valid_mask] - p_minus[valid_mask]).abs()
+    matches = (diff < 1e-4).sum()
+    match_pct = (matches / total_valid * 100.0) if total_valid > 0 else 0.0
+    max_diff = diff.max() if total_valid > 0 else 0.0
+    
+    if match_pct == 100.0:
+        regime = "SINGLE_PRICING"
+    else:
+        regime = "DUAL_PRICING"
+        
+    print(f"Total Valid Intervals: {total_valid}")
+    print(f"Matching Intervals:    {matches} ({match_pct:.2f}%)")
+    print(f"Max Abs Divergence:    {max_diff:.4f} EUR/MWh")
+    print(f"Empirical Outcome:     {regime}")
+    
+    return {
+        "zone": zone_code,
+        "regime": regime,
+        "total_valid": int(total_valid),
+        "matching_intervals": int(matches),
+        "match_pct": round(match_pct, 4),
+        "max_diff": float(max_diff)
+    }
+
 def download_entsoe_imbalance(api_key=None):
     raw_dir = './data/raw_cache'
     proc_dir = './data/processed'
@@ -81,11 +130,8 @@ def download_entsoe_imbalance(api_key=None):
                 # Query ENTSO-E imbalance prices
                 df = client.query_imbalance_prices(country_code=zone_code, start=start, end=end)
                 
-                # Inspect and log column structure (Dual-pricing vs Single-pricing schema check)
-                print(f"Schema Inspection for {zone_code}:")
-                print(f"  Columns returned: {list(df.columns)}")
-                print(f"  Data shape: {df.shape}")
-                print(f"  Sample head:\n{df.head(2)}")
+                # Procedural Regime Detection on full 13-month dataset
+                analyze_regime_classification(df, zone_code)
                 
                 csv_path = os.path.join(raw_dir, f"imbalance_{zone_code}_202506_202606.csv")
                 df.to_csv(csv_path)
@@ -121,6 +167,9 @@ def download_entsoe_imbalance(api_key=None):
             print(f"Verifying pre-registered cache file: {basename}")
             file_hash = compute_sha256(csv_file)
             update_manifest(csv_file, file_hash, source_url=manifest[basename]["source_url"], acquisition_mode="manifest_verified_cache")
+            df = pd.read_csv(csv_file, index_col=0, parse_dates=True)
+            zone_code = basename.split('_')[1]
+            analyze_regime_classification(df, zone_code)
 
 if __name__ == '__main__':
     download_entsoe_imbalance()
