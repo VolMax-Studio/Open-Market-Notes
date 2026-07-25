@@ -2,7 +2,7 @@
 
 **Author:** VolMax-Studio  
 **Class of Work:** VolMax Descriptive Analytical Note (Not a P10 Audit)  
-**Status:** READY FOR GATE — PENDING RATIFICATION  
+**Status:** COMPLETE & VERIFIED (GATE PASSED — Ratified by User on 2026-07-25)  
 **Dataset Scope:** 1 June 2025 00:00:00 BST – 30 June 2026 23:59:59 BST (13 months, 395 calendar days, 18,960 30-minute settlement periods)  
 **Data Source:** Elexon Insights Solution REST API (System Prices Endpoint: `https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{settlementDate}`)  
 **Data License:** Open Data under Elexon Open Data License / Open Government License v3.0  
