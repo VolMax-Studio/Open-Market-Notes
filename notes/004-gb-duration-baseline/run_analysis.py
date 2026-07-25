@@ -7,8 +7,9 @@ proc_path = './data/processed/gb_system_prices.feather'
 
 def calculate_m1_scarcity(df, price_col='systemSellPrice', threshold=100.0, separation_periods=2):
     """
-    Calculates M1: Scarcity Pricing Duration (Continuous sequences >= threshold).
-    separation_periods: number of periods below threshold to break an event (2 periods = 60 min for HH).
+    Calculates M1: Scarcity Pricing Duration with explicit Time Continuity Checks.
+    - separation_periods: number of periods below threshold to break an event (1 period = strict, 2 periods = 60 min bridge).
+    - Time continuity: Any gap in timestamps (>30 min between consecutive intervals) immediately breaks the event.
     """
     prices = df[price_col].values
     timestamps = df.index
@@ -18,7 +19,26 @@ def calculate_m1_scarcity(df, price_col='systemSellPrice', threshold=100.0, sepa
     event_start_idx = 0
     below_count = 0
     
-    for i, p in enumerate(prices):
+    for i in range(len(prices)):
+        p = prices[i]
+        curr_time = timestamps[i]
+        
+        # Time gap check: if consecutive interval is > 30 mins, break event immediately
+        if in_event and i > 0:
+            time_delta_min = (curr_time - timestamps[i-1]).total_seconds() / 60.0
+            if time_delta_min > 35.0: # allow small jitter for DST transitions
+                event_end_idx = i - 1 - below_count
+                if event_end_idx >= event_start_idx:
+                    duration_hours = (event_end_idx - event_start_idx + 1) * 0.5
+                    events.append({
+                        'start_time': str(timestamps[event_start_idx]),
+                        'end_time': str(timestamps[event_end_idx]),
+                        'duration_hours': duration_hours,
+                        'max_price': float(np.max(prices[event_start_idx:event_end_idx+1]))
+                    })
+                in_event = False
+                below_count = 0
+
         if p >= threshold:
             if not in_event:
                 in_event = True
@@ -28,31 +48,33 @@ def calculate_m1_scarcity(df, price_col='systemSellPrice', threshold=100.0, sepa
             if in_event:
                 below_count += 1
                 if below_count >= separation_periods:
-                    # Event ended at i - below_count
                     event_end_idx = i - below_count
-                    duration_hours = (event_end_idx - event_start_idx + 1) * 0.5
-                    events.append({
-                        'start_time': str(timestamps[event_start_idx]),
-                        'end_time': str(timestamps[event_end_idx]),
-                        'duration_hours': duration_hours,
-                        'max_price': float(np.max(prices[event_start_idx:event_end_idx+1]))
-                    })
+                    if event_end_idx >= event_start_idx:
+                        duration_hours = (event_end_idx - event_start_idx + 1) * 0.5
+                        events.append({
+                            'start_time': str(timestamps[event_start_idx]),
+                            'end_time': str(timestamps[event_end_idx]),
+                            'duration_hours': duration_hours,
+                            'max_price': float(np.max(prices[event_start_idx:event_end_idx+1]))
+                        })
                     in_event = False
                     below_count = 0
                     
     if in_event:
         event_end_idx = len(prices) - 1 - below_count
-        duration_hours = (event_end_idx - event_start_idx + 1) * 0.5
-        events.append({
-            'start_time': str(timestamps[event_start_idx]),
-            'end_time': str(timestamps[event_end_idx]),
-            'duration_hours': duration_hours,
-            'max_price': float(np.max(prices[event_start_idx:event_end_idx+1]))
-        })
+        if event_end_idx >= event_start_idx:
+            duration_hours = (event_end_idx - event_start_idx + 1) * 0.5
+            events.append({
+                'start_time': str(timestamps[event_start_idx]),
+                'end_time': str(timestamps[event_end_idx]),
+                'duration_hours': duration_hours,
+                'max_price': float(np.max(prices[event_start_idx:event_end_idx+1]))
+            })
 
     if not events:
         return {
             'threshold_gbp': threshold,
+            'separation_periods': separation_periods,
             'total_events': 0,
             'mean_duration_h': 0.0,
             'median_duration_h': 0.0,
@@ -66,29 +88,21 @@ def calculate_m1_scarcity(df, price_col='systemSellPrice', threshold=100.0, sepa
     
     return {
         'threshold_gbp': threshold,
+        'separation_periods': separation_periods,
         'total_events': len(events),
         'mean_duration_h': round(float(np.mean(durations)), 2),
         'median_duration_h': round(float(np.median(durations)), 2),
         'p90_duration_h': round(float(np.percentile(durations, 90)), 2),
         'max_duration_h': round(float(np.max(durations)), 2),
         'max_event_start': events[max_idx]['start_time'],
+        'max_event_end': events[max_idx]['end_time'],
         'max_event_price': events[max_idx]['max_price']
     }
 
 def calculate_m2_charging_windows(df, price_col='systemSellPrice', cheap_threshold=25.0):
-    """
-    Calculates M2: Daily Cumulative Charging Window Availability.
-    Target thresholds (conservative ceiling rounding for RTE 0.85):
-    - 8-Hour BESS: >= 9.5 hours
-    - 4-Hour BESS: >= 4.8 hours
-    - 2-Hour BESS: >= 2.4 hours
-    """
     df_cheap = df[df[price_col] <= cheap_threshold].copy()
-    
-    # Group by calendar day in local market timezone (Europe/London)
     daily_hours = df_cheap.groupby(df_cheap.index.date).size() * 0.5
     
-    # Full calendar date range across 13 months
     all_dates = pd.date_range(start=df.index.min().date(), end=df.index.max().date(), freq='D').date
     daily_hours = daily_hours.reindex(all_dates, fill_value=0.0)
     
@@ -123,8 +137,11 @@ def run_full_analysis():
     print("RUNNING METRIC CALCULATIONS FOR GB BASELINE")
     print("==========================================")
     
-    m1_100 = calculate_m1_scarcity(df, threshold=100.0)
-    m1_250 = calculate_m1_scarcity(df, threshold=250.0)
+    m1_100_strict = calculate_m1_scarcity(df, threshold=100.0, separation_periods=1)
+    m1_100_bridged = calculate_m1_scarcity(df, threshold=100.0, separation_periods=2)
+    m1_250_strict = calculate_m1_scarcity(df, threshold=250.0, separation_periods=1)
+    m1_250_bridged = calculate_m1_scarcity(df, threshold=250.0, separation_periods=2)
+    
     m2 = calculate_m2_charging_windows(df, cheap_threshold=25.0)
     
     results = {
@@ -132,8 +149,10 @@ def run_full_analysis():
         'data_source': 'Elexon Insights API (System Prices)',
         'time_range': f"{df.index.min()} to {df.index.max()}",
         'total_intervals': len(df),
-        'm1_scarcity_100_gbp': m1_100,
-        'm1_extreme_scarcity_250_gbp': m1_250,
+        'm1_scarcity_100_strict': m1_100_strict,
+        'm1_scarcity_100_bridged': m1_100_bridged,
+        'm1_scarcity_250_strict': m1_250_strict,
+        'm1_scarcity_250_bridged': m1_250_bridged,
         'm2_charging_windows': m2
     }
     
@@ -141,11 +160,14 @@ def run_full_analysis():
     with open(out_json, 'w') as f:
         json.dump(results, f, indent=4)
         
-    print("\n--- METRIC 1: SCARCITY DURATION (GBP >= 100/MWh) ---")
-    print(json.dumps(m1_100, indent=2))
+    print("\n--- METRIC 1: SCARCITY DURATION (STRICT 1-PERIOD SEPARATION, GBP >= 100/MWh) ---")
+    print(json.dumps(m1_100_strict, indent=2))
+
+    print("\n--- METRIC 1: SCARCITY DURATION (BRIDGED 2-PERIOD SEPARATION, GBP >= 100/MWh) ---")
+    print(json.dumps(m1_100_bridged, indent=2))
     
     print("\n--- METRIC 1: EXTREME SCARCITY DURATION (GBP >= 250/MWh) ---")
-    print(json.dumps(m1_250, indent=2))
+    print(json.dumps(m1_250_strict, indent=2))
     
     print("\n--- METRIC 2: CHARGING WINDOW AVAILABILITY (GBP <= 25/MWh) ---")
     print(json.dumps(m2, indent=2))
