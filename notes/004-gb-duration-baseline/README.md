@@ -14,10 +14,10 @@
 
 | Verification Item | Audit Findings & Evidence | Status |
 |---|---|---|
-| **1. Total Interval & DST Verification** | Exact total count = **18,960 periods**. Autumn DST (26 Oct 2025) has **50 periods**, Spring DST (29 Mar 2026) has **46 periods**, 393 standard days have **48 periods** ($393 \times 48 + 50 + 46 = 18,960$). Net zero DST shift. | **VERIFIED** |
-| **2. Time-Aware Continuity & 72.5h Event Audit** | Algorithm enforces explicit timestamp continuity checks ($\Delta t \le 30\text{ min}$). The 72.5h macro-event (7–10 March 2026) was caused by a major UK cold spell with 39 continuous hours $\ge £100/\text{MWh}$, bridged across isolated 1-period dips (e.g. £70.01 for 30 min). Under strict 1-period separation (zero tolerance for dips), max duration is **41.0 hours** (8–10 March 2026). Both strict and bridged metrics are reported below. | **VERIFIED** |
+| **1. Total Interval & DST Verification** | Scope = **395 calendar days** (393 standard days + 2 DST days). Autumn DST (26 Oct 2025) = **50 periods**; Spring DST (29 Mar 2026) = **46 periods**; 393 standard days = $18,864$ periods. Total = $18,864 + 50 + 46 = 18,960$ periods. Net zero DST shift. Time range verified: `2025-05-31T23:00:00Z` (1 June 00:00 BST) to `2026-06-30 23:30:00 BST`. | **VERIFIED** |
+| **2. Pure Scarcity vs Macro Window Semantics** | Metrics are strictly decoupled into two separate tables: **Pure Active Scarcity Runs** (uninterrupted periods strictly $\ge \text{threshold}$, excluding sub-threshold dips) and **Macro Event Window Spans** (wall-clock duration of scarcity clusters allowing $<60\text{ min}$ sub-threshold dips). Time-aware continuity ($\Delta t \le 30\text{ min}$) enforced. | **VERIFIED** |
 | **3. Raw Data Column Mapping** | Raw Elexon JSON payload explicitly contains independent fields `"systemSellPrice"` and `"systemBuyPrice"`. Imbalance settlement price confirmed. | **VERIFIED** |
-| **4. Parameter Pre-Registration & Lineage** | Parameter declaration (`PARAMS.md`) pre-dates live data ingestion in Git commit order. | **VERIFIED** |
+| **4. Parameter Lineage & Git Order** | Git commit log verifies parameter declaration (`PARAMS.md`) creation timestamp and commit lineage:<br>`b1441c8 2026-07-25 20:15:19 +0200 fix(note-004)...`<br>`792b4d9 2026-07-25 20:07:45 +0200 feat(note-004): publish GB BESS duration baseline note...` | **VERIFIED** |
 | **5. Procedural Regime Branch Verification** | Ingestion pipeline executed the dual-column comparison branch: `systemSellPrice` and `systemBuyPrice` were evaluated independently, yielding 18,960/18,960 exact matches (0.0000 GBP/MWh max diff), empirically confirming Single Imbalance Pricing. | **VERIFIED** |
 
 ---
@@ -36,21 +36,23 @@ Great Britain operates under a unified Single System Price mechanism ($SBP = SSP
 
 ---
 
-## 2. Metric 1 (M1): Scarcity Pricing Duration
+## 2. Metric 1 (M1): Scarcity Pricing Metrics
 
-Scarcity events are continuous sequences of 30-minute settlement periods meeting price thresholds. To evaluate sensitivity to single isolated dips, we report both **Strict Separation** (1 period below threshold breaks event) and **Bridged Separation** (2 periods / 60 min below threshold breaks event).
+### Table 1A: Pure Continuous Scarcity Runs (Strictly $\ge \text{Threshold}$, Zero Sub-Threshold Dips)
+Measures actual uninterrupted hours where the price was strictly at or above the threshold. Sub-threshold intervals are excluded from duration.
 
-### A. Volatility Scarcity ($\ge £100/\text{MWh}$)
-| Separation Rule | Total Events | Mean Duration | Median Duration | P90 Duration | Max Event Duration | Max Event Range | Max Price |
-|---|---|---|---|---|---|---|---|
-| **Strict (1 Period / 30 min dip breaks)** | 1,648 | **1.95 h** | **1.00 h** | **4.50 h** | **41.00 h** | 2026-03-08 07:30 to 2026-03-10 00:00 | £189.00/MWh |
-| **Bridged (2 Periods / 60 min dip breaks)** | 1,137 | **3.05 h** | **2.00 h** | **7.00 h** | **72.50 h** | 2026-03-07 02:00 to 2026-03-10 02:00 | £189.00/MWh |
+| Scarcity Level | Price Threshold | Total Active Hours (13 Months) | Total Continuous Runs | Mean Run Duration | Median Run Duration | P90 Run Duration | Max Run Duration | Max Run Range | Max Price |
+|---|---|---|---|---|---|---|---|---|---|
+| **Volatility (M1-A)** | $\ge £100/\text{MWh}$ | **3,210.0 h** | 1,648 | **1.95 h** | **1.00 h** | **4.50 h** | **41.00 h** | 2026-03-08 07:30 to 2026-03-10 00:00 | £189.00/MWh |
+| **Extreme Scarcity (M1-B)** | $\ge £250/\text{MWh}$ | **25.0 h** | 17 | **1.47 h** | **1.00 h** | **2.70 h** | **4.50 h** | 2026-06-23 18:00 to 22:00 | **£800.00/MWh** |
 
-### B. Extreme Scarcity ($\ge £250/\text{MWh}$)
-| Separation Rule | Total Events | Mean Duration | Median Duration | P90 Duration | Max Event Duration | Max Event Range | Max Price |
-|---|---|---|---|---|---|---|---|
-| **Strict (1 Period / 30 min dip breaks)** | 17 | **1.47 h** | **1.00 h** | **2.70 h** | **4.50 h** | 2026-06-23 18:00 to 22:00 | **£800.00/MWh** |
-| **Bridged (2 Periods / 60 min dip breaks)** | 15 | **1.73 h** | **1.50 h** | **3.30 h** | **4.50 h** | 2026-06-23 18:00 to 22:00 | **£800.00/MWh** |
+### Table 1B: Macro Event Window Spans (Wall-Clock Cluster Duration, $<60\text{ min}$ Sub-Threshold Dips Allowed)
+Measures the overall wall-clock span of macro-scarcity clusters where prices remain generally elevated, allowing brief isolated dips below threshold ($<60\text{ minutes}$).
+
+| Scarcity Level | Price Threshold | Max Bridge Dip Duration | Total Macro Windows | Mean Window Span | Median Window Span | P90 Window Span | Max Window Span | Max Window Range |
+|---|---|---|---|---|---|---|---|---|
+| **Volatility (M1-A)** | $\ge £100/\text{MWh}$ | $< 60\text{ min}$ (1 period) | 1,137 | **3.05 h** | **2.00 h** | **7.00 h** | **72.50 h** | 2026-03-07 02:00 to 2026-03-10 02:00 |
+| **Extreme Scarcity (M1-B)** | $\ge £250/\text{MWh}$ | $< 60\text{ min}$ (1 period) | 15 | **1.73 h** | **1.50 h** | **3.30 h** | **4.50 h** | 2026-06-23 18:00 to 22:00 |
 
 ---
 
@@ -72,7 +74,7 @@ Charging availability evaluates cumulative daily half-hourly periods $\le £25/\
 ## 4. Key Strategic Insights for GB BESS Developers
 
 1. **2-Hour Asset Alignment:** In GB, 2-hour duration BESS assets capture **30.13%** of cheap charging days ($\le £25/\text{MWh}$), whereas 4-hour assets drop to **20.25%**, confirming that 2-hour duration is currently the economic sweet spot for GB imbalance arbitrage without daily degradation over-cycling.
-2. **Extreme Scarcity Profile:** Extreme scarcity ($\ge £250/\text{MWh}$) is rare (17 events u 13 meseci) and short-lived (median 1.0 hour, P90 2.7 hours), peaking at **£800/MWh**. Fast-responding 1-hour to 2-hour BESS units capture nearly 100% of available extreme scarcity value.
+2. **Extreme Scarcity Profile:** Extreme scarcity ($\ge £250/\text{MWh}$) is rare (17 pure continuous runs u 13 meseci, total 25.0 active hours) and short-lived (median 1.0 hour, P90 2.7 hours), peaking at **£800/MWh**. Fast-responding 1-hour to 2-hour BESS units capture nearly 100% of available extreme scarcity value.
 
 ---
 
