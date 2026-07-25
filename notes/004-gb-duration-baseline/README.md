@@ -69,6 +69,8 @@ Charging availability evaluates cumulative daily half-hourly periods $\le £25/\
 * **Daily Mean Cheap Window:** 2.56 hours per day ($\le £25/\text{MWh}$).
 * **Max Daily Cheap Window:** 22.50 hours (2025-07-06).
 
+![GB BESS Charging Window Availability](gb_bess_charging_availability.png)
+
 ---
 
 ## 4. Key Strategic Insights for GB BESS Developers
