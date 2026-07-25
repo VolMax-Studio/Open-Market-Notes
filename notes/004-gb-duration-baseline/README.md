@@ -2,7 +2,7 @@
 
 **Author:** VolMax-Studio  
 **Class of Work:** VolMax Descriptive Analytical Note (Not a P10 Audit)  
-**Status:** MEASURED — PENDING GATE  
+**Status:** COMPLETE & VERIFIED (GATE PASSED)  
 **Dataset Scope:** 1 June 2025 00:00:00 BST – 30 June 2026 23:59:59 BST (13 months, 395 calendar days, 18,960 30-minute settlement periods)  
 **Data Source:** Elexon Insights Solution REST API (System Prices Endpoint: `https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{settlementDate}`)  
 **Data License:** Open Data under Elexon Open Data License / Open Government License v3.0  
@@ -73,7 +73,7 @@ Charging availability evaluates cumulative daily half-hourly periods $\le £25/\
 
 ## 4. Key Strategic Insights for GB BESS Developers
 
-1. **2-Hour Asset Alignment:** In GB, 2-hour duration BESS assets capture **30.13%** of cheap charging days ($\le £25/\text{MWh}$), whereas 4-hour assets drop to **20.25%**, confirming that 2-hour duration is currently the economic sweet spot for GB imbalance arbitrage without daily degradation over-cycling.
+1. **2-Hour Asset Alignment:** In GB, 2-hour duration BESS assets capture **30.13%** of cheap charging days ($\le £25/\text{MWh}$), whereas 4-hour assets drop to **20.25%**, demonstrating that 2-hour duration assets align with the largest share of qualifying charging days without requiring longer accumulation windows.
 2. **Extreme Scarcity Profile:** Extreme scarcity ($\ge £250/\text{MWh}$) is rare (17 pure continuous runs u 13 meseci, total 25.0 active hours) and short-lived (median 1.0 hour, P90 2.7 hours), peaking at **£800/MWh**. Fast-responding 1-hour to 2-hour BESS units capture nearly 100% of available extreme scarcity value.
 
 ---
