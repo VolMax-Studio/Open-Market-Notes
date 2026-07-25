@@ -6,3 +6,5 @@ requests==2.34.2
 nemosis==3.8.1
 pyarrow==21.0.0
 beautifulsoup4==4.12.3
+entsoe-py==0.8.0
+
