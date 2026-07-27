@@ -10,11 +10,14 @@ from datetime import datetime, timezone
 # Baseline scope: 1 June 2025 00:00:00 CEST to 30 June 2026 23:59:59 CEST (Europe/Brussels)
 
 ZONES = {
-    'DE_LU': '10Y1001A1001A82H',
-    'FR': '10YFR-RTE------C',
-    'BE': '10YBE----------X',
-    'NL': '10YNL----------L'
+    'NL': 'NL',
+    'BE': 'BE',
+    'FR': 'FR',
+    'DK_1': 'DK_1',
+    'DK_2': 'DK_2',
+    'AT': 'AT'
 }
+
 
 MARKET_TZ = 'Europe/Brussels'
 
@@ -61,8 +64,11 @@ def update_manifest(filepath, file_hash, source_url, acquisition_mode):
 
 def analyze_regime_classification(df, zone_code):
     """
-    Procedural Pricing Regime Detection Algorithm:
-    Evaluates pairwise relation between '+' and '-' imbalance price columns across full time series.
+    Procedural Pricing Regime Detection Algorithm (Frozen EBGL Rules):
+    Evaluates column mapping and pairwise equality between '+' (Long) and '-' (Short) columns.
+    Frozen Assignment Rule:
+    - Single Column or Long == Short (100% match): Single-Pricing (M1 & M2 on unified P_imb).
+    - Long != Short: Dual-Pricing (M1 on Short P_imb^-, M2 on Long P_imb^+).
     """
     cols = list(df.columns)
     print(f"\n--- PROCEDURAL REGIME ANALYSIS: {zone_code} ---")
@@ -70,7 +76,7 @@ def analyze_regime_classification(df, zone_code):
     
     if len(cols) == 1:
         regime = "SINGLE_PRICING"
-        print(f"Outcome: {regime} (Single unified price column '{cols[0]}' by source data construction)")
+        print(f"Outcome: {regime} (Single unified price column '{cols[0]}')")
         return {
             "zone": zone_code, 
             "regime": regime, 
@@ -78,41 +84,36 @@ def analyze_regime_classification(df, zone_code):
             "col_name": cols[0]
         }
     
-    # If multiple price columns exist (e.g. Long and Short or + and -)
     if 'Long' in cols and 'Short' in cols:
-        p_plus = df['Long']
-        p_minus = df['Short']
+        p_long = df['Long']
+        p_short = df['Short']
     else:
-        p_plus = df.iloc[:, 0]
-        p_minus = df.iloc[:, 1]
+        p_long = df.iloc[:, 0]
+        p_short = df.iloc[:, 1]
         
-    valid_mask = p_plus.notna() & p_minus.notna()
+    valid_mask = p_long.notna() & p_short.notna()
     total_valid = int(valid_mask.sum())
-    diff = (p_plus[valid_mask] - p_minus[valid_mask]).abs()
+    diff = (p_long[valid_mask] - p_short[valid_mask]).abs()
     matches = int((diff < 1e-4).sum())
     match_pct = (matches / total_valid * 100.0) if total_valid > 0 else 0.0
-    max_diff = float(diff.max()) if total_valid > 0 else 0.0
     
-    # Integer check for exact 100% pairwise match across all valid intervals
     if matches == total_valid and total_valid > 0:
         regime = "SINGLE_PRICING"
+        print(f"Empirical Outcome: SINGLE_PRICING (100% Long == Short match across {total_valid} intervals)")
     else:
         regime = "DUAL_PRICING"
+        print(f"Empirical Outcome: DUAL_PRICING ({matches}/{total_valid} matches, {match_pct:.2f}%)")
+        print(f"  Frozen Mapping: M1 (Shortage) -> 'Short' column ({p_short.name})")
+        print(f"  Frozen Mapping: M2 (Surplus)  -> 'Long' column ({p_long.name})")
         
-    print(f"Total Valid Intervals: {total_valid}")
-    print(f"Matching Intervals:    {matches} ({match_pct:.2f}%)")
-    print(f"Max Abs Divergence:    {max_diff:.4f} EUR/MWh")
-    print(f"Empirical Outcome:     {regime}")
-    
     return {
         "zone": zone_code,
         "regime": regime,
-        "single_column_source": False,
         "total_valid": total_valid,
         "matching_intervals": matches,
-        "match_pct": round(match_pct, 4),
-        "max_diff": max_diff
+        "match_pct": round(match_pct, 4)
     }
+
 
 def download_entsoe_imbalance(api_key=None):
     raw_dir = './data/raw_cache'

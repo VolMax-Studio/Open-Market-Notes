@@ -1,0 +1,200 @@
+{
+    "AT": {
+        "regime": "SINGLE_PRICING",
+        "total_intervals": 37919,
+        "total_days": 395,
+        "m1_100": {
+            "count": 3624,
+            "mean_min": 82.1,
+            "median_min": 45.0,
+            "p90_min": 195.0,
+            "p95_min": 300.0,
+            "p99_min": 510.0,
+            "max_min": 1305
+        },
+        "m1_250": {
+            "count": 375,
+            "mean_min": 43.0,
+            "median_min": 15.0,
+            "p90_min": 90.0,
+            "p95_min": 135.0,
+            "p99_min": 292.8,
+            "max_min": 480
+        },
+        "m2_cheap_25": {
+            "pct_4h_bess": 38.5,
+            "pct_8h_bess": 6.8,
+            "mean_daily_hours": 4.36
+        },
+        "m2_zero_neg": {
+            "pct_4h_bess": 13.4,
+            "pct_8h_bess": 0.5,
+            "mean_daily_hours": 2.15
+        }
+    },
+    "BE": {
+        "regime": "SINGLE_PRICING",
+        "total_intervals": 37919,
+        "total_days": 395,
+        "m1_100": {
+            "count": 2893,
+            "mean_min": 76.0,
+            "median_min": 30.0,
+            "p90_min": 180.0,
+            "p95_min": 270.0,
+            "p99_min": 660.0,
+            "max_min": 1545
+        },
+        "m1_250": {
+            "count": 581,
+            "mean_min": 31.2,
+            "median_min": 15.0,
+            "p90_min": 60.0,
+            "p95_min": 90.0,
+            "p99_min": 168.0,
+            "max_min": 315
+        },
+        "m2_cheap_25": {
+            "pct_4h_bess": 33.7,
+            "pct_8h_bess": 10.1,
+            "mean_daily_hours": 3.97
+        },
+        "m2_zero_neg": {
+            "pct_4h_bess": 20.5,
+            "pct_8h_bess": 4.3,
+            "mean_daily_hours": 2.55
+        }
+    },
+    "DK_1": {
+        "regime": "SINGLE_PRICING",
+        "total_intervals": 37870,
+        "total_days": 395,
+        "m1_100": {
+            "count": 2997,
+            "mean_min": 55.5,
+            "median_min": 30.0,
+            "p90_min": 120.0,
+            "p95_min": 180.0,
+            "p99_min": 330.6,
+            "max_min": 705
+        },
+        "m1_250": {
+            "count": 1040,
+            "mean_min": 32.2,
+            "median_min": 15.0,
+            "p90_min": 60.0,
+            "p95_min": 90.0,
+            "p99_min": 150.0,
+            "max_min": 390
+        },
+        "m2_cheap_25": {
+            "pct_4h_bess": 59.5,
+            "pct_8h_bess": 33.4,
+            "mean_daily_hours": 7.2
+        },
+        "m2_zero_neg": {
+            "pct_4h_bess": 26.3,
+            "pct_8h_bess": 12.2,
+            "mean_daily_hours": 3.21
+        }
+    },
+    "DK_2": {
+        "regime": "SINGLE_PRICING",
+        "total_intervals": 37869,
+        "total_days": 395,
+        "m1_100": {
+            "count": 3284,
+            "mean_min": 53.7,
+            "median_min": 30.0,
+            "p90_min": 120.0,
+            "p95_min": 165.0,
+            "p99_min": 300.0,
+            "max_min": 930
+        },
+        "m1_250": {
+            "count": 1335,
+            "mean_min": 31.8,
+            "median_min": 15.0,
+            "p90_min": 60.0,
+            "p95_min": 90.0,
+            "p99_min": 165.0,
+            "max_min": 585
+        },
+        "m2_cheap_25": {
+            "pct_4h_bess": 67.3,
+            "pct_8h_bess": 41.0,
+            "mean_daily_hours": 8.17
+        },
+        "m2_zero_neg": {
+            "pct_4h_bess": 37.5,
+            "pct_8h_bess": 12.7,
+            "mean_daily_hours": 4.35
+        }
+    },
+    "FR": {
+        "regime": "DUAL_PRICING",
+        "total_intervals": 37919,
+        "total_days": 395,
+        "m1_100": {
+            "count": 2448,
+            "mean_min": 66.1,
+            "median_min": 30.0,
+            "p90_min": 165.0,
+            "p95_min": 255.0,
+            "p99_min": 525.0,
+            "max_min": 1080
+        },
+        "m1_250": {
+            "count": 421,
+            "mean_min": 44.4,
+            "median_min": 15.0,
+            "p90_min": 105.0,
+            "p95_min": 165.0,
+            "p99_min": 324.0,
+            "max_min": 465
+        },
+        "m2_cheap_25": {
+            "pct_4h_bess": 62.5,
+            "pct_8h_bess": 41.3,
+            "mean_daily_hours": 8.17
+        },
+        "m2_zero_neg": {
+            "pct_4h_bess": 31.4,
+            "pct_8h_bess": 8.6,
+            "mean_daily_hours": 3.64
+        }
+    },
+    "NL": {
+        "regime": "DUAL_PRICING",
+        "total_intervals": 37919,
+        "total_days": 395,
+        "m1_100": {
+            "count": 3965,
+            "mean_min": 67.4,
+            "median_min": 30.0,
+            "p90_min": 159.0,
+            "p95_min": 225.0,
+            "p99_min": 480.0,
+            "max_min": 1305
+        },
+        "m1_250": {
+            "count": 294,
+            "mean_min": 30.7,
+            "median_min": 15.0,
+            "p90_min": 60.0,
+            "p95_min": 90.0,
+            "p99_min": 182.1,
+            "max_min": 255
+        },
+        "m2_cheap_25": {
+            "pct_4h_bess": 50.1,
+            "pct_8h_bess": 24.1,
+            "mean_daily_hours": 5.78
+        },
+        "m2_zero_neg": {
+            "pct_4h_bess": 36.7,
+            "pct_8h_bess": 11.6,
+            "mean_daily_hours": 4.27
+        }
+    }
+}

@@ -1,0 +1,44 @@
+{
+    "imbalance_NL_202506_202606.csv": {
+        "sha256": "f04729b76f9d9e1904feddb75ab4b22839e7917175f459b582531f1f1a6dce2a",
+        "size_bytes": 1432031,
+        "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: NL, Zone: NL)",
+        "acquisition_mode": "live_api_query",
+        "acquired_at_utc": "2026-07-27T19:11:16.835904+00:00"
+    },
+    "imbalance_BE_202506_202606.csv": {
+        "sha256": "8e6761612a7398d81f7cf3ba78889e87390654e76a18b22b9034416ecca14ef0",
+        "size_bytes": 1453904,
+        "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: BE, Zone: BE)",
+        "acquisition_mode": "live_api_query",
+        "acquired_at_utc": "2026-07-27T19:12:32.762288+00:00"
+    },
+    "imbalance_FR_202506_202606.csv": {
+        "sha256": "0966cfcb6cf6af1b5ccf8a25d5b05af7a863a71483f7d7953bd454259d86ac52",
+        "size_bytes": 1458099,
+        "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: FR, Zone: FR)",
+        "acquisition_mode": "live_api_query",
+        "acquired_at_utc": "2026-07-27T19:14:13.334083+00:00"
+    },
+    "imbalance_DK_1_202506_202606.csv": {
+        "sha256": "4aea9b119e73f01ad6def058192ad8adabf4e3e976ec69678c87826cdc0bef34",
+        "size_bytes": 1444328,
+        "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: DK_1, Zone: DK_1)",
+        "acquisition_mode": "live_api_query",
+        "acquired_at_utc": "2026-07-27T19:15:34.778862+00:00"
+    },
+    "imbalance_DK_2_202506_202606.csv": {
+        "sha256": "4098678f5496177720bdf15311d428f0ffa04db78e91acab4ca94f5b0e32acce",
+        "size_bytes": 1446724,
+        "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: DK_2, Zone: DK_2)",
+        "acquisition_mode": "live_api_query",
+        "acquired_at_utc": "2026-07-27T19:16:30.082769+00:00"
+    },
+    "imbalance_AT_202506_202606.csv": {
+        "sha256": "bbf726205c0c663e79240c81f69ec030b2ab66829a2c9a296f54d79797baf571",
+        "size_bytes": 1649732,
+        "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: AT, Zone: AT)",
+        "acquisition_mode": "live_api_query",
+        "acquired_at_utc": "2026-07-27T19:17:33.810410+00:00"
+    }
+}
