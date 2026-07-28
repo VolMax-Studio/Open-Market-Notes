@@ -11,9 +11,13 @@ import sys
 import json
 import hashlib
 import glob
+import numpy as np
 import pandas as pd
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 # Define workspace paths
 NOTE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -56,10 +60,10 @@ EIC_MAP = {
 
 # Fixed geographic / alphabetical corridor listing across telemetered borders (Rule D compliant)
 CORRIDORS = [
-    {"id": "AT_DE", "name": "AT ↔ DE", "c1": ("AT", "DE"), "c2": ("DE", "AT")},
-    {"id": "BE_NL", "name": "BE ↔ NL", "c1": ("BE", "NL"), "c2": ("NL", "BE")},
-    {"id": "FR_BE", "name": "FR ↔ BE", "c1": ("FR", "BE"), "c2": ("BE", "FR")},
-    {"id": "NL_DE", "name": "NL ↔ DE", "c1": ("NL", "DE"), "c2": ("DE", "NL")}
+    {"id": "AT_DE", "name": "AT ↔ DE", "c1": ("AT", "DE"), "c2": ("DE", "AT"), "color": "#00d2ff"},
+    {"id": "BE_NL", "name": "BE ↔ NL", "c1": ("BE", "NL"), "c2": ("NL", "BE"), "color": "#39ff14"},
+    {"id": "FR_BE", "name": "FR ↔ BE", "c1": ("FR", "BE"), "c2": ("BE", "FR"), "color": "#ff007f"},
+    {"id": "NL_DE", "name": "NL ↔ DE", "c1": ("NL", "DE"), "c2": ("DE", "NL"), "color": "#ffaa00"}
 ]
 
 def parse_xml_payload(filepath, qty_name="flow_mw"):
@@ -174,6 +178,68 @@ def load_and_aggregate_empirical_telemetry():
     
     return full_df, data_sha256
 
+def generate_small_multiples_fdc_chart(full_df, summary_by_corridor):
+    """
+    Generates a 2x2 Small Multiples Flow Duration Curve chart in strict compliance with Rule D.
+    Each corridor receives its own independent panel with its own percentiles.
+    """
+    plt.style.use('dark_background')
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10), dpi=300)
+    fig.suptitle("ENTSO-E Intra-Corridor Physical Flow Duration Curves (Metric M2 Baseline)",
+                 fontsize=15, fontweight='bold', color='#ffffff', y=0.98)
+                 
+    fig.text(0.5, 0.94, "Rule D Compliance: Small Multiples Layout — Each corridor evaluated strictly against its own temporal distribution.",
+             ha='center', fontsize=10, fontstyle='italic', color='#bbbbbb')
+
+    axes_flat = axes.flatten()
+
+    for idx, c in enumerate(CORRIDORS):
+        ax = axes_flat[idx]
+        cdf = full_df[full_df["corridor"] == c["id"]].copy()
+        flows_sorted = np.sort(cdf["net_flow_mw"].values)[::-1]  # Sort descending for FDC
+        percent_duration = np.linspace(0, 100, len(flows_sorted))
+        
+        stats = summary_by_corridor[c["id"]]
+        
+        # Plot FDC
+        ax.plot(percent_duration, flows_sorted, color=c["color"], linewidth=2.2, label=f"{c['name']} Flow Duration")
+        ax.fill_between(percent_duration, 0, flows_sorted, color=c["color"], alpha=0.15)
+        
+        # Reference lines matching summary.json percentiles
+        p50 = stats["median_p50_flow_mw"]
+        p90 = stats["p90_flow_mw"]
+        p99 = stats["p99_flow_mw"]
+        
+        ax.axhline(p50, color='#ffffff', linestyle='--', linewidth=1.0, alpha=0.7, label=f"Median (P50): {p50:,.1f} MW")
+        ax.axhline(p90, color='#ffea00', linestyle=':', linewidth=1.0, alpha=0.8, label=f"High (P90): {p90:,.1f} MW")
+        ax.axhline(p99, color='#ff3333', linestyle='-.', linewidth=1.0, alpha=0.8, label=f"Peak (P99): {p99:,.1f} MW")
+        
+        ax.set_title(f"Corridor: {c['name']} (13-Month Self-Distribution)", fontsize=12, fontweight='bold', color='#ffffff', pad=8)
+        ax.set_xlabel("% of Annual Duration", fontsize=9, color='#cccccc')
+        ax.set_ylabel("Net Physical Flow (|P_flow| MW)", fontsize=9, color='#cccccc')
+        ax.set_xlim(0, 100)
+        ax.set_ylim(0, max(flows_sorted) * 1.15)
+        
+        ax.grid(True, linestyle=':', alpha=0.25, color='#888888')
+        ax.legend(loc='upper right', fontsize=8.5, framealpha=0.4, facecolor='#111111')
+        
+        # Stats annotation box inside panel
+        stats_text = (f"Mean: {stats['mean_flow_mw']:,.1f} MW\n"
+                      f"Std (σ): {stats['std_flow_mw']:,.1f} MW\n"
+                      f"Peak Ratio: {stats['peak_to_mean_ratio']}x")
+        ax.text(0.04, 0.08, stats_text, transform=ax.transAxes, fontsize=8.5,
+                bbox=dict(boxstyle="round,pad=0.4", facecolor='#111111', edgecolor='#444444', alpha=0.8),
+                color='#e0e0e0')
+
+    plt.tight_layout(rect=[0, 0.03, 1, 0.92])
+    
+    chart_path = os.path.join(FIGURES_DIR, "m2_flow_duration_curves.png")
+    plt.savefig(chart_path, dpi=300)
+    plt.close()
+    
+    print(f"[FIGURE SUCCESS] Rule D Small Multiples Flow Duration Curves chart saved: {chart_path}")
+    return compute_file_sha256(chart_path)
+
 def run_pipeline():
     print("=== Open Market Note #005 — Deterministic Pipeline Execution (L1–L6) ===")
     print("[EXECUTION MODE] EMPIRICAL METRIC M2 — INTRA-CORRIDOR PHYSICAL FLOW DYNAMICS")
@@ -242,6 +308,10 @@ def run_pipeline():
             "peak_to_mean_ratio": peak_ratio
         }
         
+    # L4: Generate Rule D Small Multiples Visual
+    chart_sha256 = generate_small_multiples_fdc_chart(full_df, summary_by_corridor)
+    PROTOCOL_STACK["provenance_hashes"]["figure_sha256"] = chart_sha256
+
     # L4: Assemble summary.json
     summary_output = {
         "note_id": "005",

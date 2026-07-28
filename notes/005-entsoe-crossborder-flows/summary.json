@@ -66,8 +66,9 @@
     "p10-client-audit": "1.0.0",
     "provenance_hashes": {
       "methodology_sha256": "f0be9a12d5bac2c4bdac02f61263061d7a034e217635cd49ebc3091b6d0f8a87",
-      "pipeline_sha256": "286b7f364d85e40b1d2d9a80bb1d59a630e50d45390d8c4a13097cc488b9f2a0",
-      "data_sha256": "d996f62a0fcf4a2ab0713519d81d01abae25251d3665e94e828dad23c27ae301"
+      "pipeline_sha256": "73034a9ea58877d1a7ba19e3325cc7080772345b933f8ce6fb91c04a827b2d32",
+      "data_sha256": "d996f62a0fcf4a2ab0713519d81d01abae25251d3665e94e828dad23c27ae301",
+      "figure_sha256": "023ffa7cb8989eada91d24076259b3623fa75e4cd2a124d91f82a30c8daad82e"
     }
   }
 }

@@ -8,10 +8,11 @@
 > - `market-note-baseline v1.4.0`  
 > - `p10-gate v1.1.0`  
 > - `p10-client-audit v1.0.0`  
-> **Tri-Hash Provenance Stack:**  
+> **Quad-Hash Provenance Stack:**  
 > - `methodology_sha256`: `f0be9a12d5bac2c4bdac02f61263061d7a034e217635cd49ebc3091b6d0f8a87`  
-> - `pipeline_sha256`: `286b7f364d85e40b1d2d9a80bb1d59a630e50d45390d8c4a13097cc488b9f2a0`  
-> - `data_sha256`: `d996f62a0fcf4a2ab0713519d81d01abae25251d3665e94e828dad23c27ae301`
+> - `pipeline_sha256`: `73034a9ea58877d1a7ba19e3325cc7080772345b933f8ce6fb91c04a827b2d32`  
+> - `data_sha256`: `d996f62a0fcf4a2ab0713519d81d01abae25251d3665e94e828dad23c27ae301`  
+> - `figure_sha256`: `023ffa7cb8989eada91d24076259b3623fa75e4cd2a124d91f82a30c8daad82e`
 
 ---
 
@@ -27,7 +28,15 @@ This Open Market Note establishes a 13-month descriptive baseline for net physic
 
 ---
 
-## 1. Metric M2 Summary Table (Intra-Corridor Self-Distribution per Rule D)
+## 1. Metric M2 Flow Duration Curves (Rule D Small Multiples Visualization)
+
+![ENTSO-E Intra-Corridor Physical Flow Duration Curves](figures/m2_flow_duration_curves.png)
+
+*Figure 1: Intra-corridor net physical flow duration curves (|P_flow| MW) plotted across 4 Small Multiples subplots (1 panel per corridor). Horizontal lines mark median P50 (white), high-load P90 (yellow), and peak P99 (red) thresholds matching summary.json exactly.*
+
+---
+
+## 2. Metric M2 Summary Table (Intra-Corridor Self-Distribution per Rule D)
 
 > **Methodological Note (Metric M1 Status):** Metric M1 (Capacity Utilization Duration) is **EXCLUDED for all corridors** per Decision `D-006` / Rule A due to missing directional Total NTC telemetry under CC BY 4.0 in the ENTSO-E API.
 
@@ -42,7 +51,7 @@ This Open Market Note establishes a 13-month descriptive baseline for net physic
 
 ---
 
-## 2. Decision Impact Matrix (Dependency Graph)
+## 3. Decision Impact Matrix (Dependency Graph)
 
 | Decision ID | Target Area | Decision Source | Affected Downstream Artifacts |
 | :---: | :--- | :--- | :--- |
@@ -55,14 +64,15 @@ This Open Market Note establishes a 13-month descriptive baseline for net physic
 
 ---
 
-## 3. Reproducibility & Provenance
+## 4. Reproducibility & Provenance
 
-To execute deterministic regeneration of all outputs:
+To execute deterministic regeneration of all outputs and figures:
 
 ```bash
 python3 run_pipeline.py
 ```
 
+- **Generated Visual:** [`figures/m2_flow_duration_curves.png`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/figures/m2_flow_duration_curves.png)
 - **Raw Payload Manifest:** [`data/data_manifest.json`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/data/data_manifest.json)
 - **Input Manifest:** [`data/input_manifest.json`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/data/input_manifest.json)
 - **JSON Summary:** [`summary.json`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/summary.json)
