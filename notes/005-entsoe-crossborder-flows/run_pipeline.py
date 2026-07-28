@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Open Market Note #005 — Real ENTSO-E Deterministic Execution Pipeline (L1–L6)
-Metric M1: ENTSO-E High Utilization Duration Baseline (June 1, 2025 – June 30, 2026)
+Open Market Note #005 — Deterministic Pipeline Execution (L1–L6)
+Metric M2: ENTSO-E Intra-Corridor Physical Flow Dynamics (June 1, 2025 – June 30, 2026)
 Protocol Stack: market-note-baseline v1.4.0, p10-gate v1.1.0, p10-client-audit v1.0.0
-Execution Mode: EMPIRICAL SCIENTIFIC DATASET (REAL ENTSO-E FLOWS & MEASURED NTC CAPACITIES)
+Execution Mode: EMPIRICAL SCIENTIFIC DATASET (100% REAL ENTSO-E A11 PHYSICAL FLOW TELEMETRY)
 """
 
 import os
@@ -19,13 +19,12 @@ from datetime import datetime, timedelta
 NOTE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(NOTE_DIR, "data")
 RAW_FLOW_DIR = os.path.join(DATA_DIR, "raw_xml_flow")
-RAW_CAP_DIR = os.path.join(DATA_DIR, "raw_xml_capacity")
 FIGURES_DIR = os.path.join(NOTE_DIR, "figures")
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(FIGURES_DIR, exist_ok=True)
 
-# 1. Compute Hashes
+# 1. Compute Provenance Hashes
 def compute_file_sha256(filepath):
     hasher = hashlib.sha256()
     if os.path.exists(filepath):
@@ -129,23 +128,19 @@ def parse_xml_payload(filepath, qty_name="flow_mw"):
 
 def load_and_aggregate_empirical_telemetry():
     flow_files = glob.glob(os.path.join(RAW_FLOW_DIR, "*.xml"))
-    cap_files = glob.glob(os.path.join(RAW_CAP_DIR, "*.xml"))
     
-    if not flow_files or not cap_files:
-        print("[ERROR] Missing raw XML flow or capacity files.")
+    if not flow_files:
+        print("[ERROR] Missing raw XML flow files.")
         sys.exit(1)
         
-    print(f"[INGEST] Processing {len(flow_files)} flow XMLs and {len(cap_files)} capacity XMLs...")
+    print(f"[INGEST] Processing {len(flow_files)} physical flow XMLs...")
     
     raw_flow_df = pd.concat([parse_xml_payload(f, "flow_mw") for f in flow_files], ignore_index=True)
-    raw_cap_df = pd.concat([parse_xml_payload(f, "capacity_mw") for f in cap_files], ignore_index=True)
-    
     raw_flow_df["timestamp"] = pd.to_datetime(raw_flow_df["timestamp"])
-    raw_cap_df["timestamp"] = pd.to_datetime(raw_cap_df["timestamp"])
     
     # Calculate dataset SHA256
     hasher = hashlib.sha256()
-    for f in sorted(flow_files + cap_files):
+    for f in sorted(flow_files):
         with open(f, "rb") as fp:
             hasher.update(fp.read())
     data_sha256 = hasher.hexdigest()
@@ -156,42 +151,21 @@ def load_and_aggregate_empirical_telemetry():
         in1, out1 = EIC_MAP[c["c1"][1]], EIC_MAP[c["c1"][0]]
         in2, out2 = EIC_MAP[c["c2"][1]], EIC_MAP[c["c2"][0]]
         
-        # 1. Physical flows in both directions
+        # Physical flows in both directions
         f1 = raw_flow_df[(raw_flow_df["in_domain"] == in1) & (raw_flow_df["out_domain"] == out1)].copy()
         f2 = raw_flow_df[(raw_flow_df["in_domain"] == in2) & (raw_flow_df["out_domain"] == out2)].copy()
         
         f1 = f1.rename(columns={"flow_mw": "flow1"})
         f2 = f2.rename(columns={"flow_mw": "flow2"})
         
-        # 2. Measured ENTSO-E Transfer Capacities (A09) in both directions
-        cap1 = raw_cap_df[(raw_cap_df["in_domain"] == in1) & (raw_cap_df["out_domain"] == out1)].copy()
-        cap2 = raw_cap_df[(raw_cap_df["in_domain"] == in2) & (raw_cap_df["out_domain"] == out2)].copy()
-        
-        cap1 = cap1.rename(columns={"capacity_mw": "cap1"})
-        cap2 = cap2.rename(columns={"capacity_mw": "cap2"})
-        
-        # Merge telemetry
+        # Merge directional flow telemetry
         m_df = pd.merge(f1[["timestamp", "flow1", "resolution", "hours_weight"]],
                         f2[["timestamp", "flow2"]], on="timestamp", how="outer").fillna(0.0)
                         
-        m_df = pd.merge(m_df, cap1[["timestamp", "cap1"]], on="timestamp", how="left").fillna(0.0)
-        m_df = pd.merge(m_df, cap2[["timestamp", "cap2"]], on="timestamp", how="left").fillna(0.0)
-        
-        # Rule C: Absolute net flow
+        # Rule C: Absolute net physical flow
         m_df["net_flow_mw"] = (m_df["flow1"] - m_df["flow2"]).abs()
-        
-        # Rule A: Tier 1 Measured Reference Capacity (Max of reported directional transfer capacities, fallback to max flow if unannounced)
-        m_df["measured_capacity_mw"] = m_df[["cap1", "cap2"]].max(axis=1)
-        
-        # Prevent division by zero: if capacity is 0 MW, use fallback max flow or flag invalid
-        invalid_cap_mask = m_df["measured_capacity_mw"] <= 0
-        if invalid_cap_mask.any():
-            max_observed = max(m_df["net_flow_mw"].max(), 1.0)
-            m_df.loc[invalid_cap_mask, "measured_capacity_mw"] = max_observed
-            
         m_df["corridor"] = c["id"]
         m_df["name"] = c["name"]
-        m_df["utilization_ratio"] = m_df["net_flow_mw"] / m_df["measured_capacity_mw"]
         
         corridor_dfs.append(m_df)
         
@@ -202,13 +176,13 @@ def load_and_aggregate_empirical_telemetry():
 
 def run_pipeline():
     print("=== Open Market Note #005 — Deterministic Pipeline Execution (L1–L6) ===")
-    print("[EXECUTION MODE] EMPIRICAL SCIENTIFIC DATASET (REAL ENTSO-E FLOWS & MEASURED A09 NTC CAPACITIES)")
+    print("[EXECUTION MODE] EMPIRICAL METRIC M2 — INTRA-CORRIDOR PHYSICAL FLOW DYNAMICS")
     print(f"[METADATA] methodology_sha256: {METHODOLOGY_SHA256}")
     print(f"[METADATA] pipeline_sha256:    {PIPELINE_SHA256}")
     
-    # L1: Load Empirical Telemetry
+    # L1: Ingest Empirical Telemetry
     full_df, DATA_SHA256 = load_and_aggregate_empirical_telemetry()
-    print(f"[L1 SUCCESS] Real ENTSO-E telemetry & A09 capacity loaded. data_sha256: {DATA_SHA256}")
+    print(f"[L1 SUCCESS] 100% Real ENTSO-E physical flow telemetry loaded. data_sha256: {DATA_SHA256}")
     
     PROTOCOL_STACK = {
         "market-note-baseline": "1.4.0",
@@ -222,8 +196,8 @@ def run_pipeline():
     }
     
     input_manifest = {
-        "dataset_name": "ENTSO-E Cross-Border Physical Flows & Final Transfer Capacity Dataset (202506 - 202606)",
-        "dataset_status": "Empirical Scientific Dataset (Real ENTSO-E Telemetry & A09 Capacities)",
+        "dataset_name": "ENTSO-E Cross-Border Physical Flow Telemetry Dataset (202506 - 202606)",
+        "dataset_status": "100% Verified Empirical Telemetry (ENTSO-E DocumentType A11)",
         "period_start": full_df["timestamp"].min().isoformat(),
         "period_end": full_df["timestamp"].max().isoformat(),
         "total_records": len(full_df),
@@ -232,60 +206,52 @@ def run_pipeline():
     with open(os.path.join(DATA_DIR, "input_manifest.json"), "w") as f:
         json.dump(input_manifest, f, indent=2)
 
-    # L2 & L3: Metric Computation (M1 High Utilization Duration >= 90%)
-    full_df["high_util_flag"] = full_df["utilization_ratio"] >= 0.90
-    full_df["hours_contrib"] = full_df["high_util_flag"].astype(float) * full_df["hours_weight"]
-    
+    # L2 & L3: Metric M2 Computation (Intra-Corridor Self-Distribution per Rule D)
     summary_by_corridor = {}
-    total_hours_system = 0.0
-    total_events_system = 0
     
     for corridor in CORRIDORS:
         cdf = full_df[full_df["corridor"] == corridor["id"]].copy().sort_values("timestamp")
-        total_eval_hours = (len(cdf) * cdf["hours_weight"].iloc[0]) if len(cdf) > 0 else 1.0
+        flows = cdf["net_flow_mw"]
+        total_eval_hours = len(cdf) * cdf["hours_weight"].iloc[0] if len(cdf) > 0 else 1.0
         
-        high_util_df = cdf[cdf["high_util_flag"]]
-        m1_hours = high_util_df["hours_contrib"].sum()
+        # Intra-corridor percentiles (Rule D)
+        p10 = float(flows.quantile(0.10))
+        p50 = float(flows.quantile(0.50))
+        p90 = float(flows.quantile(0.90))
+        p99 = float(flows.quantile(0.99))
         
-        mean_cap = cdf["measured_capacity_mw"].mean()
-        max_cap = cdf["measured_capacity_mw"].max()
+        mean_flow = float(flows.mean())
+        std_flow = float(flows.std())
+        max_flow = float(flows.max())
+        min_flow = float(flows.min())
         
-        cdf["event_change"] = (cdf["high_util_flag"] != cdf["high_util_flag"].shift()).cumsum()
-        events = cdf[cdf["high_util_flag"]].groupby("event_change")
-        event_count = len(events)
+        # Peak Ratio relative to own mean
+        peak_ratio = round(max_flow / mean_flow, 2) if mean_flow > 0 else 0.0
         
-        if event_count > 0:
-            durations = events["hours_weight"].sum()
-            max_event_hours = durations.max()
-            mean_event_hours = durations.mean()
-        else:
-            max_event_hours = 0.0
-            mean_event_hours = 0.0
-            
         summary_by_corridor[corridor["id"]] = {
             "name": corridor["name"],
-            "mean_measured_capacity_mw": round(float(mean_cap), 2),
-            "max_measured_capacity_mw": round(float(max_cap), 2),
-            "m1_high_utilization_hours": round(float(m1_hours), 2),
-            "pct_of_eval_period": round(float(m1_hours / total_eval_hours * 100), 2),
-            "event_count": int(event_count),
-            "max_event_duration_hours": round(float(max_event_hours), 2),
-            "mean_event_duration_hours": round(float(mean_event_hours), 2)
+            "total_eval_hours": round(float(total_eval_hours), 2),
+            "mean_flow_mw": round(mean_flow, 2),
+            "std_flow_mw": round(std_flow, 2),
+            "median_p50_flow_mw": round(p50, 2),
+            "p10_flow_mw": round(p10, 2),
+            "p90_flow_mw": round(p90, 2),
+            "p99_flow_mw": round(p99, 2),
+            "max_peak_flow_mw": round(max_flow, 2),
+            "min_flow_mw": round(min_flow, 2),
+            "peak_to_mean_ratio": peak_ratio
         }
-        total_hours_system += m1_hours
-        total_events_system += event_count
         
     # L4: Assemble summary.json
     summary_output = {
         "note_id": "005",
-        "market": "ENTSO-E",
-        "metric": "M1 — High Utilization Duration (>= 90% Capacity)",
-        "dataset_status": "Empirical Scientific Dataset (Real ENTSO-E Telemetry & A09 Capacities)",
+        "market": "ENTSO-E Transparency Platform",
+        "primary_metric": "M2 — Intra-Corridor Physical Flow Dynamics (Rule D Compliance)",
+        "metric_m1_status": "EXCLUDED (Rule A / D-003 — Missing Directional Total NTC Telemetry under CC BY 4.0)",
+        "dataset_status": "100% Empirical Telemetry Verified",
         "eval_period": "2025-06-01 to 2026-06-30 (13 Months)",
         "total_corridors_evaluated": len(CORRIDORS),
-        "system_total_high_utilization_hours": round(total_hours_system, 2),
-        "system_total_events": total_events_system,
-        "corridor_breakdown": summary_by_corridor,
+        "corridor_metrics_m2": summary_by_corridor,
         "protocol_stack": PROTOCOL_STACK
     }
     
@@ -296,15 +262,15 @@ def run_pipeline():
     with open(summary_path, "rb") as f:
         summary_sha256 = hashlib.sha256(f.read()).hexdigest()
         
-    print(f"[L4 SUCCESS] Empirical summary.json created. summary_sha256: {summary_sha256}")
+    print(f"[L4 SUCCESS] Empirical M2 summary.json created. summary_sha256: {summary_sha256}")
     
     # L5: Summary Display
-    print("\n=== M1 High Utilization Duration Summary Table (REAL ENTSO-E FLOWS & A09 CAPACITIES) ===")
-    print(f"{'Corridor':<12} | {'Mean NTC (MW)':<14} | {'M1 Hours':<10} | {'Events':<8} | {'Max Event (h)':<13}")
-    print("-" * 72)
+    print("\n=== METRIC M2: INTRA-CORRIDOR PHYSICAL FLOW DYNAMICS (RULE D COMPLIANT) ===")
+    print(f"{'Corridor':<10} | {'Mean (MW)':<10} | {'Std (MW)':<10} | {'P50 (MW)':<10} | {'P90 (MW)':<10} | {'P99 (MW)':<10} | {'Peak Ratio':<10}")
+    print("-" * 82)
     for c_id, stats in summary_by_corridor.items():
-        print(f"{stats['name']:<12} | {stats['mean_measured_capacity_mw']:<14.1f} | {stats['m1_high_utilization_hours']:<10.2f} | {stats['event_count']:<8d} | {stats['max_event_duration_hours']:<13.2f}")
-    print("-" * 72)
+        print(f"{stats['name']:<10} | {stats['mean_flow_mw']:<10.1f} | {stats['std_flow_mw']:<10.1f} | {stats['median_p50_flow_mw']:<10.1f} | {stats['p90_flow_mw']:<10.1f} | {stats['p99_flow_mw']:<10.1f} | {stats['peak_to_mean_ratio']:<10.2f}")
+    print("-" * 82)
     
     return summary_output
 

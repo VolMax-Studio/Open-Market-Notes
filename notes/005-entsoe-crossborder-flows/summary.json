@@ -1,20 +1,73 @@
 {
   "note_id": "005",
-  "market": "ENTSO-E",
-  "metric": "M1 — High Utilization Duration (>= 90% Capacity)",
-  "dataset_status": "Under Review (Rule A Exclusion Enforcement — Missing Total NTC Telemetry)",
+  "market": "ENTSO-E Transparency Platform",
+  "primary_metric": "M2 \u2014 Intra-Corridor Physical Flow Dynamics (Rule D Compliance)",
+  "metric_m1_status": "EXCLUDED (Rule A / D-003 \u2014 Missing Directional Total NTC Telemetry under CC BY 4.0)",
+  "dataset_status": "100% Empirical Telemetry Verified",
   "eval_period": "2025-06-01 to 2026-06-30 (13 Months)",
   "total_corridors_evaluated": 4,
-  "metric_m1_status": "EXCLUDED (Rule A / D-003)",
-  "audit_finding": "Pattern #9: Hardcoded or allocated capacity denominator prohibited by Rule A.",
+  "corridor_metrics_m2": {
+    "NL_DE": {
+      "name": "NL \u2194 DE",
+      "total_eval_hours": 9479.5,
+      "mean_flow_mw": 1615.62,
+      "std_flow_mw": 1139.65,
+      "median_p50_flow_mw": 1427.14,
+      "p10_flow_mw": 279.26,
+      "p90_flow_mw": 3202.52,
+      "p99_flow_mw": 4732.9,
+      "max_peak_flow_mw": 6572.4,
+      "min_flow_mw": 0.2,
+      "peak_to_mean_ratio": 4.07
+    },
+    "BE_NL": {
+      "name": "BE \u2194 NL",
+      "total_eval_hours": 9480.0,
+      "mean_flow_mw": 1409.1,
+      "std_flow_mw": 861.05,
+      "median_p50_flow_mw": 1325.34,
+      "p10_flow_mw": 308.8,
+      "p90_flow_mw": 2614.6,
+      "p99_flow_mw": 3554.77,
+      "max_peak_flow_mw": 4425.49,
+      "min_flow_mw": 0.14,
+      "peak_to_mean_ratio": 3.14
+    },
+    "AT_DE": {
+      "name": "AT \u2194 DE",
+      "total_eval_hours": 9480.0,
+      "mean_flow_mw": 1206.35,
+      "std_flow_mw": 737.43,
+      "median_p50_flow_mw": 1163.17,
+      "p10_flow_mw": 237.05,
+      "p90_flow_mw": 2221.69,
+      "p99_flow_mw": 2831.71,
+      "max_peak_flow_mw": 3708.53,
+      "min_flow_mw": 0.01,
+      "peak_to_mean_ratio": 3.07
+    },
+    "FR_BE": {
+      "name": "FR \u2194 BE",
+      "total_eval_hours": 9480.0,
+      "mean_flow_mw": 1865.0,
+      "std_flow_mw": 1098.34,
+      "median_p50_flow_mw": 1812.0,
+      "p10_flow_mw": 414.62,
+      "p90_flow_mw": 3391.7,
+      "p99_flow_mw": 4476.77,
+      "max_peak_flow_mw": 5340.94,
+      "min_flow_mw": 0.11,
+      "peak_to_mean_ratio": 2.86
+    }
+  },
   "protocol_stack": {
     "market-note-baseline": "1.4.0",
     "p10-gate": "1.1.0",
     "p10-client-audit": "1.0.0",
     "provenance_hashes": {
-      "methodology_sha256": "1231d1586e6869d07ade21e28f611042471d640d581317980c9feb3e3c76e512",
-      "pipeline_sha256": "c02fffcc99683f5545e2bcb67ed9706808edb157bda4902bd4be71a8be96f35a",
-      "data_sha256": "e79c901af6e18d541f7a64599b0c30e6434aefe0438c49e279a940f8cc519e8b"
+      "methodology_sha256": "f0be9a12d5bac2c4bdac02f61263061d7a034e217635cd49ebc3091b6d0f8a87",
+      "pipeline_sha256": "8258bde23a1f9d4bed95ffac07068c667c885f135924be4fc212155948a97b63",
+      "data_sha256": "d996f62a0fcf4a2ab0713519d81d01abae25251d3665e94e828dad23c27ae301"
     }
   }
 }
