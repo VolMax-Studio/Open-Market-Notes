@@ -1,0 +1,62 @@
+{
+  "note_id": "005",
+  "market": "ENTSO-E",
+  "metric": "M1 \u2014 High Utilization Duration (>= 90% Capacity)",
+  "eval_period": "2025-06-01 to 2026-06-30 (13 Months)",
+  "total_corridors_evaluated": 5,
+  "system_total_high_utilization_hours": 22584.5,
+  "system_total_events": 9211,
+  "corridor_breakdown": {
+    "NL_DE": {
+      "name": "NL \u2194 DE",
+      "capacity_mw": 5200.0,
+      "m1_high_utilization_hours": 4474.75,
+      "pct_of_year": 47.3,
+      "event_count": 1877,
+      "max_event_duration_hours": 21.5,
+      "mean_event_duration_hours": 2.38
+    },
+    "BE_NL": {
+      "name": "BE \u2194 NL",
+      "capacity_mw": 3400.0,
+      "m1_high_utilization_hours": 4429.75,
+      "pct_of_year": 46.82,
+      "event_count": 1883,
+      "max_event_duration_hours": 24.25,
+      "mean_event_duration_hours": 2.35
+    },
+    "AT_DE": {
+      "name": "AT \u2194 DE",
+      "capacity_mw": 4800.0,
+      "m1_high_utilization_hours": 4516.75,
+      "pct_of_year": 47.74,
+      "event_count": 1782,
+      "max_event_duration_hours": 18.25,
+      "mean_event_duration_hours": 2.53
+    },
+    "DK1_DE": {
+      "name": "DK1 \u2194 DE",
+      "capacity_mw": 2500.0,
+      "m1_high_utilization_hours": 4614.75,
+      "pct_of_year": 48.78,
+      "event_count": 1789,
+      "max_event_duration_hours": 37.0,
+      "mean_event_duration_hours": 2.58
+    },
+    "FR_BE": {
+      "name": "FR \u2194 BE",
+      "capacity_mw": 3200.0,
+      "m1_high_utilization_hours": 4548.5,
+      "pct_of_year": 48.08,
+      "event_count": 1880,
+      "max_event_duration_hours": 20.5,
+      "mean_event_duration_hours": 2.42
+    }
+  },
+  "protocol_stack": {
+    "market-note-baseline": "1.4.0",
+    "p10-gate": "1.1.0",
+    "p10-client-audit": "1.0.0",
+    "methodology_sha256": "1231d1586e6869d07ade21e28f611042471d640d581317980c9feb3e3c76e512"
+  }
+}
