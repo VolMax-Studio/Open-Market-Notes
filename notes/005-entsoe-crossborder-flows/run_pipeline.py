@@ -3,6 +3,7 @@
 Open Market Note #005 — Deterministic Execution Pipeline (L1–L6)
 Metric M1: ENTSO-E High Utilization Duration Baseline (June 1, 2025 – June 30, 2026)
 Protocol Stack: market-note-baseline v1.4.0, p10-gate v1.1.0, p10-client-audit v1.0.0
+Execution Mode: SOFTWARE PIPELINE VALIDATION (SYNTHETIC DATA RUN)
 """
 
 import os
@@ -21,7 +22,14 @@ FIGURES_DIR = os.path.join(NOTE_DIR, "figures")
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(FIGURES_DIR, exist_ok=True)
 
-# 1. Compute methodology_sha256 hash over PARAMS.md and DECISIONS.md
+# 1. Compute methodology_sha256 and pipeline_sha256
+def compute_file_sha256(filepath):
+    hasher = hashlib.sha256()
+    if os.path.exists(filepath):
+        with open(filepath, "rb") as f:
+            hasher.update(f.read())
+    return hasher.hexdigest()
+
 def compute_methodology_hash():
     params_path = os.path.join(NOTE_DIR, "PARAMS.md")
     decisions_path = os.path.join(NOTE_DIR, "DECISIONS.md")
@@ -34,13 +42,7 @@ def compute_methodology_hash():
     return hasher.hexdigest()
 
 METHODOLOGY_SHA256 = compute_methodology_hash()
-
-PROTOCOL_STACK = {
-    "market-note-baseline": "1.4.0",
-    "p10-gate": "1.1.0",
-    "p10-client-audit": "1.0.0",
-    "methodology_sha256": METHODOLOGY_SHA256
-}
+PIPELINE_SHA256 = compute_file_sha256(os.path.abspath(__file__))
 
 # 2. Corridors definition (Decision D-002)
 CORRIDORS = [
@@ -51,22 +53,19 @@ CORRIDORS = [
     {"id": "FR_BE", "name": "FR ↔ BE", "in_domain": "10YFR-RTE------C", "out_domain": "10YBE----------2", "pmax_mw": 3200.0}
 ]
 
-def generate_reproducible_telemetry(corridor, seed=42):
+def generate_synthetic_telemetry(corridor, seed=42):
     """
-    Generates synthetic deterministic ENTSO-E physical flow telemetry (8760 hours)
-    satisfying Decision D-001 (Threshold >= 90%), Rule B (15m=0.25h), and Rule C (Absolute Flow).
+    Generates synthetic deterministic telemetry for software pipeline verification.
     """
     np.random.seed(seed + hash(corridor["id"]) % 1000)
     timestamps = pd.date_range(start="2025-06-01 00:00", end="2026-06-30 23:45", freq="15min")
     
     pmax = corridor["pmax_mw"]
-    # Base diurnal/seasonal pattern + stochastic noise
     t_hours = np.arange(len(timestamps)) / 4.0
     diurnal = 0.65 + 0.20 * np.sin(2 * np.pi * t_hours / 24) + 0.10 * np.cos(2 * np.pi * t_hours / (24 * 365))
     noise = np.random.normal(0, 0.08, len(timestamps))
     
     ratio = np.clip(diurnal + noise, 0.0, 0.98)
-    # Inject high utilization continuous events
     event_mask = np.random.binomial(1, 0.04, len(timestamps)).astype(bool)
     for i in range(len(timestamps) - 16):
         if event_mask[i]:
@@ -85,27 +84,43 @@ def generate_reproducible_telemetry(corridor, seed=42):
 
 def run_pipeline():
     print("=== Open Market Note #005 — Deterministic Pipeline Execution (L1–L6) ===")
+    print("[EXECUTION MODE] Software Pipeline Validation Run (Synthetic Benchmark Data)")
     print(f"[METADATA] methodology_sha256: {METHODOLOGY_SHA256}")
+    print(f"[METADATA] pipeline_sha256:    {PIPELINE_SHA256}")
     
-    # L1: Generate / Load Data & Build Input Manifest
+    # L1: Telemetry Freeze & Tri-Hash Computation
     all_dfs = []
     input_corridor_hashes = {}
+    combined_hasher = hashlib.sha256()
     
     for corridor in CORRIDORS:
-        df = generate_reproducible_telemetry(corridor)
+        df = generate_synthetic_telemetry(corridor)
         all_dfs.append(df)
         csv_path = os.path.join(DATA_DIR, f"telemetry_{corridor['id']}.csv")
         df.to_csv(csv_path, index=False)
         
-        # Calculate SHA256 of file
         with open(csv_path, "rb") as f:
-            input_corridor_hashes[corridor["id"]] = hashlib.sha256(f.read()).hexdigest()
+            content = f.read()
+            input_corridor_hashes[corridor["id"]] = hashlib.sha256(content).hexdigest()
+            combined_hasher.update(content)
             
+    DATA_SHA256 = combined_hasher.hexdigest()
     full_df = pd.concat(all_dfs, ignore_index=True)
     
-    # Save input manifest
+    PROTOCOL_STACK = {
+        "market-note-baseline": "1.4.0",
+        "p10-gate": "1.1.0",
+        "p10-client-audit": "1.0.0",
+        "provenance_hashes": {
+            "methodology_sha256": METHODOLOGY_SHA256,
+            "pipeline_sha256": PIPELINE_SHA256,
+            "data_sha256": DATA_SHA256
+        }
+    }
+    
     input_manifest = {
-        "dataset_name": "ENTSO-E Cross-Border Physical Flows Baseline (202506_202606)",
+        "dataset_name": "ENTSO-E Cross-Border Physical Flows Synthetic Validation Dataset",
+        "dataset_status": "Software Pipeline Validation Run (Synthetic Data)",
         "period_start": "2025-06-01T00:00:00Z",
         "period_end": "2026-06-30T23:45:00Z",
         "resolution": "15-minute time-weighted (Rule B)",
@@ -115,10 +130,9 @@ def run_pipeline():
     with open(os.path.join(DATA_DIR, "input_manifest.json"), "w") as f:
         json.dump(input_manifest, f, indent=2)
         
-    print("[L1 SUCCESS] Telemetry frozen & input_manifest.json created.")
+    print(f"[L1 SUCCESS] Telemetry frozen. data_sha256: {DATA_SHA256}")
 
-    # L2 & L3: Metric Computation (M1 High Utilization Duration)
-    # Rule B: 15min = 0.25h
+    # L2 & L3: Metric Computation
     full_df["high_util_flag"] = full_df["utilization_ratio"] >= 0.90
     full_df["hours_contrib"] = full_df["high_util_flag"].astype(float) * 0.25
     
@@ -129,10 +143,8 @@ def run_pipeline():
     for corridor in CORRIDORS:
         cdf = full_df[full_df["corridor"] == corridor["id"]].copy()
         high_util_df = cdf[cdf["high_util_flag"]]
-        
         m1_hours = high_util_df["hours_contrib"].sum()
         
-        # Count contiguous events
         cdf["event_change"] = (cdf["high_util_flag"] != cdf["high_util_flag"].shift()).cumsum()
         events = cdf[cdf["high_util_flag"]].groupby("event_change").size()
         event_count = len(events)
@@ -151,11 +163,12 @@ def run_pipeline():
         total_hours_system += m1_hours
         total_events_system += event_count
         
-    # L4: Assemble summary.json with embedded protocol_stack
+    # L4: Assemble summary.json
     summary_output = {
         "note_id": "005",
         "market": "ENTSO-E",
         "metric": "M1 — High Utilization Duration (>= 90% Capacity)",
+        "dataset_status": "Software Pipeline Validation Run (Synthetic Benchmark Data)",
         "eval_period": "2025-06-01 to 2026-06-30 (13 Months)",
         "total_corridors_evaluated": len(CORRIDORS),
         "system_total_high_utilization_hours": round(total_hours_system, 2),
@@ -168,14 +181,13 @@ def run_pipeline():
     with open(summary_path, "w") as f:
         json.dump(summary_output, f, indent=2)
         
-    # Compute summary_sha256
     with open(summary_path, "rb") as f:
         summary_sha256 = hashlib.sha256(f.read()).hexdigest()
         
     print(f"[L4 SUCCESS] summary.json created. summary_sha256: {summary_sha256}")
     
-    # L5: ASCII Distribution Summary
-    print("\n=== M1 High Utilization Duration Summary Table ===")
+    # L5: Summary Display
+    print("\n=== M1 High Utilization Duration Summary Table (Synthetic Validation) ===")
     print(f"{'Corridor':<12} | {'Cap (MW)':<10} | {'M1 Hours':<10} | {'Events':<8} | {'Max Event (h)':<13}")
     print("-" * 65)
     for c_id, stats in summary_by_corridor.items():
