@@ -1,17 +1,17 @@
 {
-  "dataset_name": "ENTSO-E Cross-Border Physical Flows Empirical Dataset (202506 - 202606)",
-  "dataset_status": "Empirical Scientific Dataset (Real ENTSO-E Telemetry)",
+  "dataset_name": "ENTSO-E Cross-Border Physical Flows & Final Transfer Capacity Dataset (202506 - 202606)",
+  "dataset_status": "Empirical Scientific Dataset (Real ENTSO-E Telemetry & A09 Capacities)",
   "period_start": "2025-06-01T00:00:00+00:00",
   "period_end": "2026-06-30T23:45:00+00:00",
-  "total_records": 123238,
+  "total_records": 226986,
   "protocol_stack": {
     "market-note-baseline": "1.4.0",
     "p10-gate": "1.1.0",
     "p10-client-audit": "1.0.0",
     "provenance_hashes": {
       "methodology_sha256": "1231d1586e6869d07ade21e28f611042471d640d581317980c9feb3e3c76e512",
-      "pipeline_sha256": "4709426580b01b315b1337028c97a3bacc8a1edb4e66a5fdde5f1c32aab6be23",
-      "data_sha256": "cbbfebcda91af51f316575040d8f28ccfed7f1c50e750c674037e8b01f02c638"
+      "pipeline_sha256": "c02fffcc99683f5545e2bcb67ed9706808edb157bda4902bd4be71a8be96f35a",
+      "data_sha256": "e79c901af6e18d541f7a64599b0c30e6434aefe0438c49e279a940f8cc519e8b"
     }
   }
 }

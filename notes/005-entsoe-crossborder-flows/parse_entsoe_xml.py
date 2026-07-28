@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Open Market Note #005 — Real ENTSO-E Physical Flow XML Parser
-Parses DocumentType A11 XML payloads into cleaned DataFrames following Rules A, B, and C.
+Open Market Note #005 — Real ENTSO-E Telemetry & Capacity Parser
+Parses A11 (Physical Flow) and A09 (Final Transfer Capacity) XML files into DataFrames.
 """
 
 import os
@@ -12,20 +12,22 @@ from datetime import datetime, timedelta
 
 NOTE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(NOTE_DIR, "data")
-RAW_DIR = os.path.join(DATA_DIR, "raw_xml")
+RAW_FLOW_DIR = os.path.join(DATA_DIR, "raw_xml_flow")
+RAW_CAP_DIR = os.path.join(DATA_DIR, "raw_xml_capacity")
 
-def parse_xml_file(filepath):
-    tree = ET.parse(filepath)
-    root = tree.getroot()
-    
-    # Extract namespace if present
+def parse_xml_payload(filepath, qty_name="flow_mw"):
+    try:
+        tree = ET.parse(filepath)
+        root = tree.getroot()
+    except Exception:
+        return pd.DataFrame()
+        
     ns = {}
     if root.tag.startswith('{'):
         ns_url = root.tag.split('}')[0].strip('{')
         ns = {'ns': ns_url}
         
     timeseries_list = root.findall('.//ns:TimeSeries', ns) if ns else root.findall('.//TimeSeries')
-    
     records = []
     
     for ts in timeseries_list:
@@ -53,7 +55,6 @@ def parse_xml_file(filepath):
                 step = timedelta(hours=1)
                 hours_weight = 1.00
                 
-            # Parse start ISO timestamp
             clean_start = start_str.replace("Z", "+00:00")
             base_dt = datetime.fromisoformat(clean_start)
             
@@ -65,41 +66,35 @@ def parse_xml_file(filepath):
                 if pos_elem is not None and qty_elem is not None:
                     pos = int(pos_elem.text)
                     qty = float(qty_elem.text)
-                    
-                    # Position is 1-indexed
                     pt_dt = base_dt + (pos - 1) * step
+                    
                     records.append({
                         "timestamp": pt_dt.isoformat(),
                         "in_domain": in_domain,
                         "out_domain": out_domain,
-                        "flow_mw": abs(qty),  # Rule C: Directional Neutrality |Pflow|
+                        qty_name: abs(qty),
                         "resolution": res,
                         "hours_weight": hours_weight
                     })
                     
     return pd.DataFrame(records)
 
-def parse_all_raw_data():
-    xml_files = glob.glob(os.path.join(RAW_DIR, "*.xml"))
-    print(f"[PARSER] Found {len(xml_files)} raw XML files in {RAW_DIR}")
+def parse_all_data():
+    flow_files = glob.glob(os.path.join(RAW_FLOW_DIR, "*.xml"))
+    cap_files = glob.glob(os.path.join(RAW_CAP_DIR, "*.xml"))
     
-    all_df_list = []
-    for f in xml_files:
-        df = parse_xml_file(f)
-        if not df.empty:
-            all_df_list.append(df)
-            
-    if not all_df_list:
-        print("[WARN] No valid XML telemetry parsed.")
-        return pd.DataFrame()
-        
-    full_df = pd.concat(all_df_list, ignore_index=True)
-    full_df["timestamp"] = pd.to_datetime(full_df["timestamp"])
-    full_df = full_df.sort_values("timestamp").reset_index(drop=True)
-    print(f"[PARSER SUCCESS] Parsed {len(full_df)} telemetry interval records.")
-    return full_df
+    print(f"[PARSER] Found {len(flow_files)} flow XMLs and {len(cap_files)} capacity XMLs.")
+    
+    # Parse Flows
+    f_list = [parse_xml_payload(f, "flow_mw") for f in flow_files]
+    flow_df = pd.concat([df for df in f_list if not df.empty], ignore_index=True) if f_list else pd.DataFrame()
+    
+    # Parse Capacities
+    c_list = [parse_xml_payload(f, "capacity_mw") for f in cap_files]
+    cap_df = pd.concat([df for df in c_list if not df.empty], ignore_index=True) if c_list else pd.DataFrame()
+    
+    return flow_df, cap_df
 
 if __name__ == "__main__":
-    df = parse_all_raw_data()
-    if not df.empty:
-        print(df.head())
+    fdf, cdf = parse_all_data()
+    print(f"Flows parsed: {len(fdf)} rows | Capacities parsed: {len(cdf)} rows")
