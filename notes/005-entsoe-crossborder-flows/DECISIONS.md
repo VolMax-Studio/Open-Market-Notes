@@ -82,4 +82,17 @@
   - [x] Timestamp delta calculator in aggregation pipeline
 
 ---
+
+### D-006 — Metric M1 Exclusion and Metric M2 Pivot to Intra-Corridor Physical Flow Dynamics
+- **Status:** `Active`
+- **Question:** How to handle Note #005 primary metric when ENTSO-E does not disclose directional Total NTC telemetry under CC BY 4.0?
+- **Alternatives Considered:** (1) Hardcode unverified static nameplate capacity estimates; (2) Use commercial allocation results (`A09`) despite artificial directional capacity zeros; (3) Classify M1 as Excluded per Rule A (`D-003`) and pivot to Metric M2 (Intra-Corridor Absolute Physical Flow Dynamics).
+- **Choice Made:** Option (3). Enforce Rule A exclusion for Metric M1 and pivot primary evaluation to Metric M2.
+- **A-Priori Justification:** Hardcoded or allocated capacity denominators distort utilization ratios. Metric M2 evaluates raw physical flow telemetry ($|P_{\text{flow}}|$ MW) strictly *within each corridor against its own self-distribution over time*, forbidding un-normalized cross-corridor ranking (Rule D).
+- **Evidence Required:**
+  - [x] Rule A exclusion logged in summary.json and README.md
+  - [x] Rule D intra-corridor self-distribution boundary stated in PARAMS.md
+
+---
 *VolMax Studio Lab · Open Market Note #005 Decision Ledger*
+
