@@ -1,54 +1,12 @@
 {
   "note_id": "005",
   "market": "ENTSO-E",
-  "metric": "M1 \u2014 High Utilization Duration (>= 90% Capacity)",
-  "dataset_status": "Empirical Scientific Dataset (Real ENTSO-E Telemetry & A09 Capacities)",
+  "metric": "M1 — High Utilization Duration (>= 90% Capacity)",
+  "dataset_status": "Under Review (Rule A Exclusion Enforcement — Missing Total NTC Telemetry)",
   "eval_period": "2025-06-01 to 2026-06-30 (13 Months)",
   "total_corridors_evaluated": 4,
-  "system_total_high_utilization_hours": 18111.5,
-  "system_total_events": 14574,
-  "corridor_breakdown": {
-    "NL_DE": {
-      "name": "NL \u2194 DE",
-      "mean_measured_capacity_mw": 1725.18,
-      "max_measured_capacity_mw": 8825.2,
-      "m1_high_utilization_hours": 5707.75,
-      "pct_of_eval_period": 32.7,
-      "event_count": 5036,
-      "max_event_duration_hours": 42.0,
-      "mean_event_duration_hours": 1.13
-    },
-    "BE_NL": {
-      "name": "BE \u2194 NL",
-      "mean_measured_capacity_mw": 1321.66,
-      "max_measured_capacity_mw": 6015.2,
-      "m1_high_utilization_hours": 918.0,
-      "pct_of_eval_period": 4.56,
-      "event_count": 1677,
-      "max_event_duration_hours": 21.0,
-      "mean_event_duration_hours": 0.55
-    },
-    "AT_DE": {
-      "name": "AT \u2194 DE",
-      "mean_measured_capacity_mw": 1648.89,
-      "max_measured_capacity_mw": 7751.4,
-      "m1_high_utilization_hours": 5856.5,
-      "pct_of_eval_period": 34.05,
-      "event_count": 3310,
-      "max_event_duration_hours": 37.75,
-      "mean_event_duration_hours": 1.77
-    },
-    "FR_BE": {
-      "name": "FR \u2194 BE",
-      "mean_measured_capacity_mw": 2346.38,
-      "max_measured_capacity_mw": 6624.2,
-      "m1_high_utilization_hours": 5629.25,
-      "pct_of_eval_period": 33.01,
-      "event_count": 4551,
-      "max_event_duration_hours": 68.0,
-      "mean_event_duration_hours": 1.24
-    }
-  },
+  "metric_m1_status": "EXCLUDED (Rule A / D-003)",
+  "audit_finding": "Pattern #9: Hardcoded or allocated capacity denominator prohibited by Rule A.",
   "protocol_stack": {
     "market-note-baseline": "1.4.0",
     "p10-gate": "1.1.0",
