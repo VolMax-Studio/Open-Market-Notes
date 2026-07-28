@@ -36,7 +36,7 @@ def dry_run_physical_flow(in_domain, out_domain, start_str="202606010000", end_s
         print("[ERROR] ENTSO-E API token not found.")
         sys.exit(1)
         
-    url = "https://web-api.entsoe.eu/api"
+    url = "https://web-api.tp.entsoe.eu/api"
     params = {
         'securityToken': token,
         'documentType': 'A11',  # Physical Flow

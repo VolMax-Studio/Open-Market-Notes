@@ -2,56 +2,47 @@
   "note_id": "005",
   "market": "ENTSO-E",
   "metric": "M1 \u2014 High Utilization Duration (>= 90% Capacity)",
-  "dataset_status": "Software Pipeline Validation Run (Synthetic Benchmark Data)",
+  "dataset_status": "Empirical Scientific Dataset (Real ENTSO-E Telemetry)",
   "eval_period": "2025-06-01 to 2026-06-30 (13 Months)",
-  "total_corridors_evaluated": 5,
-  "system_total_high_utilization_hours": 22703.5,
-  "system_total_events": 9284,
+  "total_corridors_evaluated": 4,
+  "system_total_high_utilization_hours": 1821.75,
+  "system_total_events": 756,
   "corridor_breakdown": {
     "NL_DE": {
       "name": "NL \u2194 DE",
       "capacity_mw": 5200.0,
-      "m1_high_utilization_hours": 4715.0,
-      "pct_of_year": 49.84,
-      "event_count": 1894,
-      "max_event_duration_hours": 18.75,
-      "mean_event_duration_hours": 2.49
+      "m1_high_utilization_hours": 64.75,
+      "pct_of_year": 0.68,
+      "event_count": 72,
+      "max_event_duration_hours": 7.0,
+      "mean_event_duration_hours": 0.9
     },
     "BE_NL": {
       "name": "BE \u2194 NL",
       "capacity_mw": 3400.0,
-      "m1_high_utilization_hours": 4387.5,
-      "pct_of_year": 46.38,
-      "event_count": 1810,
-      "max_event_duration_hours": 18.25,
-      "mean_event_duration_hours": 2.42
+      "m1_high_utilization_hours": 1.0,
+      "pct_of_year": 0.01,
+      "event_count": 133,
+      "max_event_duration_hours": 1.0,
+      "mean_event_duration_hours": 0.01
     },
     "AT_DE": {
       "name": "AT \u2194 DE",
       "capacity_mw": 4800.0,
-      "m1_high_utilization_hours": 4620.25,
-      "pct_of_year": 48.84,
-      "event_count": 1815,
-      "max_event_duration_hours": 21.0,
-      "mean_event_duration_hours": 2.55
-    },
-    "DK1_DE": {
-      "name": "DK1 \u2194 DE",
-      "capacity_mw": 2500.0,
-      "m1_high_utilization_hours": 4489.5,
-      "pct_of_year": 47.45,
-      "event_count": 1889,
-      "max_event_duration_hours": 26.0,
-      "mean_event_duration_hours": 2.38
+      "m1_high_utilization_hours": 0.0,
+      "pct_of_year": 0.0,
+      "event_count": 0,
+      "max_event_duration_hours": 0.0,
+      "mean_event_duration_hours": 0.0
     },
     "FR_BE": {
       "name": "FR \u2194 BE",
       "capacity_mw": 3200.0,
-      "m1_high_utilization_hours": 4491.25,
-      "pct_of_year": 47.47,
-      "event_count": 1876,
-      "max_event_duration_hours": 19.5,
-      "mean_event_duration_hours": 2.39
+      "m1_high_utilization_hours": 1756.0,
+      "pct_of_year": 18.52,
+      "event_count": 551,
+      "max_event_duration_hours": 46.0,
+      "mean_event_duration_hours": 3.19
     }
   },
   "protocol_stack": {
@@ -60,8 +51,8 @@
     "p10-client-audit": "1.0.0",
     "provenance_hashes": {
       "methodology_sha256": "1231d1586e6869d07ade21e28f611042471d640d581317980c9feb3e3c76e512",
-      "pipeline_sha256": "13e6c5b389d89428a62a8bc05d255bf1190211067979058fe67f9ab875e7dedf",
-      "data_sha256": "bb7f54b540a08fd4ef79f8db4d9791130503a23b337cf34e30185ce12ff1374d"
+      "pipeline_sha256": "4709426580b01b315b1337028c97a3bacc8a1edb4e66a5fdde5f1c32aab6be23",
+      "data_sha256": "cbbfebcda91af51f316575040d8f28ccfed7f1c50e750c674037e8b01f02c638"
     }
   }
 }

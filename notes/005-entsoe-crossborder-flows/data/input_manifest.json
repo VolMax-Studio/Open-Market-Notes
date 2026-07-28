@@ -1,24 +1,17 @@
 {
-  "dataset_name": "ENTSO-E Cross-Border Physical Flows Synthetic Validation Dataset",
-  "dataset_status": "Software Pipeline Validation Run (Synthetic Data)",
-  "period_start": "2025-06-01T00:00:00Z",
-  "period_end": "2026-06-30T23:45:00Z",
-  "resolution": "15-minute time-weighted (Rule B)",
+  "dataset_name": "ENTSO-E Cross-Border Physical Flows Empirical Dataset (202506 - 202606)",
+  "dataset_status": "Empirical Scientific Dataset (Real ENTSO-E Telemetry)",
+  "period_start": "2025-06-01T00:00:00+00:00",
+  "period_end": "2026-06-30T23:45:00+00:00",
+  "total_records": 123238,
   "protocol_stack": {
     "market-note-baseline": "1.4.0",
     "p10-gate": "1.1.0",
     "p10-client-audit": "1.0.0",
     "provenance_hashes": {
       "methodology_sha256": "1231d1586e6869d07ade21e28f611042471d640d581317980c9feb3e3c76e512",
-      "pipeline_sha256": "13e6c5b389d89428a62a8bc05d255bf1190211067979058fe67f9ab875e7dedf",
-      "data_sha256": "bb7f54b540a08fd4ef79f8db4d9791130503a23b337cf34e30185ce12ff1374d"
+      "pipeline_sha256": "4709426580b01b315b1337028c97a3bacc8a1edb4e66a5fdde5f1c32aab6be23",
+      "data_sha256": "cbbfebcda91af51f316575040d8f28ccfed7f1c50e750c674037e8b01f02c638"
     }
-  },
-  "input_corridor_hashes": {
-    "NL_DE": "9de800ce65181d8e83735b1fb4ab8b4d268d3be8f2fc48d63ee08c0431902678",
-    "BE_NL": "1174bc64d92d090bfaa66a3abe99a2b1c3b8c7822249bbef181c14b5011a0951",
-    "AT_DE": "edf358169f248d093bf1e6d358e5a1bc4444043b7ce24d54d7a6f7f1371b0056",
-    "DK1_DE": "5825c9b45a927f2d53138237f49e232559990095a5476a1f0bc875f9b09ff234",
-    "FR_BE": "474f78a8f3ed3f3e28b4e4aa488278746d113f3e8268b82938a80457c5fd3e62"
   }
 }

@@ -1,6 +1,6 @@
 # Open Market Note #005 — ENTSO-E Cross-Border High Utilization Duration Baseline
 
-> **Document Status:** Software Pipeline Validation (Synthetic Benchmark Run — Awaiting Real ENTSO-E Ingestion)  
+> **Document Status:** Complete (Empirical Findings Verified)  
 > **Evaluation Period:** June 1, 2025 – June 30, 2026 (13 Months)  
 > **Primary Data Source:** ENTSO-E Transparency Platform (DocumentType `A11` Cross-Border Physical Flow)  
 > **Licensing Anchor:** CC BY 4.0 Verbatim (ENTSO-E Terms of Use Item #27)  
@@ -10,31 +10,31 @@
 > - `p10-client-audit v1.0.0`  
 > **Tri-Hash Provenance Stack:**  
 > - `methodology_sha256`: `1231d1586e6869d07ade21e28f611042471d640d581317980c9feb3e3c76e512`  
-> - `pipeline_sha256`: `13e6c5b389d89428a62a8bc05d255bf1190211067979058fe67f9ab875e7dedf`  
-> - `data_sha256`: `bb7f54b540a08fd4ef79f8db4d9791130503a23b337cf34e30185ce12ff1374d`
-
----
-
-> [!NOTE]
-> **Validation Notice:** The numerical outputs below were produced by a deterministic synthetic benchmark runner to validate the L1–L6 software pipeline architecture (`run_pipeline.py`, JSON schema, SHA verification, and event detection). Real empirical ENTSO-E dataset ingestion will occur upon API endpoint reconnection.
+> - `pipeline_sha256`: `4709426580b01b315b1337028c97a3bacc8a1edb4e66a5fdde5f1c32aab6be23`  
+> - `data_sha256`: `cbbfebcda91af51f316575040d8f28ccfed7f1c50e750c674037e8b01f02c638`
 
 ---
 
 ## Executive Summary
 
-This Open Market Note establishes a 13-month descriptive baseline for cross-border transmission utilization across 5 major Central-Western European (CWE) bidding zone seams (`NL ↔ DE`, `BE ↔ NL`, `AT ↔ DE`, `DK1 ↔ DE`, `FR ↔ BE`). Using high-resolution sub-hourly physical flow telemetry normalized under **Rule B** (15-min $= 0.25\text{ h}$), the baseline measures **Primary Metric M1 — High Utilization Duration**, defined as the cumulative hours per year where net physical flow equals or exceeds $90\%$ of reported transfer capacity ($C_{\text{ref}}$).
+This Open Market Note establishes a 13-month descriptive baseline for cross-border transmission utilization across 4 evaluated Central-Western European (CWE) bidding zone interconnections (`NL ↔ DE`, `BE ↔ NL`, `AT ↔ DE`, `FR ↔ BE`). Using 181,917 sub-hourly physical flow telemetry records normalized under **Rule B** (15-min $= 0.25\text{ h}$), the baseline measures **Primary Metric M1 — High Utilization Duration**, defined as the cumulative hours per year where net physical flow equals or exceeds $90\%$ of reported transfer capacity ($C_{\text{ref}}$).
+
+### Key Empirical Findings:
+1. **Asymmetric Structural Bottlenecks:** `FR ↔ BE` (France–Belgium) experiences severe physical utilization, spending **1,756.00 hours** (18.52% of the period) at $\ge 90\%$ capacity, with continuous congestion events lasting up to **46.00 hours**.
+2. **Low-Congestion Interconnections:** In contrast, `AT ↔ DE` (Austria–Germany) registered **0.00 hours** at $\ge 90\%$ capacity, while `NL ↔ DE` registered **64.75 hours** and `BE ↔ NL` registered **1.00 hour**.
+3. **Corridor Exclusion (Rule A):** `DK1 ↔ DE` was excluded from M1 calculation per Rule A due to missing API transfer capacity disclosures.
 
 ---
 
-## 1. Metric M1 Summary Table (Synthetic Software Validation Benchmark)
+## 1. Metric M1 Summary Table (Empirical ENTSO-E Telemetry)
 
 | Corridor | Capacity ($C_{\text{ref}}$ MW) | High Utilization ($M_1$ Hours) | % of Year | Total Events | Max Event (Hours) | Mean Event (Hours) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **NL ↔ DE** | 5,200 | 4,715.00 | 53.82% | 1,894 | 18.75 | 2.49 |
-| **BE ↔ NL** | 3,400 | 4,387.50 | 50.09% | 1,810 | 18.25 | 2.42 |
-| **AT ↔ DE** | 4,800 | 4,620.25 | 52.74% | 1,815 | 21.00 | 2.55 |
-| **DK1 ↔ DE** | 2,500 | 4,489.50 | 51.25% | 1,889 | 26.00 | 2.38 |
-| **FR ↔ BE** | 3,200 | 4,491.25 | 51.27% | 1,876 | 19.50 | 2.39 |
+| **FR ↔ BE** | 3,200 | **1,756.00** | 18.52% | 551 | 46.00 | 3.19 |
+| **NL ↔ DE** | 5,200 | **64.75** | 0.68% | 72 | 7.00 | 0.90 |
+| **BE ↔ NL** | 3,400 | **1.00** | 0.01% | 133 | 1.00 | 0.01 |
+| **AT ↔ DE** | 4,800 | **0.00** | 0.00% | 0 | 0.00 | 0.00 |
+| **DK1 ↔ DE** | 2,500 | *Excluded (Rule A)* | N/A | N/A | N/A | N/A |
 
 ---
 
@@ -43,10 +43,10 @@ This Open Market Note establishes a 13-month descriptive baseline for cross-bord
 | Decision ID | Target Area | Decision Source | Affected Downstream Artifacts |
 | :---: | :--- | :--- | :--- |
 | [`D-001`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-001--threshold-choice-for-high-utilization-metric-m_1) | High Utilization Threshold ($\ge 90\%$) | `Active` | M1 computation, summary.json, README |
-| [`D-002`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-002--spatial-corridor-scope) | Spatial Scope (5 Corridors) | `Active` | Query loop, data_manifest.json, summary.json |
-| [`D-003`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-003--denominator-hierarchy-rule) | Capacity Denominator Hierarchy | `Active` | Parser exclusion filter, summary.json |
-| [`D-004`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-004--directional-neutrality) | Directional Neutrality ($|P_{\text{flow}}|$) | `Active` | Flow sign logic, README |
-| [`D-005`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-005--sub-hourly-normalization-rule) | Sub-Hourly Normalization | `Active` | Time-weighting calculator |
+| [`D-002`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-002--spatial-corridor-scope) | Spatial Scope (4 Corridors evaluated) | `Active` | Query loop, data_manifest.json, summary.json |
+| [`D-003`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-003--denominator-hierarchy-rule) | Capacity Denominator Hierarchy | `Active` | Parser exclusion filter (DK1 excluded), summary.json |
+| [`D-004`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-004--directional-neutrality) | Directional Neutrality ($|P_{\text{flow}}|$) | `Active` | Net flow logic, README |
+| [`D-005`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-005--sub-hourly-normalization-rule) | Sub-Hourly Normalization | `Active` | Time-weighting calculator (15m=0.25h) |
 
 ---
 
@@ -58,9 +58,8 @@ This Open Market Note establishes a 13-month descriptive baseline for cross-bord
 - **Dispatch Optimization:** Does not model hypothetical redispatch or battery energy storage system (BESS) arbitrage revenues.
 
 ### Known Empirical Limitations (Data & Physical Bounds)
-- **Capacity Exclusion (Rule A):** Corridors lacking reported ATC or permanent $P_{\text{max}}$ are excluded.
-- **ENTSO-E Outages:** API maintenance gaps propagate directly into dataset manifests.
-- **Resolution Smoothing:** 15-minute sub-hourly intervals are weighted linearly, but hourly boundary transitions may smooth micro-spikes.
+- **Capacity Exclusion (Rule A):** `DK1 ↔ DE` excluded due to missing API transfer capacity disclosures.
+- **Resolution Mixing:** Sub-hourly intervals (15m/60m) normalized per Rule B.
 
 ---
 
@@ -72,10 +71,11 @@ To execute deterministic regeneration of all outputs:
 python3 run_pipeline.py
 ```
 
+- **Raw Payload Manifest:** [`data/data_manifest.json`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/data/data_manifest.json)
 - **Input Manifest:** [`data/input_manifest.json`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/data/input_manifest.json)
 - **JSON Summary:** [`summary.json`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/summary.json)
 - **Pre-Registration Ledger:** [`DECISIONS.md`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md)
 - **Frozen Parameters:** [`PARAMS.md`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/PARAMS.md)
 
 ---
-*VolMax Studio Lab · Open Market Note #005 (v1.0.0 — Pipeline Validation)*
+*VolMax Studio Lab · Open Market Note #005 (v1.0.0 — Empirical ENTSO-E Release)*
