@@ -1,0 +1,73 @@
+{
+  "note_id": "005",
+  "market": "ENTSO-E Transparency Platform",
+  "primary_metric": "M2 \u2014 Intra-Corridor Physical Flow Dynamics (Rule D Compliance)",
+  "metric_m1_note": "Metric M1 (Utilization Ratio) is EXCLUDED for all corridors per Decision D-006 / Rule A due to missing directional Total NTC telemetry under CC BY 4.0.",
+  "dataset_status": "100% Empirical Telemetry Verified",
+  "eval_period": "2025-06-01 to 2026-06-30 (13 Months)",
+  "total_corridors_evaluated": 4,
+  "corridor_metrics_m2": {
+    "AT_DE": {
+      "name": "AT \u2194 DE",
+      "total_eval_hours": 9480.0,
+      "mean_flow_mw": 1206.35,
+      "std_flow_mw": 737.43,
+      "median_p50_flow_mw": 1163.17,
+      "p10_flow_mw": 237.05,
+      "p90_flow_mw": 2221.69,
+      "p99_flow_mw": 2831.71,
+      "max_peak_flow_mw": 3708.53,
+      "min_flow_mw": 0.01,
+      "peak_to_mean_ratio": 3.07
+    },
+    "BE_NL": {
+      "name": "BE \u2194 NL",
+      "total_eval_hours": 9480.0,
+      "mean_flow_mw": 1409.1,
+      "std_flow_mw": 861.05,
+      "median_p50_flow_mw": 1325.34,
+      "p10_flow_mw": 308.8,
+      "p90_flow_mw": 2614.6,
+      "p99_flow_mw": 3554.77,
+      "max_peak_flow_mw": 4425.49,
+      "min_flow_mw": 0.14,
+      "peak_to_mean_ratio": 3.14
+    },
+    "FR_BE": {
+      "name": "FR \u2194 BE",
+      "total_eval_hours": 9480.0,
+      "mean_flow_mw": 1865.0,
+      "std_flow_mw": 1098.34,
+      "median_p50_flow_mw": 1812.0,
+      "p10_flow_mw": 414.62,
+      "p90_flow_mw": 3391.7,
+      "p99_flow_mw": 4476.77,
+      "max_peak_flow_mw": 5340.94,
+      "min_flow_mw": 0.11,
+      "peak_to_mean_ratio": 2.86
+    },
+    "NL_DE": {
+      "name": "NL \u2194 DE",
+      "total_eval_hours": 9479.5,
+      "mean_flow_mw": 1615.62,
+      "std_flow_mw": 1139.65,
+      "median_p50_flow_mw": 1427.14,
+      "p10_flow_mw": 279.26,
+      "p90_flow_mw": 3202.52,
+      "p99_flow_mw": 4732.9,
+      "max_peak_flow_mw": 6572.4,
+      "min_flow_mw": 0.2,
+      "peak_to_mean_ratio": 4.07
+    }
+  },
+  "protocol_stack": {
+    "market-note-baseline": "1.4.0",
+    "p10-gate": "1.1.0",
+    "p10-client-audit": "1.0.0",
+    "provenance_hashes": {
+      "methodology_sha256": "f0be9a12d5bac2c4bdac02f61263061d7a034e217635cd49ebc3091b6d0f8a87",
+      "pipeline_sha256": "286b7f364d85e40b1d2d9a80bb1d59a630e50d45390d8c4a13097cc488b9f2a0",
+      "data_sha256": "d996f62a0fcf4a2ab0713519d81d01abae25251d3665e94e828dad23c27ae301"
+    }
+  }
+}
