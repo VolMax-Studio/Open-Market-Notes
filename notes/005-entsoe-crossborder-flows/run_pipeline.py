@@ -51,15 +51,15 @@ EIC_MAP = {
     'DE': '10Y1001A1001A83F',
     'BE': '10YBE----------2',
     'AT': '10YAT-APG------L',
-    'DK1': '10YDK-1--------W',
     'FR': '10YFR-RTE------C'
 }
 
+# Fixed geographic / alphabetical corridor listing across telemetered borders (Rule D compliant)
 CORRIDORS = [
-    {"id": "NL_DE", "name": "NL ↔ DE", "c1": ("NL", "DE"), "c2": ("DE", "NL")},
-    {"id": "BE_NL", "name": "BE ↔ NL", "c1": ("BE", "NL"), "c2": ("NL", "BE")},
     {"id": "AT_DE", "name": "AT ↔ DE", "c1": ("AT", "DE"), "c2": ("DE", "AT")},
-    {"id": "FR_BE", "name": "FR ↔ BE", "c1": ("FR", "BE"), "c2": ("BE", "FR")}
+    {"id": "BE_NL", "name": "BE ↔ NL", "c1": ("BE", "NL"), "c2": ("NL", "BE")},
+    {"id": "FR_BE", "name": "FR ↔ BE", "c1": ("FR", "BE"), "c2": ("BE", "FR")},
+    {"id": "NL_DE", "name": "NL ↔ DE", "c1": ("NL", "DE"), "c2": ("DE", "NL")}
 ]
 
 def parse_xml_payload(filepath, qty_name="flow_mw"):
@@ -247,7 +247,7 @@ def run_pipeline():
         "note_id": "005",
         "market": "ENTSO-E Transparency Platform",
         "primary_metric": "M2 — Intra-Corridor Physical Flow Dynamics (Rule D Compliance)",
-        "metric_m1_status": "EXCLUDED (Rule A / D-003 — Missing Directional Total NTC Telemetry under CC BY 4.0)",
+        "metric_m1_note": "Metric M1 (Utilization Ratio) is EXCLUDED for all corridors per Decision D-006 / Rule A due to missing directional Total NTC telemetry under CC BY 4.0.",
         "dataset_status": "100% Empirical Telemetry Verified",
         "eval_period": "2025-06-01 to 2026-06-30 (13 Months)",
         "total_corridors_evaluated": len(CORRIDORS),

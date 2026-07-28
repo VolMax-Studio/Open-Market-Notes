@@ -2,7 +2,7 @@
 
 > **Document Status:** Complete (100% Verified Empirical Telemetry — Rule D Intra-Corridor Metric M2)  
 > **Evaluation Period:** June 1, 2025 – June 30, 2026 (13 Months)  
-> **Primary Data Source:** ENTSO-E Transparency Platform (DocumentType `A11` Cross-Border Physical Flow, 181,917 sub-hourly records)  
+> **Primary Data Source:** ENTSO-E Transparency Platform (DocumentType `A11` Cross-Border Physical Flow, 181,917 sub-hourly telemetered records)  
 > **Licensing Anchor:** CC BY 4.0 Verbatim (ENTSO-E Terms of Use Item #27)  
 > **Protocol Stack:**  
 > - `market-note-baseline v1.4.0`  
@@ -10,33 +10,35 @@
 > - `p10-client-audit v1.0.0`  
 > **Tri-Hash Provenance Stack:**  
 > - `methodology_sha256`: `f0be9a12d5bac2c4bdac02f61263061d7a034e217635cd49ebc3091b6d0f8a87`  
-> - `pipeline_sha256`: `8258bde23a1f9d4bed95ffac07068c667c885f135924be4fc212155948a97b63`  
+> - `pipeline_sha256`: `286b7f364d85e40b1d2d9a80bb1d59a630e50d45390d8c4a13097cc488b9f2a0`  
 > - `data_sha256`: `d996f62a0fcf4a2ab0713519d81d01abae25251d3665e94e828dad23c27ae301`
 
 ---
 
-## Executive Summary & Methodological Findings
+## Executive Summary & Audit Findings
 
-This Open Market Note establishes a 13-month descriptive baseline for net physical power flow dynamics ($|P_{\text{flow}}|$ MW) across 4 Central-Western European (CWE) bidding zone interconnections (`NL ↔ DE`, `BE ↔ NL`, `AT ↔ DE`, `FR ↔ BE`).
+This Open Market Note establishes a 13-month descriptive baseline for net physical power flow dynamics ($|P_{\text{flow}}|$ MW) across telemetered Central-Western European (CWE) bidding zone interconnections (`AT ↔ DE`, `BE ↔ NL`, `FR ↔ BE`, `NL ↔ DE`).
 
 ### Key Audit Findings:
-1. **Rule A Metric M1 Exclusion:** Metric M1 (High Utilization Ratio $U_t = |P_{\text{flow}}| / C_{\text{ref}}$) is **EXCLUDED** per Rule A (`D-003`). ENTSO-E does not disclose directional Total NTC ($A61/A26$) under CC BY 4.0 for CWE flow-based borders. Using hardcoded static capacities or commercial auction allocation results (`A09`) creates artificial capacity zeros and distorted utilization ratios. Note #005 documents this data availability boundary rather than inventing a denominator.
-2. **Rule D Intra-Corridor Evaluation (Metric M2):** In accordance with Rule D (`D-006`), cross-corridor ranking without capacity normalization is prohibited. Metric M2 evaluates physical flow telemetry strictly within each corridor against its own self-distribution (P10, P50, P90, P99) over the 13-month period.
-3. **Flow Volatility & Peak Spikes:** `NL ↔ DE` exhibits the highest intra-corridor peak-to-mean volatility ratio ($4.07\times$), with 99th percentile physical flows reaching $4,732.9\text{ MW}$ compared to a median (P50) of $1,427.1\text{ MW}$.
+1. **Rule A Metric M1 Exclusion:** Metric M1 (High Utilization Ratio $U_t = |P_{\text{flow}}| / C_{\text{ref}}$) is **EXCLUDED FOR ALL CORRIDORS** per Rule A (`D-003`). ENTSO-E does not disclose directional Total NTC ($A61/A26$) under CC BY 4.0 for CWE flow-based borders. Using hardcoded static capacity guesses or commercial auction allocation results (`A09`) creates artificial capacity zeros and distorted utilization ratios. Note #005 documents this public data availability boundary rather than inventing a denominator.
+2. **Rule D Intra-Corridor Evaluation (Metric M2):** In accordance with Rule D (`D-006`), cross-corridor ranking without capacity normalization is prohibited. Metric M2 evaluates physical flow telemetry strictly within each corridor against its own temporal self-distribution (P10, P50, P90, P99) over the 13-month period.
+3. **Flow Volatility & Peak Spikes:** `NL ↔ DE` exhibits intra-corridor peak-to-mean volatility ratio ($4.07\times$), with 99th percentile physical flows reaching $4,732.9\text{ MW}$ compared to a median (P50) of $1,427.1\text{ MW}$.
+4. **DK1 ↔ DE Ingestion Exclusion:** `DK1 ↔ DE` telemetry was excluded from initial raw XML payload ingestion due to unannounced API transfer capacity disclosures under Rule A scoping.
 
 ---
 
-## 1. Metric M2 Baseline Table (Intra-Corridor Self-Distribution per Rule D)
+## 1. Metric M2 Summary Table (Intra-Corridor Self-Distribution per Rule D)
 
-| Corridor | Mean Net Flow ($\bar{P}$ MW) | Volatility ($\sigma_{P}$ MW) | Median (P50 MW) | High Load (P90 MW) | Extreme Peak (P99 MW) | Peak-to-Mean Ratio | Metric M1 Status |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **FR ↔ BE** | 1,865.0 | 1,098.3 | 1,812.0 | 3,391.7 | 4,476.8 | 2.86 | *EXCLUDED (Rule A)* |
-| **NL ↔ DE** | 1,615.6 | 1,139.7 | 1,427.1 | 3,202.5 | 4,732.9 | **4.07** | *EXCLUDED (Rule A)* |
-| **BE ↔ NL** | 1,409.1 | 861.0 | 1,325.3 | 2,614.6 | 3,554.8 | 3.14 | *EXCLUDED (Rule A)* |
-| **AT ↔ DE** | 1,206.3 | 737.4 | 1,163.2 | 2,221.7 | 2,831.7 | 3.07 | *EXCLUDED (Rule A)* |
-| **DK1 ↔ DE** | N/A | N/A | N/A | N/A | N/A | N/A | *EXCLUDED (Rule A)* |
+> **Methodological Note (Metric M1 Status):** Metric M1 (Capacity Utilization Duration) is **EXCLUDED for all corridors** per Decision `D-006` / Rule A due to missing directional Total NTC telemetry under CC BY 4.0 in the ENTSO-E API.
 
-*Note: In accordance with Rule D, each row represents an independent temporal self-distribution. Magnitudes are not ranked cross-corridor without capacity normalization.*
+| Corridor (Fixed Order) | Mean Net Flow ($\bar{P}$ MW) | Volatility ($\sigma_{P}$ MW) | Median (P50 MW) | High Load (P90 MW) | Extreme Peak (P99 MW) | Peak-to-Mean Ratio |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **AT ↔ DE** | 1,206.3 | 737.4 | 1,163.2 | 2,221.7 | 2,831.7 | 3.07 |
+| **BE ↔ NL** | 1,409.1 | 861.0 | 1,325.3 | 2,614.6 | 3,554.8 | 3.14 |
+| **FR ↔ BE** | 1,865.0 | 1,098.3 | 1,812.0 | 3,391.7 | 4,476.8 | 2.86 |
+| **NL ↔ DE** | 1,615.6 | 1,139.7 | 1,427.1 | 3,202.5 | 4,732.9 | 4.07 |
+
+> **Rule D Compliance Disclaimer:** Interconnection corridors are listed above in **fixed alphabetical order**, not ranked by flow magnitude or performance. In accordance with Rule D, each row represents an independent temporal self-distribution. No cross-corridor efficiency, utilization, or performance ranking is implied.
 
 ---
 

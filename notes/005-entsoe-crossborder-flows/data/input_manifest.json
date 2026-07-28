@@ -10,7 +10,7 @@
     "p10-client-audit": "1.0.0",
     "provenance_hashes": {
       "methodology_sha256": "f0be9a12d5bac2c4bdac02f61263061d7a034e217635cd49ebc3091b6d0f8a87",
-      "pipeline_sha256": "8258bde23a1f9d4bed95ffac07068c667c885f135924be4fc212155948a97b63",
+      "pipeline_sha256": "286b7f364d85e40b1d2d9a80bb1d59a630e50d45390d8c4a13097cc488b9f2a0",
       "data_sha256": "d996f62a0fcf4a2ab0713519d81d01abae25251d3665e94e828dad23c27ae301"
     }
   }
