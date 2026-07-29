@@ -13,6 +13,18 @@ We do not predict the future; we build the empirical, version-controlled foundat
 
 ---
 
+## 🏛️ VolMax Observatory Registry
+
+| Note ID | Note Title | Market Scope | Results Hash (`results_sha256`) | Immutable Zenodo DOI |
+| :--- | :--- | :--- | :--- | :---: |
+| `OMN-001` | [Open Market Note #001 — NEM Duration Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/001-nem-duration-baseline) | Mainland Australia NEM (NSW1, QLD1, SA1, VIC1) | `c192e7ee97ac...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693239.svg)](https://doi.org/10.5281/zenodo.21693239) |
+| `OMN-002` | [Open Market Note #002 — ERCOT Duration Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/002-ercot-duration-baseline) | ERCOT (West, North, South, Houston) | `90e3543b5550...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693245.svg)](https://doi.org/10.5281/zenodo.21693245) |
+| `OMN-003` | [Open Market Note #003 — ENTSO-E Imbalance Price Duration Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/003-entsoe-imbalance-baseline) | ENTSO-E Imbalance (NL, BE, FR, DK1, DK2, AT) | `b1c713379887...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693254.svg)](https://doi.org/10.5281/zenodo.21693254) |
+| `OMN-004` | [Open Market Note #004 — GB BESS Duration Baseline (Elexon BMRS)](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/004-gb-duration-baseline) | Great Britain (Elexon BMRS NGET Area) | `385ddfd9ed88...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693262.svg)](https://doi.org/10.5281/zenodo.21693262) |
+| `OMN-005` | [Open Market Note #005 — ENTSO-E Cross-Border Physical Flow Dynamics Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/005-entsoe-crossborder-flows) | ENTSO-E CWE Interconnections (AT-DE, BE-NL, FR-BE, NL-DE) | `60314bd2764e...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693276.svg)](https://doi.org/10.5281/zenodo.21693276) |
+
+---
+
 ## Product Hierarchy
 
 VolMax operates three distinct layers of public infrastructure:
