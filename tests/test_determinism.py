@@ -66,26 +66,27 @@ def create_synthetic_telemetry_fixture(temp_proc_dir, start_date="2025-06-01", e
         scada_df.to_feather(os.path.join(temp_proc_dir, f"scada_{ym_str}.feather"))
 
 class TestSyntheticCIDeterminismFixture(unittest.TestCase):
-    """Guarantees CI Determinism Guard passes 100% reliably on clean checkout without telemetry dependency."""
+    """Guarantees CI Determinism Guard passes 100% reliably on clean checkout without modifying repository working tree."""
     def test_synthetic_reproduction_determinism(self):
-        with tempfile.TemporaryDirectory() as temp_proc_dir:
+        with tempfile.TemporaryDirectory() as temp_proc_dir, tempfile.TemporaryDirectory() as temp_out_dir:
             create_synthetic_telemetry_fixture(temp_proc_dir)
             reproduce_script = os.path.join(NOTE_DIR, "reproduce.py")
+            temp_results_json = os.path.join(temp_out_dir, "results.json")
             
             # Run 1
-            cmd1 = [sys.executable, reproduce_script, "--start-date", "2025-06-01", "--end-date", "2026-06-30", "--data-dir", temp_proc_dir]
+            cmd1 = [sys.executable, reproduce_script, "--start-date", "2025-06-01", "--end-date", "2026-06-30", "--data-dir", temp_proc_dir, "--out-dir", temp_out_dir]
             res1 = subprocess.run(cmd1, cwd=BASE_DIR, capture_output=True, text=True)
             self.assertEqual(res1.returncode, 0, f"Synthetic Run 1 failed:\n{res1.stderr}")
-            hash1 = compute_sha256(RESULTS_JSON)
+            hash1 = compute_sha256(temp_results_json)
             
-            # Delete output and Run 2
-            os.remove(RESULTS_JSON)
+            # Delete temp output and Run 2
+            os.remove(temp_results_json)
             res2 = subprocess.run(cmd1, cwd=BASE_DIR, capture_output=True, text=True)
             self.assertEqual(res2.returncode, 0, f"Synthetic Run 2 failed:\n{res2.stderr}")
-            hash2 = compute_sha256(RESULTS_JSON)
+            hash2 = compute_sha256(temp_results_json)
             
             self.assertEqual(hash1, hash2, "Synthetic fixture output is non-deterministic!")
-            print(f"\n[SYNTHETIC CI DETERMINISM GUARD PASSED] Verified byte-identity on synthetic fixture: {hash1}")
+            print(f"\n[SYNTHETIC CI DETERMINISM GUARD PASSED] Verified byte-identity on synthetic fixture (isolated temp_out_dir): {hash1}")
 
 class TestReinforcedDeterminism(unittest.TestCase):
     def test_rename_recreate_byte_identity(self):

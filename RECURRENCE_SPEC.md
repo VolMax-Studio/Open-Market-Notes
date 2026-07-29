@@ -1,5 +1,5 @@
 # VolMax Open Market Notes — Recurrence Specification
-**Version:** v1.0.4  
+**Version:** v1.0.5  
 **Status:** Draft for Ratification  
 **Date:** 2026-07-30  
 **Repository:** `VolMax-Studio/Open-Market-Notes`  
@@ -11,7 +11,7 @@
 This document defines the formal operational, procedural, and cryptographic governance protocol for executing **recurrent baseline refreshes** across the VolMax Open Market Notes repository (#001–#005+).
 
 The recurrence pipeline ensures that market observation baselines remain dynamically updated over a rolling 13-month calendar window while strictly maintaining:
-1. **Audit Immutability:** Core analytical logic (`reproduce.py`), parameter definitions (`PARAMS.md`), and historical baseline registries (`notes_registry.json`) are immutable. `PARAMS.md` immutability is cryptographically enforced via SHA-256 verification against the frozen registry reference.
+1. **Audit Immutability:** Core analytical logic (`reproduce.py`), parameter definitions (`PARAMS.md`), and historical baseline registries (`notes_registry.json`) are immutable. Both `PARAMS.md` and `reproduce.py` immutability are cryptographically enforced via SHA-256 verification (`params_sha256` and `reproduce_sha256`) against the frozen registry reference.
 2. **Provenance Traceability:** Every recurrent execution appends a 4-layer Quad-Hash provenance record to `history/measurement_log.json`.
 3. **Human-in-the-Loop Ratification:** Automated executions submit Pull Requests; machine code **NEVER** writes directly to `main`.
 
@@ -19,6 +19,7 @@ The recurrence pipeline ensures that market observation baselines remain dynamic
 
 ## 2. Revision History & Governance Changelog
 
+- **v1.0.5 (2026-07-30):** Enforced Mandate 3 dual cryptographic check (`params_sha256` + `reproduce_sha256`); mandated isolated output directory (`--out-dir`) for synthetic CI guard; enforced upper and lower boundary date filtering; unified input path anchoring via `requirements.txt` and `--data-dir`; expanded Mandate 7 manual recurrence taxonomy.
 - **v1.0.4 (2026-07-30):** Restored Mandate 7 (Execution Modes: Automated vs Manual) and Mandate 9 (Zero Secret Leakage Control); corrected Mandate 1 calendar window phrasing; added synthetic CI guard architecture specification; enforced strict git commit SHA resolution.
 - **v1.0.3 (2026-07-30):** Aligned specification with frozen registry baseline ($v1.0.0$); updated history log schema to 4-layer Quad-Hash stack (`results_sha256`, `input_manifest_sha256`, `params_sha256`, `pipeline_commit_sha`).
 - **v1.0.2 (2026-07-30):** Restored versioning taxonomy ($v1.0.0$ / $v1.x.0$ / $v2.0.0$) and `executed_at` ratification rules.
@@ -31,16 +32,16 @@ The recurrence pipeline ensures that market observation baselines remain dynamic
 
 ### Mandate 1 — 13-Month Rolling Calendar Window Alignment
 - Every recurrent measurement MUST evaluate exactly 13 full calendar months ending on the last day of the last fully completed calendar month prior to execution.
-- Partial calendar months are strictly prohibited.
+- Telemetry data MUST be filtered with strict lower AND upper boundary timestamps (e.g. `SETTLEMENTDATE >= start_date 04:05:00` AND `SETTLEMENTDATE <= end_date+1d 04:00:00`). Partial calendar months are strictly prohibited.
 
 ### Mandate 2 — PR-Only Branch & Commit Isolation
 - Recurrent automation workflows MUST execute on isolated branches named `recurrent-measurement/omn-00X-${{ github.run_id }}`.
 - Machine workflows are strictly forbidden from committing directly to `main`.
 - Automated PRs MUST target `main` and require explicit human review and merge ratification.
 
-### Mandate 3 — PARAMS Immutability & Hash Verification
-- Before running analytical calculations, the runner MUST verify `PARAMS.md` against the authoritative `params_sha256` stored in `notes_registry.json`.
-- If `PARAMS.md` has been modified or the hash differs, execution MUST terminate immediately (`sys.exit(1)`).
+### Mandate 3 — PARAMS & Code Immutability Verification
+- Before running analytical calculations, the runner MUST verify BOTH `PARAMS.md` and the analytical script (`reproduce.py`) against the authoritative `params_sha256` and `reproduce_sha256` stored in `notes_registry.json`.
+- If either file has been modified or its hash differs, execution MUST terminate immediately (`sys.exit(1)`).
 
 ### Mandate 4 — Quad-Hash Provenance Stack
 Every recurrent measurement execution MUST record a 4-layer cryptographic provenance stack:
@@ -72,13 +73,17 @@ All recurrent measurement refreshes write to `history/measurement_log.json`:
 
 ### Mandate 7 — Execution Modes (Automated vs Manual Recurrence)
 - **Automated Recurrence (`parameterized: True`)**: Fully parameterized pipelines (e.g. Note #001) dispatched automatically via GitHub Actions schedule or manual workflow_dispatch.
-- **Manual Recurrence (`parameterized: False`)**: Non-parameterized pipelines (e.g. Notes #002–#005) executed manually in controlled local environments using parametric changelog protocol until date parameterization PR is merged.
+- **Manual Recurrence (`parameterized: False` OR IP/WAF Restrictions)**: Non-parameterized pipelines (e.g. Notes #003–#005) OR pipelines subject to cloud runner IP blocks (e.g. Note #002 ERCOT grid telemetry WAF) executed manually in controlled local environments using parametric changelog protocol until resolved.
 
 ### Mandate 8 — Telemetry Completeness & Boundary Verification
-- The pipeline MUST verify the presence and non-zero size of all 13 monthly telemetry files. If telemetry is missing or incomplete, the workflow MUST terminate immediately (`sys.exit(1)`).
+- The pipeline MUST verify the presence and non-zero size of all 13 monthly telemetry files in the explicitly passed data directory. If telemetry is missing or incomplete, the workflow MUST terminate immediately (`sys.exit(1)`).
 
 ### Mandate 9 — Zero Secret Leakage Control
 - Automated workflows and scripts MUST NOT dump environment variables or print secrets. Log output must remain strictly limited to provenance hashes and execution status.
+
+### Mandate 10 — Local Pre-Dispatch Reproduction & Synthetic Guard Isolation
+- The In-Job Synthetic CI Guard verifies code execution determinism on clean checkouts by writing exclusively to an isolated temporary output directory (`--out-dir temp_out_dir`), guaranteeing zero modification of committed repository artifacts.
+- Byte-level reproduction of the published baseline ($v1.0.0$) is a mandatory local pre-dispatch verification step executed prior to opening pull requests.
 
 ---
 
@@ -91,16 +96,16 @@ All recurrent measurement refreshes write to `history/measurement_log.json`:
 [Check Out main Clean]
         │
         ▼
-[Execute In-Job Synthetic CI Guard] ──(FAIL)──► [ABORT Workflow]
+[Execute In-Job Synthetic CI Guard (Isolated Temp Out)] ──(FAIL)──► [ABORT Workflow]
         │ (PASS)
         ▼
-[Verify PARAMS.md Hash vs Frozen Registry] ──(FAIL)──► [ABORT Workflow]
+[Verify PARAMS.md & reproduce.py Hashes vs Frozen Registry] ──(FAIL)──► [ABORT Workflow]
         │ (PASS)
         ▼
 [Download & Verify 13-Month Telemetry] ──(FAIL)──► [ABORT Workflow]
         │ (PASS)
         ▼
-[Execute Analysis Pipeline (cwd=note_dir)]
+[Execute Analysis Pipeline (cwd=note_dir, --data-dir proc_dir)]
         │
         ▼
 [Append Entry to history/measurement_log.json]
@@ -109,13 +114,11 @@ All recurrent measurement refreshes write to `history/measurement_log.json`:
 [Open Pull Request for Human Ratification]
 ```
 
-The **In-Job Synthetic CI Guard** executes `TestSyntheticCIDeterminismFixture` on clean checkouts. It generates a temporary synthetic telemetry dataset in memory/temp directory to verify calculation logic and path anchoring without requiring multi-gigabyte historical market telemetry downloads.
-
 ---
 
 ## 5. Operational Checklist & Ratification Protocol
 
-1. **Frozen Registry:** `notes_registry.json` is immutable for published $v1.0.0$ baselines and DOIs.
+1. **Frozen Registry:** `notes_registry.json` is immutable for published $v1.0.0$ baselines, DOIs, and baseline pipeline hashes.
 2. **Dynamic Lineage:** All recurrent runs append to `history/measurement_log.json`.
 3. **PR Payload:** PRs contain only `results.json`, `data_manifest.json`, `history/measurement_log.json`, and generated plots (`results/*.png`).
 4. **Human Control:** The human maintainer reviews the PR diff and merges to ratify the new measurement into `main`.

@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas numpy requests matplotlib jinja2 nemosis pyarrow
+          pip install -r requirements.txt
 
       - name: Execute In-Job CI Determinism Guard (Pre-Run Clean Checkout)
         run: |
