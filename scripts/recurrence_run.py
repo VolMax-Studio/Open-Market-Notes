@@ -4,7 +4,7 @@ VolMax Open Market Notes — Automated Recurrence Script
 Governed by Recurrence Specification v1.0.4
 
 This script executes the rolling 13-month recurrent measurement pipeline,
-verifies telemetry completeness and PARAMS immutability, appends to the
+verifies telemetry completeness and PARAMS/pipeline immutability, appends to the
 versioned measurement log with full Quad-Hash provenance, and generates a dynamic PR summary.
 """
 
@@ -137,7 +137,7 @@ def main():
     folder_name = os.path.basename(note_dir)
     print(f"=== RECURRENT MEASUREMENT RUNNER — NOTE #{note_num} ({folder_name}) ===")
     
-    # 2. Mandate 3: PARAMS.md Immutability Verification against Frozen Registry Reference
+    # 2. Mandate 3: PARAMS.md & Pipeline Script Immutability Verification against Frozen Registry Reference
     params_file = os.path.join(note_dir, "PARAMS.md")
     if not os.path.exists(params_file):
         print(f"FATAL ERROR (Mandate 3 Abort): PARAMS.md missing at {params_file}")
@@ -155,7 +155,19 @@ def main():
         print(f"  Actual:                    {actual_params_sha256}")
         print("ABORTING WORKFLOW — PARAMS.MD WAS MODIFIED. NO PULL REQUEST WILL BE OPENED.")
         sys.exit(1)
-    print(f"Mandate 3 Check PASSED: PARAMS.md immutability verified ({actual_params_sha256[:12]}...).")
+
+    reproduce_script = os.path.join(note_dir, config["analysis_script"])
+    expected_reproduce_sha256 = registry_entry.get("reproduce_sha256")
+    if expected_reproduce_sha256:
+        actual_reproduce_sha256 = compute_sha256(reproduce_script)
+        if actual_reproduce_sha256 != expected_reproduce_sha256:
+            print(f"FATAL ERROR (Mandate 3 Abort): Analytical script ({config['analysis_script']}) hash mismatch!")
+            print(f"  Expected (Frozen Baseline): {expected_reproduce_sha256}")
+            print(f"  Actual:                    {actual_reproduce_sha256}")
+            print("ABORTING WORKFLOW — PIPELINE SCRIPT WAS MODIFIED. NO PULL REQUEST WILL BE OPENED.")
+            sys.exit(1)
+            
+    print(f"Mandate 3 Check PASSED: PARAMS.md ({actual_params_sha256[:12]}...) and pipeline script immutability verified.")
 
     # 3. Determine target rolling window dynamically if not provided
     if args.start_date and args.end_date:
@@ -179,9 +191,9 @@ def main():
             print("Telemetry download completed successfully.")
             
     # 5. Mandate 8: Telemetry Completeness & Boundary Verification (STRICT NO-BYPASS)
-    proc_dir = os.path.join(note_dir, "data", "processed")
+    proc_dir = os.path.abspath(os.path.join(note_dir, "data", "processed"))
     expected_months = generate_expected_months(start_date, end_date)
-    print(f"\n--- Mandate 8 Check: Verifying {len(expected_months)} Expected Monthly Telemetry Files ---")
+    print(f"\n--- Mandate 8 Check: Verifying {len(expected_months)} Expected Monthly Telemetry Files in {proc_dir} ---")
     
     if not os.path.exists(proc_dir):
         print(f"FATAL ERROR (Mandate 8 Abort): Processed telemetry directory missing: {proc_dir}")
@@ -199,12 +211,11 @@ def main():
         print("ABORTING WORKFLOW — NO PULL REQUEST WILL BE OPENED.")
         sys.exit(1)
         
-    print(f"Mandate 8 Check PASSED: All {len(expected_months)} monthly telemetry files verified.")
+    print(f"Mandate 8 Check PASSED: All {len(expected_months)} monthly telemetry files verified in {proc_dir}.")
 
-    # 6. Execute Analytical Pipeline with cwd=note_dir
-    reproduce_script = os.path.join(note_dir, config["analysis_script"])
+    # 6. Execute Analytical Pipeline with cwd=note_dir and explicit --data-dir
     print(f"\n--- Executing Analytical Pipeline ({os.path.basename(reproduce_script)}) ---")
-    cmd = [sys.executable, reproduce_script, "--start-date", start_date, "--end-date", end_date]
+    cmd = [sys.executable, reproduce_script, "--start-date", start_date, "--end-date", end_date, "--data-dir", proc_dir]
     res = subprocess.run(cmd, cwd=note_dir, capture_output=True, text=True)
     if res.returncode != 0:
         print(f"FATAL ERROR (Pipeline Failed):\n{res.stderr[:500]}")

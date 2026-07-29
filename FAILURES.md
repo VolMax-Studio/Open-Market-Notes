@@ -61,3 +61,13 @@ This document records procedural failures, governance violations, and anti-patte
 - **Root Cause:** Timestamp fabrication anti-pattern. Estimated/generated timestamps were asserted as historical facts without raw git log verification.  
 - **Remediation:** Extracted raw git author timestamp (`2026-07-18T18:52:18Z`) using `git log --format=%aI --follow -- notes/001-nem-duration-baseline/results.json | tail -1`.  
 - **Status:** Logged — Remediation Pending Gate Ratification.
+
+---
+
+### Failure Entry #007 — Synthetic Test Overwrote Repository Baseline Artifacts
+- **Date:** 2026-07-30  
+- **Target Files:** `tests/test_determinism.py`, `notes/001-nem-duration-baseline/results.json`  
+- **Violation:** `TestSyntheticCIDeterminismFixture` executed `reproduce.py` with synthetic inputs without specifying an isolated `--out-dir`, overwriting the baseline `results.json` and plots in `notes/001-nem-duration-baseline/` with synthetic test outputs.  
+- **Root Cause:** Test side-effect anti-pattern. Test suite modified committed working tree artifacts during execution.  
+- **Remediation:** Added `--out-dir` parameter to `reproduce.py`. Updated `TestSyntheticCIDeterminismFixture` to pass an isolated temporary directory (`temp_out_dir`), guaranteeing zero modification of repository artifacts. Restored committed baseline `results.json` (`0ddbc333...`) via `git checkout`.  
+- **Status:** Logged — Remediation Pending Gate Ratification.

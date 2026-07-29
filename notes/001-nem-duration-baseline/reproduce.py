@@ -39,18 +39,17 @@ BESS_ENERGY_CAPACITY = {
     'CAPBES1': 200.0,   # Capital BESS
 }
 
-def main(start_date_str="2025-06-01", end_date_str="2026-06-30", data_dir_override=None):
+def main(start_date_str="2025-06-01", end_date_str="2026-06-30", data_dir_override=None, out_dir_override=None):
+    import datetime
     print("======================================================================")
     print("STARTING REPRODUCTION OF VOLMAX NOTE #1: NEM DURATION BASELINE")
     print("======================================================================")
 
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     if data_dir_override:
-        proc_dir = data_dir_override
+        proc_dir = os.path.abspath(data_dir_override)
     else:
-        proc_dir = '../../data/processed'
-        if not os.path.exists(proc_dir):
-            # Try local path if run from repo root
-            proc_dir = './data/processed'
+        proc_dir = os.path.abspath(os.path.join(script_dir, "data", "processed"))
     
     if not os.path.exists(proc_dir):
         raise FileNotFoundError(f"Processed data directory not found at {proc_dir}")
@@ -65,8 +64,12 @@ def main(start_date_str="2025-06-01", end_date_str="2026-06-30", data_dir_overri
     price_df = pd.concat(price_list, ignore_index=True)
     price_df['SETTLEMENTDATE'] = pd.to_datetime(price_df['SETTLEMENTDATE'])
     
-    # Filter strictly to the target trading window
-    price_df = price_df[(price_df['SETTLEMENTDATE'] >= f"{start_date_str} 04:05:00")].copy()
+    # Strictly filter to trading window with both lower AND upper bounds
+    start_dt_filter = pd.to_datetime(f"{start_date_str} 04:05:00")
+    end_dt_obj = datetime.datetime.strptime(end_date_str, "%Y-%m-%d") + datetime.timedelta(days=1)
+    end_dt_filter = pd.to_datetime(f"{end_dt_obj.strftime('%Y-%m-%d')} 04:00:00")
+    
+    price_df = price_df[(price_df['SETTLEMENTDATE'] >= start_dt_filter) & (price_df['SETTLEMENTDATE'] <= end_dt_filter)].copy()
     print(f"Stitched and filtered price data shape: {price_df.shape}")
 
     # 2. Stitch and load 13 months of SCADA data
@@ -81,8 +84,8 @@ def main(start_date_str="2025-06-01", end_date_str="2026-06-30", data_dir_overri
     scada_df = pd.concat(scada_list, ignore_index=True)
     scada_df['SETTLEMENTDATE'] = pd.to_datetime(scada_df['SETTLEMENTDATE'])
     
-    # Filter strictly to the target trading window
-    scada_df = scada_df[(scada_df['SETTLEMENTDATE'] >= f"{start_date_str} 04:05:00")].copy()
+    # Strictly filter to trading window with both lower AND upper bounds
+    scada_df = scada_df[(scada_df['SETTLEMENTDATE'] >= start_dt_filter) & (scada_df['SETTLEMENTDATE'] <= end_dt_filter)].copy()
     print(f"Stitched and filtered BESS SCADA data shape: {scada_df.shape}")
 
     regions = ['NSW1', 'QLD1', 'SA1', 'VIC1']
@@ -238,20 +241,16 @@ def main(start_date_str="2025-06-01", end_date_str="2026-06-30", data_dir_overri
     # ==========================================================================
     # SAVE OUTPUTS AND GENERATE PLOTS
     # ==========================================================================
-    # Write JSON results (Anchored to script directory)
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    json_path = os.path.join(script_dir, "results.json")
-    out_dir = os.path.join(script_dir, "results")
-    os.makedirs(out_dir, exist_ok=True)
+    target_out_dir = os.path.abspath(out_dir_override) if out_dir_override else script_dir
+    json_path = os.path.join(target_out_dir, "results.json")
+    plot_dir = os.path.join(target_out_dir, "results")
+    os.makedirs(plot_dir, exist_ok=True)
     
     with open(json_path, 'w') as f:
         json.dump(results, f, indent=4)
     print(f"\nSaved results to {json_path}")
 
     # Generate Plots
-    plot_dir = os.path.join(os.path.dirname(json_path), 'results')
-    os.makedirs(plot_dir, exist_ok=True)
-
     # Plot 1: Charging Window Availability
     plt.figure(figsize=(10, 6))
     x = np.arange(len(regions))
@@ -324,5 +323,6 @@ if __name__ == '__main__':
     parser.add_argument("--start-date", default="2025-06-01", help="Start date (YYYY-MM-DD)")
     parser.add_argument("--end-date", default="2026-06-30", help="End date (YYYY-MM-DD)")
     parser.add_argument("--data-dir", default=None, help="Override processed data directory")
+    parser.add_argument("--out-dir", default=None, help="Override output directory")
     args = parser.parse_args()
-    main(args.start_date, args.end_date, args.data_dir)
+    main(args.start_date, args.end_date, args.data_dir, args.out_dir)
