@@ -20,7 +20,7 @@ def compute_sha256(filepath):
             h.update(chunk)
     return h.hexdigest()
 
-def get_registry_sha256(note_num="001"):
+def get_frozen_registry_sha256(note_num="001"):
     with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
         registry = json.load(f)
     for entry in registry:
@@ -31,18 +31,20 @@ def get_registry_sha256(note_num="001"):
 class TestReinforcedDeterminism(unittest.TestCase):
     def test_rename_recreate_byte_identity(self):
         self.assertTrue(os.path.exists(RESULTS_JSON), f"Source results.json missing at {RESULTS_JSON}")
-        expected_registry_sha256 = get_registry_sha256("001")
+        frozen_registry_sha256 = get_frozen_registry_sha256("001")
         
-        # 1. RENAME original file to force true recreation
-        shutil.move(RESULTS_JSON, BACKUP_JSON)
-        self.assertFalse(os.path.exists(RESULTS_JSON), "results.json was not successfully moved!")
+        # 1. COPY original file to backup location (non-destructive)
+        shutil.copy2(RESULTS_JSON, BACKUP_JSON)
+        # Delete original to force true recreation by reproduce.py
+        os.remove(RESULTS_JSON)
+        self.assertFalse(os.path.exists(RESULTS_JSON), "results.json was not successfully deleted for recreation test!")
 
         try:
             # 2. RUN pipeline with explicit baseline dates from root CWD
             reproduce_script = os.path.join(NOTE_DIR, "reproduce.py")
             cmd = [sys.executable, reproduce_script, "--start-date", "2025-06-01", "--end-date", "2026-06-30"]
             
-            # Execute with root CWD to verify anchor independence (Blocker 1)
+            # Execute with root CWD to verify path anchor independence (Blocker 1)
             res = subprocess.run(cmd, cwd=BASE_DIR, capture_output=True, text=True)
             self.assertEqual(res.returncode, 0, f"Pipeline execution failed:\n{res.stderr}")
             
@@ -54,16 +56,15 @@ class TestReinforcedDeterminism(unittest.TestCase):
             backup_sha256 = compute_sha256(BACKUP_JSON)
             
             self.assertEqual(recreated_sha256, backup_sha256, "Recreated results.json does not match backup hash!")
-            self.assertEqual(recreated_sha256, expected_registry_sha256, f"Hash mismatch with registry! Expected {expected_registry_sha256}, got {recreated_sha256}")
+            self.assertEqual(recreated_sha256, frozen_registry_sha256, f"Hash mismatch with frozen registry! Expected {frozen_registry_sha256}, got {recreated_sha256}")
             print(f"\n[REINFORCED DETERMINISM TEST PASSED] Recreated results_sha256: {recreated_sha256}")
             
         finally:
-            # Clean up backup and ensure results.json exists
+            # Always restore backup if recreated file missing or failed
+            if not os.path.exists(RESULTS_JSON) and os.path.exists(BACKUP_JSON):
+                shutil.copy2(BACKUP_JSON, RESULTS_JSON)
             if os.path.exists(BACKUP_JSON):
-                if not os.path.exists(RESULTS_JSON):
-                    shutil.move(BACKUP_JSON, RESULTS_JSON)
-                else:
-                    os.remove(BACKUP_JSON)
+                os.remove(BACKUP_JSON)
 
 if __name__ == '__main__':
     unittest.main()
