@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "title": "Open Market Note #003 \u2014 ENTSO-E Imbalance Price Duration Baseline",
+    "upload_type": "publication",
+    "publication_type": "report",
+    "description": "13-month empirical baseline for 15-min imbalance price duration, shortage vs surplus runs, and TSO incentive windows across ENTSO-E zones (NL, BE, FR, DK1, DK2, AT).\n\nPackage contains documentation (README.md), parameter ledger (PARAMS.md), reproducible python code, summary results (results.json), figures, data manifest (data_manifest.json).\n\nSource Data Attribution: ENTSO-E Transparency Platform Terms of Use Item #27 (CC BY 4.0 Verbatim, https://transparency.entsoe.eu/content/static_content/html/terms_of_use.html)",
+    "creators": [
+      {
+        "name": "Nestorov, Ivan",
+        "affiliation": "VolMax Studio Lab",
+        "orcid": "0009-0006-7940-9539"
+      }
+    ],
+    "access_right": "open",
+    "license": "cc-by-4.0",
+    "version": "v1.0.0"
+  }
+}

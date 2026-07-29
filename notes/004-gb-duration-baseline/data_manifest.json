@@ -1,9 +1,16 @@
 {
-    "gb_system_prices_202506_202606.csv": {
-        "sha256": "3c63f78a910f96d48b9235200b7b29b74d40b220cee84d39eeb556b38734a664",
-        "size_bytes": 3935566,
-        "source_url": "https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{settlementDate} (Open Elexon Insights API)",
-        "acquisition_mode": "live_open_api_query",
-        "acquired_at_utc": "2026-07-25T17:58:06.139617+00:00"
+  "manifest_version": "1.0.0",
+  "note_id": "OMN-004",
+  "data_source_class": "Primary Settlement Administrator (Elexon BMRS API)",
+  "analysis_period": "2025-06-01 to 2026-06-30",
+  "acquired_at_utc": "2026-07-19T12:00:00Z",
+  "files": [
+    {
+      "file_name": "gb_system_prices_202506_202606.csv",
+      "sha256": "3c63f78a910f96d48b9235200b7b29b74d40b220cee84d39eeb556b38734a664",
+      "size_bytes": 3935566,
+      "source_url": "https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{settlementDate} (Open Elexon Insights API)",
+      "acquisition_mode": "live_open_api_query"
     }
+  ]
 }

@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "title": "Open Market Note #005 \u2014 ENTSO-E Cross-Border Physical Flow Dynamics Baseline",
+    "upload_type": "publication",
+    "publication_type": "report",
+    "description": "Data Boundary Finding: Metric M1 High Utilization Exclusion (Rule A) and Metric M2 Intra-Corridor Physical Flow Dynamics Baseline across CWE bidding zone borders (AT-DE, BE-NL, FR-BE, NL-DE).\n\nPackage contains documentation (README.md), parameter ledger (PARAMS.md), decision ledger (DECISIONS.md), reproducible python code, summary results (results.json), figures, data manifest (data_manifest.json).\n\nSource Data Attribution: ENTSO-E Transparency Platform Terms of Use Item #27 (CC BY 4.0 Verbatim, https://transparency.entsoe.eu/content/static_content/html/terms_of_use.html)",
+    "creators": [
+      {
+        "name": "Nestorov, Ivan",
+        "affiliation": "VolMax Studio Lab",
+        "orcid": "0009-0006-7940-9539"
+      }
+    ],
+    "access_right": "open",
+    "license": "cc-by-4.0",
+    "version": "v1.0.0"
+  }
+}
