@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
 VolMax Open Market Notes — Automated Recurrence Script
-Governed by Recurrence Specification v1.0.2
+Governed by Recurrence Specification v1.0.3
 
 This script executes the rolling 13-month recurrent measurement pipeline,
 verifies telemetry completeness and PARAMS immutability, appends to the
-versioned measurement log, and generates a dynamic PR summary.
+versioned measurement log with full Quad-Hash provenance, and generates a dynamic PR summary.
 """
 
 import os
@@ -59,6 +59,15 @@ def compute_sha256(filepath):
         while chunk := f.read(65536):
             h.update(chunk)
     return h.hexdigest()
+
+def get_git_commit_sha():
+    if "GITHUB_SHA" in os.environ:
+        return os.environ["GITHUB_SHA"]
+    try:
+        res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True)
+        return res.stdout.strip()
+    except Exception:
+        return "0000000000000000000000000000000000000000"
 
 def calculate_rolling_window(reference_date=None):
     if reference_date is None:
@@ -199,7 +208,7 @@ def main():
         sys.exit(1)
     print("Pipeline execution completed successfully.")
     
-    # 7. Compute SHA-256 Hashes
+    # 7. Compute SHA-256 Hashes & Pipeline Commit SHA
     results_json_path = os.path.join(note_dir, "results.json")
     manifest_json_path = os.path.join(note_dir, "data_manifest.json")
     
@@ -209,11 +218,13 @@ def main():
         
     calc_results_sha256 = compute_sha256(results_json_path)
     calc_manifest_sha256 = compute_sha256(manifest_json_path)
+    pipeline_commit_sha = get_git_commit_sha()
     
     print(f"\nResults Output Hash (`results_sha256`): {calc_results_sha256}")
     print(f"Input Manifest Hash (`input_manifest_sha256`): {calc_manifest_sha256}")
+    print(f"Pipeline Commit SHA (`pipeline_commit_sha`): {pipeline_commit_sha}")
 
-    # 8. Mandate 5 & 6: Appending to history/measurement_log.json
+    # 8. Mandate 4, 5 & 6: Appending to history/measurement_log.json
     history_dir = os.path.join(note_dir, "history")
     os.makedirs(history_dir, exist_ok=True)
     history_file = os.path.join(history_dir, "measurement_log.json")
@@ -245,6 +256,7 @@ def main():
         "results_sha256": calc_results_sha256,
         "input_manifest_sha256": calc_manifest_sha256,
         "params_sha256": actual_params_sha256,
+        "pipeline_commit_sha": pipeline_commit_sha,
         "executed_at": now_utc
     }
     history_log.append(new_entry)
@@ -259,7 +271,7 @@ def main():
     
     pr_body = f"""## VolMax Recurrent Measurement PR — OMN-{note_num} ({next_version})
 
-This automated Pull Request presents a recurrent measurement baseline refresh executed per **Recurrence Specification v1.0.2**.
+This automated Pull Request presents a recurrent measurement baseline refresh executed per **Recurrence Specification v1.0.3**.
 
 ### Verification Summary:
 - **Target Note:** Open Market Note #{note_num} (`OMN-{note_num}`)
@@ -269,9 +281,10 @@ This automated Pull Request presents a recurrent measurement baseline refresh ex
 - **Mandate 8 Abort Check:** PASSED ({len(expected_months)} expected monthly telemetry files verified).
 
 ### Quad-Hash Provenance Stack:
-- **`results_sha256` (Analytical Output):** `{calc_results_sha256}`
-- **`input_manifest_sha256` (Telemetry Input):** `{calc_manifest_sha256}`
-- **`params_sha256` (PARM Parameters):** `{actual_params_sha256}`
+1. **`results_sha256` (Analytical Output):** `{calc_results_sha256}`
+2. **`input_manifest_sha256` (Telemetry Input):** `{calc_manifest_sha256}`
+3. **`params_sha256` (PARM Parameters):** `{actual_params_sha256}`
+4. **`pipeline_commit_sha` (Pipeline Code):** `{pipeline_commit_sha}`
 - **`executed_at`:** `{now_utc}`
 
 ### Included Payload Files:

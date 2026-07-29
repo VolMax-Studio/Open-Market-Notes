@@ -12,6 +12,7 @@ REGISTRY_PATH = os.path.join(BASE_DIR, "notes_registry.json")
 NOTE_DIR = os.path.join(BASE_DIR, "notes", "001-nem-duration-baseline")
 RESULTS_JSON = os.path.join(NOTE_DIR, "results.json")
 BACKUP_JSON = os.path.join(NOTE_DIR, "results.json.bak")
+PROC_DIR = os.path.join(NOTE_DIR, "data", "processed")
 
 def compute_sha256(filepath):
     h = hashlib.sha256()
@@ -62,6 +63,9 @@ class TestReinforcedDeterminism(unittest.TestCase):
         finally:
             # Unconditional restore in finally block to ensure working tree is NEVER left corrupt
             if os.path.exists(BACKUP_JSON):
+                if os.path.exists(RESULTS_JSON) and compute_sha256(RESULTS_JSON) != compute_sha256(BACKUP_JSON):
+                    # Save failed artifact for forensics before restore
+                    shutil.copy2(RESULTS_JSON, RESULTS_JSON + ".failed")
                 shutil.copy2(BACKUP_JSON, RESULTS_JSON)
                 os.remove(BACKUP_JSON)
 
