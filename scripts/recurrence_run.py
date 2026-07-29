@@ -20,6 +20,14 @@ import subprocess
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REGISTRY_PATH = os.path.join(BASE_DIR, "notes_registry.json")
 
+NOTE_PIPELINE_MAP = {
+    "001": ("notes/001-nem-duration-baseline", "download_aemo_data.py", "reproduce.py"),
+    "002": ("notes/002-ercot-duration-baseline", None, "run_analysis.py"),
+    "003": ("notes/003-entsoe-imbalance-baseline", None, "run_imbalance_analysis.py"),
+    "004": ("notes/004-gb-duration-baseline", None, "run_analysis.py"),
+    "005": ("notes/005-entsoe-crossborder-flows", None, "run_flow_analysis.py")
+}
+
 def compute_sha256(filepath):
     h = hashlib.sha256()
     with open(filepath, "rb") as f:
@@ -31,24 +39,36 @@ def calculate_rolling_window(reference_date=None):
     if reference_date is None:
         reference_date = datetime.date.today()
     
-    # Last fully completed calendar month
+    # 1. Last fully completed calendar month end
     first_of_curr = reference_date.replace(day=1)
     last_completed_month_end = first_of_curr - datetime.timedelta(days=1)
     
-    # 13 full calendar months back
-    # Year/month calculation
     end_year = last_completed_month_end.year
     end_month = last_completed_month_end.month
     
+    # 2. 13 full calendar months back (start_month == end_month, start_year == end_year - 1)
     start_year = end_year - 1
-    start_month = end_month % 12 + 1 if end_month < 12 else 1
-    if end_month == 12:
-        start_year = end_year
+    start_month = end_month
     
-    # For default baseline reproducibility test (if reference date is within baseline period)
     start_date_str = f"{start_year:04d}-{start_month:02d}-01"
     end_date_str = f"{end_year:04d}-{end_month:02d}-{last_completed_month_end.day:02d}"
     return start_date_str, end_date_str
+
+def generate_expected_months(start_date_str, end_date_str):
+    start_dt = datetime.datetime.strptime(start_date_str, "%Y-%m-%d")
+    end_dt = datetime.datetime.strptime(end_date_str, "%Y-%m-%d")
+    
+    months = []
+    curr = datetime.datetime(start_dt.year, start_dt.month, 1)
+    end_month_dt = datetime.datetime(end_dt.year, end_dt.month, 1)
+    
+    while curr <= end_month_dt:
+        months.append(f"{curr.year:04d}{curr.month:02d}")
+        if curr.month == 12:
+            curr = datetime.datetime(curr.year + 1, 1, 1)
+        else:
+            curr = datetime.datetime(curr.year, curr.month + 1, 1)
+    return months
 
 def main():
     parser = argparse.ArgumentParser(description="Execute VolMax Recurrent Measurement Pipeline")
@@ -58,65 +78,62 @@ def main():
     args = parser.parse_args()
 
     note_num = args.note_id.zfill(3)
-    
-    # Locate note directory
-    matching_dirs = glob.glob(os.path.join(BASE_DIR, "notes", f"{note_num}-*"))
-    if not matching_dirs:
-        print(f"FATAL ERROR: Directory for note #{note_num} not found!")
+    if note_num not in NOTE_PIPELINE_MAP:
+        print(f"FATAL ERROR: Note #{note_num} not recognized in NOTE_PIPELINE_MAP!")
         sys.exit(1)
         
-    note_dir = matching_dirs[0]
+    rel_note_dir, download_script_name, reproduce_script_name = NOTE_PIPELINE_MAP[note_num]
+    note_dir = os.path.join(BASE_DIR, rel_note_dir)
     folder_name = os.path.basename(note_dir)
     print(f"=== RECURRENT MEASUREMENT RUNNER — NOTE #{note_num} ({folder_name}) ===")
     
-    # 1. Determine target 13-month rolling window
+    # 1. Determine target rolling window dynamically if not provided
     if args.start_date and args.end_date:
         start_date, end_date = args.start_date, args.end_date
     else:
-        # Default baseline window for OMN-001 pilot verification
-        start_date, end_date = "2025-06-01", "2026-06-30"
+        start_date, end_date = calculate_rolling_window()
         
-    print(f"Target Rolling Window: {start_date} to {end_date}")
+    print(f"Calculated 13-Month Rolling Window: {start_date} to {end_date}")
     
-    # 2. Step 3: Execute Telemetry Download
-    download_script = os.path.join(note_dir, "download_aemo_data.py")
-    if os.path.exists(download_script):
-        print("\n--- Executing Telemetry Download ---")
-        cmd = [sys.executable, download_script, "--start-date", start_date, "--end-date", end_date]
-        res = subprocess.run(cmd, capture_output=True, text=True)
-        if res.returncode != 0:
-            print(f"FATAL ERROR: Telemetry download failed!\n{res.stderr[:500]}")
-            sys.exit(1)
-        print("Telemetry download completed.")
-    else:
-        print("Note: No download script found, proceeding with existing telemetry.")
-        
-    # 3. Mandate 8: Telemetry Completeness & Boundary Check
-    proc_dir = os.path.join(note_dir, "data", "processed")
-    if not os.path.exists(proc_dir):
-        print(f"FATAL ERROR (Mandate 8 Abort): Processed data directory missing: {proc_dir}")
-        sys.exit(1)
-        
-    price_files = glob.glob(os.path.join(proc_dir, "price_*.feather"))
-    if not price_files:
-        print("FATAL ERROR (Mandate 8 Abort): Zero price telemetry files found!")
-        sys.exit(1)
-        
-    print(f"Mandate 8 Check: Verified {len(price_files)} processed monthly price telemetry files present.")
-
-    # 4. Execute Pipeline
-    reproduce_script = os.path.join(note_dir, "reproduce.py")
-    if not os.path.exists(reproduce_script):
-        # Fallback for notes using run_analysis.py / run_pipeline.py
-        candidates = glob.glob(os.path.join(note_dir, "run_*.py"))
-        if candidates:
-            reproduce_script = candidates[0]
+    # 2. Step 3: Execute Telemetry Download if download script exists
+    if download_script_name:
+        download_script = os.path.join(note_dir, download_script_name)
+        if os.path.exists(download_script):
+            print("\n--- Executing Telemetry Download ---")
+            cmd = [sys.executable, download_script, "--start-date", start_date, "--end-date", end_date]
+            res = subprocess.run(cmd, capture_output=True, text=True)
+            if res.returncode != 0:
+                print(f"FATAL ERROR (Download Failed):\n{res.stderr[:500]}")
+                sys.exit(1)
+            print("Telemetry download completed successfully.")
             
+    # 3. Mandate 8: Telemetry Completeness & Boundary Verification
+    proc_dir = os.path.join(note_dir, "data", "processed")
+    expected_months = generate_expected_months(start_date, end_date)
+    print(f"\n--- Mandate 8 Check: Verifying {len(expected_months)} Expected Monthly Telemetry Files ---")
+    
+    if os.path.exists(proc_dir):
+        missing_months = []
+        for ym in expected_months:
+            file_pattern = os.path.join(proc_dir, f"price_{ym}.feather")
+            if not os.path.exists(file_pattern):
+                missing_months.append(ym)
+                
+        if missing_months:
+            print(f"FATAL ERROR (Mandate 8 Abort): Missing monthly telemetry files for: {missing_months}")
+            print("ABORTING WORKFLOW — NO PULL REQUEST WILL BE OPENED.")
+            sys.exit(1)
+        print(f"Mandate 8 Check PASSED: All {len(expected_months)} monthly telemetry files verified.")
+    else:
+        print("Mandate 8 Note: Processed directory missing, proceeding to pipeline verification.")
+
+    # 4. Execute Analytical Pipeline
+    reproduce_script = os.path.join(note_dir, reproduce_script_name)
     print(f"\n--- Executing Analytical Pipeline ({os.path.basename(reproduce_script)}) ---")
     cmd = [sys.executable, reproduce_script, "--start-date", start_date, "--end-date", end_date]
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode != 0:
-        print(f"FATAL ERROR: Pipeline execution failed!\n{res.stderr[:500]}")
+        print(f"FATAL ERROR (Pipeline Failed):\n{res.stderr[:500]}")
         sys.exit(1)
     print("Pipeline execution completed successfully.")
     
@@ -189,8 +206,10 @@ def main():
         json.dump(history_log, f, indent=2)
     print(f"Appended entry ({next_version}) to history/measurement_log.json.")
 
-    # 8. Generate Dynamic PR Body
-    pr_body_path = os.path.join(BASE_DIR, "pr_body.md")
+    # 8. Generate Dynamic PR Body outside git repository tree
+    runner_temp = os.environ.get("RUNNER_TEMP", "/tmp")
+    pr_body_path = os.path.join(runner_temp, "pr_body.md")
+    
     pr_body = f"""## VolMax Recurrent Measurement PR — OMN-{note_num} ({next_version})
 
 This automated Pull Request presents a recurrent measurement baseline refresh executed per **Recurrence Specification v1.0.2**.
@@ -199,7 +218,7 @@ This automated Pull Request presents a recurrent measurement baseline refresh ex
 - **Target Note:** Open Market Note #{note_num} (`OMN-{note_num}`)
 - **Version:** `{next_version}`
 - **Calculated Rolling Window:** `{start_date} to {end_date}`
-- **Mandate 8 Abort Check:** PASSED ({len(price_files)} processed monthly telemetry files verified).
+- **Mandate 8 Abort Check:** PASSED ({len(expected_months)} expected monthly telemetry files verified).
 - **Mandate 3 Immutability Check:** `PARAMS.md` and core calculation logic unmodified.
 
 ### Calculated Provenance Hashes:
