@@ -1,4 +1,4 @@
-# Note #002: ERCOT Duration Baseline
+# Open Market Note #002 — ERCOT Duration Baseline
 **Class of Work:** VolMax Descriptive Analytical Note (Evidence Class B — Third-Party GridStatus API)
 **Status:** Completed
 **Last Recalculated:** 2026-07-19T14:15:00+02:00

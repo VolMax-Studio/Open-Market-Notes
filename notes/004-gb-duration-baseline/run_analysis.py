@@ -232,6 +232,10 @@ def run_full_analysis():
     out_json = './data/processed/gb_baseline_results.json'
     with open(out_json, 'w') as f:
         json.dump(results, f, indent=4)
+    with open('results.json', 'w') as f:
+        json.dump(results, f, indent=4)
+    with open('summary.json', 'w') as f:
+        json.dump(results, f, indent=4)
         
     print("\n--- METRIC 1: PURE CONTINUOUS SCARCITY RUNS (GBP >= 100/MWh) ---")
     print(json.dumps(m1_100_pure, indent=2))

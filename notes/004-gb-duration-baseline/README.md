@@ -1,4 +1,4 @@
-# VolMax Note #004: GB BESS Duration Baseline (Elexon BMRS)
+# Open Market Note #004 — GB BESS Duration Baseline (Elexon BMRS)
 
 **Author:** VolMax-Studio  
 **Class of Work:** VolMax Descriptive Analytical Note (Not a P10 Audit)  
