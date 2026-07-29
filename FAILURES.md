@@ -39,7 +39,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Target Files:** `.github/workflows/recurrence-omn-001.yml`, `tests/test_determinism.py`  
 - **Violation:** CI determinism guard relied on multi-gigabyte historical market telemetry files (`data/processed/*.feather`) gitignored from checkout, and was placed after `recurrence_run.py` instead of before it on clean checkout.  
 - **Root Cause:** Environment assumption anti-pattern. Local test pass assumed presence of gitignored telemetry on GitHub Actions runner.  
-- **Remediation:** Implemented synthetic in-memory/temp-file fixture for CI determinism guard that verifies calculation logic and path anchoring on clean checkout without requiring market telemetry downloads.  
+- **Remediation:** Implemented `TestSyntheticCIDeterminismFixture` in `tests/test_determinism.py` generating a lightweight synthetic fixture dataset in a temporary directory for clean checkout CI execution.  
 - **Status:** Logged — Remediation Pending Gate Ratification.
 
 ---
@@ -50,4 +50,14 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** Failure Entry #003 was marked as `Logged & Remediated` prior to human review and PR merge ratification.  
 - **Root Cause:** Self-certification anti-pattern extended to the failure registry itself.  
 - **Remediation:** Updated all pending entries in `FAILURES.md` to `Logged — Remediation Pending Gate Ratification`.  
+- **Status:** Logged — Remediation Pending Gate Ratification.
+
+---
+
+### Failure Entry #006 — Inconsistent Historical Execution Timestamp Attribution
+- **Date:** 2026-07-30  
+- **Target File:** `notes/001-nem-duration-baseline/history/measurement_log.json`  
+- **Violation:** Three different timestamps (`2026-07-29T20:30:00Z`, `2026-07-19T07:40:07Z`, `2026-07-18T18:52:18Z`) were presented across review rounds as the baseline execution time.  
+- **Root Cause:** Timestamp fabrication anti-pattern. Estimated/generated timestamps were asserted as historical facts without raw git log verification.  
+- **Remediation:** Extracted raw git author timestamp (`2026-07-18T18:52:18Z`) using `git log --format=%aI --follow -- notes/001-nem-duration-baseline/results.json | tail -1`.  
 - **Status:** Logged — Remediation Pending Gate Ratification.

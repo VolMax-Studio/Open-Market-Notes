@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 VolMax Open Market Notes — Automated Recurrence Script
-Governed by Recurrence Specification v1.0.3
+Governed by Recurrence Specification v1.0.4
 
 This script executes the rolling 13-month recurrent measurement pipeline,
 verifies telemetry completeness and PARAMS immutability, appends to the
@@ -11,7 +11,6 @@ versioned measurement log with full Quad-Hash provenance, and generates a dynami
 import os
 import sys
 import json
-import glob
 import hashlib
 import datetime
 import argparse
@@ -61,13 +60,17 @@ def compute_sha256(filepath):
     return h.hexdigest()
 
 def get_git_commit_sha():
-    if "GITHUB_SHA" in os.environ:
-        return os.environ["GITHUB_SHA"]
+    if "GITHUB_SHA" in os.environ and os.environ["GITHUB_SHA"].strip():
+        return os.environ["GITHUB_SHA"].strip()
     try:
-        res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True)
-        return res.stdout.strip()
-    except Exception:
-        return "0000000000000000000000000000000000000000"
+        res = subprocess.run(["git", "rev-parse", "HEAD"], cwd=BASE_DIR, capture_output=True, text=True, check=True)
+        sha = res.stdout.strip()
+        if len(sha) == 40:
+            return sha
+        raise ValueError(f"Invalid Git SHA length: {sha}")
+    except Exception as e:
+        print(f"FATAL ERROR (Mandate 4 Abort): Unable to resolve pipeline_commit_sha! Details: {e}")
+        sys.exit(1)
 
 def calculate_rolling_window(reference_date=None):
     if reference_date is None:
@@ -249,7 +252,7 @@ def main():
         else:
             next_version = "v1.1.0"
             
-    now_utc = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    now_utc = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     new_entry = {
         "version": next_version,
         "measurement_window": f"{start_date} to {end_date}",
@@ -271,7 +274,7 @@ def main():
     
     pr_body = f"""## VolMax Recurrent Measurement PR — OMN-{note_num} ({next_version})
 
-This automated Pull Request presents a recurrent measurement baseline refresh executed per **Recurrence Specification v1.0.3**.
+This automated Pull Request presents a recurrent measurement baseline refresh executed per **Recurrence Specification v1.0.4**.
 
 ### Verification Summary:
 - **Target Note:** Open Market Note #{note_num} (`OMN-{note_num}`)
@@ -283,7 +286,7 @@ This automated Pull Request presents a recurrent measurement baseline refresh ex
 ### Quad-Hash Provenance Stack:
 1. **`results_sha256` (Analytical Output):** `{calc_results_sha256}`
 2. **`input_manifest_sha256` (Telemetry Input):** `{calc_manifest_sha256}`
-3. **`params_sha256` (PARM Parameters):** `{actual_params_sha256}`
+3. **`params_sha256` (PARAMS Parameters):** `{actual_params_sha256}`
 4. **`pipeline_commit_sha` (Pipeline Code):** `{pipeline_commit_sha}`
 - **`executed_at`:** `{now_utc}`
 
