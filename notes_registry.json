@@ -27,8 +27,7 @@
     "results_sha256": "90e3543b555087a0ba9404812eb142509a1faaacadf392bea5694b9389033f9c",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
-    "doi": "https://doi.org/10.5281/zenodo.21693245",
-    "reproduce_sha256": "d3458cc5a6637c1f8b85556ec3898a5680fe89ec62ff1b6047ea66eaaf29b142"
+    "doi": "https://doi.org/10.5281/zenodo.21693245"
   },
   {
     "id": "OMN-003",
@@ -42,8 +41,7 @@
     "results_sha256": "b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
-    "doi": "https://doi.org/10.5281/zenodo.21693254",
-    "reproduce_sha256": "7e6be06d5b7e7a46223c83998eb4ad35cdb4a16be5245932abce3c827aa5b484"
+    "doi": "https://doi.org/10.5281/zenodo.21693254"
   },
   {
     "id": "OMN-004",
@@ -57,8 +55,7 @@
     "results_sha256": "385ddfd9ed88357d6edf1dc39161468dbaa94115339671d4a39cec90446f873e",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
-    "doi": "https://doi.org/10.5281/zenodo.21693262",
-    "reproduce_sha256": "c168f0ceab8320002b784ce71ee458ec3f05c3589ea3cc653cddb71923ff2180"
+    "doi": "https://doi.org/10.5281/zenodo.21693262"
   },
   {
     "id": "OMN-005",
@@ -72,7 +69,6 @@
     "results_sha256": "60314bd2764e58b90656e09843ef88392e7b5a59d3dc2945ade9936f559a719b",
     "status": "Published",
     "evidence_class": "Data Boundary Finding",
-    "doi": "https://doi.org/10.5281/zenodo.21693276",
-    "reproduce_sha256": "73034a9ea58877d1a7ba19e3325cc7080772345b933f8ce6fb91c04a827b2d32"
+    "doi": "https://doi.org/10.5281/zenodo.21693276"
   }
 ]
