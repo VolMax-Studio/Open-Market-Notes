@@ -39,16 +39,18 @@ BESS_ENERGY_CAPACITY = {
     'CAPBES1': 200.0,   # Capital BESS
 }
 
-def main(start_date_str="2025-06-01", end_date_str="2026-06-30"):
-    import argparse
+def main(start_date_str="2025-06-01", end_date_str="2026-06-30", data_dir_override=None):
     print("======================================================================")
     print("STARTING REPRODUCTION OF VOLMAX NOTE #1: NEM DURATION BASELINE")
     print("======================================================================")
 
-    proc_dir = '../../data/processed'
-    if not os.path.exists(proc_dir):
-        # Try local path if run from repo root
-        proc_dir = './data/processed'
+    if data_dir_override:
+        proc_dir = data_dir_override
+    else:
+        proc_dir = '../../data/processed'
+        if not os.path.exists(proc_dir):
+            # Try local path if run from repo root
+            proc_dir = './data/processed'
     
     if not os.path.exists(proc_dir):
         raise FileNotFoundError(f"Processed data directory not found at {proc_dir}")
@@ -321,5 +323,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Reproduce OMN-001 baseline calculations")
     parser.add_argument("--start-date", default="2025-06-01", help="Start date (YYYY-MM-DD)")
     parser.add_argument("--end-date", default="2026-06-30", help="End date (YYYY-MM-DD)")
+    parser.add_argument("--data-dir", default=None, help="Override processed data directory")
     args = parser.parse_args()
-    main(args.start_date, args.end_date)
+    main(args.start_date, args.end_date, args.data_dir)

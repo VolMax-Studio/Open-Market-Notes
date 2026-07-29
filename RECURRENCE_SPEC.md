@@ -1,123 +1,121 @@
-# VolMax Open Market Notes — Recurrence Specification v1.0.2
-
-> **Class of Work:** VolMax Governance Specification & Automation Standard  
-> **Status:** Draft for Ratification (v1.0.2 Gate Remediation)  
-> **Version:** 1.0.2  
-> **Target Scope:** All VolMax Open Market Notes (#001–#010+)  
-> **Enforcement Level:** Mandatory for all automated `workflow_dispatch` and scheduled `cron` executions  
+# VolMax Open Market Notes — Recurrence Specification
+**Version:** v1.0.4  
+**Status:** Draft for Ratification  
+**Date:** 2026-07-30  
+**Repository:** `VolMax-Studio/Open-Market-Notes`  
 
 ---
 
-## 1. Executive Summary
+## 1. Executive Summary & Immutability Scope
 
-This specification governs the automated and semi-automated recalculation ("recurrence") of empirical market measurement baselines across all VolMax Open Market Notes.
+This document defines the formal operational, procedural, and cryptographic governance protocol for executing **recurrent baseline refreshes** across the VolMax Open Market Notes repository (#001–#005+).
 
-The core objective of the VolMax Observatory is to transform point-in-time descriptive analytical notes into **living, reproducible market instruments**. Recurrence builds a continuous **Measurement History** ($v1.0.0 \rightarrow v1.1.0 \rightarrow v2.0.0$), allowing the market to observe how scarcity duration, BESS charging availability, and cross-border flow dynamics evolve over time under identical analytical parameters.
+The recurrence pipeline ensures that market observation baselines remain dynamically updated over a rolling 13-month calendar window while strictly maintaining:
+1. **Audit Immutability:** Core analytical logic (`reproduce.py`), parameter definitions (`PARAMS.md`), and historical baseline registries (`notes_registry.json`) are immutable. `PARAMS.md` immutability is cryptographically enforced via SHA-256 verification against the frozen registry reference.
+2. **Provenance Traceability:** Every recurrent execution appends a 4-layer Quad-Hash provenance record to `history/measurement_log.json`.
+3. **Human-in-the-Loop Ratification:** Automated executions submit Pull Requests; machine code **NEVER** writes directly to `main`.
 
 ---
 
-## 2. Core Operational Mandates
+## 2. Revision History & Governance Changelog
 
-### Mandate 1: Rolling Measurement Window Rule
-- Recurrent measurement runs calculate market metrics over **13 full calendar months, ending on the last fully completed calendar month prior to execution** (e.g., execution on 15 August 2026 calculates the window `1 July 2025 – 31 July 2026`).
-- The rolling window MUST retain full telemetry resolution (15-minute / 30-minute / 5-minute) across the entire 13-month span to guarantee seasonal comparability across full annual cycles.
+- **v1.0.4 (2026-07-30):** Restored Mandate 7 (Execution Modes: Automated vs Manual) and Mandate 9 (Zero Secret Leakage Control); corrected Mandate 1 calendar window phrasing; added synthetic CI guard architecture specification; enforced strict git commit SHA resolution.
+- **v1.0.3 (2026-07-30):** Aligned specification with frozen registry baseline ($v1.0.0$); updated history log schema to 4-layer Quad-Hash stack (`results_sha256`, `input_manifest_sha256`, `params_sha256`, `pipeline_commit_sha`).
+- **v1.0.2 (2026-07-30):** Restored versioning taxonomy ($v1.0.0$ / $v1.x.0$ / $v2.0.0$) and `executed_at` ratification rules.
+- **v1.0.1 (2026-07-30):** Clarified 13-month rolling window calculation rules.
+- **v1.0.0 (2026-07-29):** Initial baseline recurrence specification.
 
-### Mandate 2: Human-in-the-Loop PR Enforcement (Zero Direct Commit to Main)
-- Automated GitHub Action workflows **MUST NEVER commit directly to `main`**.
-- Every workflow run generates an isolated git branch (`recurrent-measurement/omn-00X-YYYYMMDD`) and opens a Pull Request against `main`.
-- The Pull Request MUST contain:
-  1. Updated `notes_registry.json` (with fresh `results_sha256`).
-  2. Updated `results.json` and metric figures.
-  3. Updated `data_manifest.json` with fresh input file SHA-256 hashes.
-  4. Appended measurement record entry in `history/measurement_log.json`.
-  5. A mechanical PR diff summary highlighting metric changes relative to the previous ratified baseline.
-- Human review and manual PR merge constitute the formal ratification of every new measurement point.
+---
 
-### Mandate 3: Strict Parameter & Metric Immutability
-- Governance documents reference single sources of truth and MUST NOT duplicate analytical parameters.
-- Workflows MUST preserve all scarcity and charging price thresholds **exactly as recorded in each note's frozen `PARAMS.md`**.
-- Workflows are **STRICTLY FORBIDDEN** from modifying:
-  - Metric formulas, mathematical definitions, or bridging rules.
-  - Price thresholds recorded in `PARAMS.md`.
-  - Fixed parameter ledgers or methodology documentation.
+## 3. Mandatory Core Mandates
 
-### Mandate 4: Quad-Hash Provenance Stack Preservation
-Every recurrent execution MUST construct and verify the 4-layer provenance chain:
-1. **Input Telemetry Hash:** SHA-256 manifest of raw telemetry files recorded in `data_manifest.json`.
-2. **Frozen Pipeline Hash:** Commit SHA of the execution codebase on `main`.
-3. **Parametric Ledger Hash:** SHA-256 hash of `PARAMS.md`.
-4. **Results Output Hash:** SHA-256 hash of `results.json` recorded in `notes_registry.json` as `results_sha256`.
+### Mandate 1 — 13-Month Rolling Calendar Window Alignment
+- Every recurrent measurement MUST evaluate exactly 13 full calendar months ending on the last day of the last fully completed calendar month prior to execution.
+- Partial calendar months are strictly prohibited.
 
-### Mandate 5: Versioning Taxonomy
-- **`v1.0.0`**: Initial Baseline Release (Minted Zenodo DOI #1).
-- **`v1.x.0`**: Periodic Recurrent Measurement Refresh (Monthly / Quarterly rolling update ratified via PR merge).
-- **`v2.0.0`**: Annual Milestone Measurement Release (Triggers minting of new Zenodo DOI #2).
+### Mandate 2 — PR-Only Branch & Commit Isolation
+- Recurrent automation workflows MUST execute on isolated branches named `recurrent-measurement/omn-00X-${{ github.run_id }}`.
+- Machine workflows are strictly forbidden from committing directly to `main`.
+- Automated PRs MUST target `main` and require explicit human review and merge ratification.
 
-### Mandate 6: Measurement History Persistence Architecture
-To prevent past measurement points from being lost when `results.json` is updated, every note directory MUST maintain a persistent `history/measurement_log.json` ledger.
-Each workflow run appends an immutable JSON record using the timestamp of execution (`executed_at`):
+### Mandate 3 — PARAMS Immutability & Hash Verification
+- Before running analytical calculations, the runner MUST verify `PARAMS.md` against the authoritative `params_sha256` stored in `notes_registry.json`.
+- If `PARAMS.md` has been modified or the hash differs, execution MUST terminate immediately (`sys.exit(1)`).
+
+### Mandate 4 — Quad-Hash Provenance Stack
+Every recurrent measurement execution MUST record a 4-layer cryptographic provenance stack:
+1. **`results_sha256`**: SHA-256 hash of output `results.json`.
+2. **`input_manifest_sha256`**: SHA-256 hash of `data_manifest.json`.
+3. **`params_sha256`**: SHA-256 hash of `PARAMS.md`.
+4. **`pipeline_commit_sha`**: Full 40-character Git commit SHA of the execution pipeline HEAD.
+
+### Mandate 5 — Versioning & DOI Semantics
+- **`v1.0.0`**: Initial published baseline (linked to original Zenodo DOI).
+- **`v1.x.0`**: Recurrent 13-month rolling measurement refresh (recorded in `history/measurement_log.json`). Recurrent runs update history lineage and DO NOT mint new Zenodo DOIs.
+- **`v2.0.0`**: Major structural or parameter methodology change (requires new Zenodo DOI minting).
+
+### Mandate 6 — History Log Ledger
+All recurrent measurement refreshes write to `history/measurement_log.json`:
 ```json
-{
-  "version": "v1.1.0",
-  "measurement_window": "YYYY-MM-01 to YYYY-MM-31",
-  "results_sha256": "<sha256-hash-of-results-json>",
-  "input_manifest_sha256": "<sha256-hash-of-data-manifest>",
-  "executed_at": "YYYY-MM-DDTHH:MM:SSZ"
-}
+[
+  {
+    "version": "v1.1.0",
+    "measurement_window": "2025-07-01 to 2026-07-31",
+    "results_sha256": "...",
+    "input_manifest_sha256": "...",
+    "params_sha256": "...",
+    "pipeline_commit_sha": "...",
+    "executed_at": "2026-08-01T04:00:00Z"
+  }
+]
 ```
-*Note: Ratification is established solely by the human merge commit in git history, which records the author's identity and timestamp.*
 
-### Mandate 7: Execution Modes (Automated vs. Manual Recurrence)
-Notes operate under one of two legal execution modes depending on upstream provider infrastructure:
-- **`Automated Recurrence`** (e.g., #001 NEM, #003/#004 ENTSO-E/Elexon): Executed via GitHub Actions `workflow_dispatch` / `cron`.
-- **`Manual Recurrence`** (e.g., #002 ERCOT via GridStatus WAF): Executed manually on authorized local environments when runner IPs are blocked by Web Application Firewalls (WAF), submitting results via identical Pull Request workflows.
+### Mandate 7 — Execution Modes (Automated vs Manual Recurrence)
+- **Automated Recurrence (`parameterized: True`)**: Fully parameterized pipelines (e.g. Note #001) dispatched automatically via GitHub Actions schedule or manual workflow_dispatch.
+- **Manual Recurrence (`parameterized: False`)**: Non-parameterized pipelines (e.g. Notes #002–#005) executed manually in controlled local environments using parametric changelog protocol until date parameterization PR is merged.
 
-### Mandate 8: Telemetry Failure & Data Boundary Rule
-- If primary data acquisition fails, times out, or returns incomplete date coverage for the target 13-month window, **the workflow MUST abort immediately with an exit code error**.
-- The workflow **MUST NOT open a Pull Request** for incomplete or partial telemetry windows.
+### Mandate 8 — Telemetry Completeness & Boundary Verification
+- The pipeline MUST verify the presence and non-zero size of all 13 monthly telemetry files. If telemetry is missing or incomplete, the workflow MUST terminate immediately (`sys.exit(1)`).
 
-### Mandate 9: Zero Secret Leakage Policy
-- API credentials (ENTSO-E Security Tokens, GridStatus API Keys, GitHub Access Tokens) supplied via GitHub Secrets MUST NEVER be printed, echoed, or dumped into standard logs or stdout/stderr under any circumstances.
+### Mandate 9 — Zero Secret Leakage Control
+- Automated workflows and scripts MUST NOT dump environment variables or print secrets. Log output must remain strictly limited to provenance hashes and execution status.
 
 ---
 
-## 3. Workflow Execution Architecture
+## 4. Workflow Architecture & CI Guard
 
 ```
-[ Scheduled Cron / Manual Dispatch ]
-                 │
-                 ▼
-[ Runner Environment (Automated or Manual Recurrence) ]
-                 │
-                 ├── 1. Verify telemetry availability for target 13-month window
-                 │      └─> [ABORT if incomplete / API failure]
-                 ├── 2. Checkout main frozen codebase
-                 ├── 3. Download telemetry & hash inputs into data_manifest.json
-                 ├── 4. Execute frozen pipeline (run_analysis.py)
-                 ├── 5. Generate fresh results.json & plots
-                 └── 6. Append entry to history/measurement_log.json (executed_at)
-                 │
-                 ▼
-[ Open Branch & Pull Request (recurrent-measurement/omn-XXX) ]
-                 │
-                 ▼
-[ Human Review & Ratification (Click Merge) ]
-                 │
-                 ▼
-[ Automated GitHub Pages Re-Render (Observatory Dashboard) ]
+[GitHub Cron / Dispatch]
+        │
+        ▼
+[Check Out main Clean]
+        │
+        ▼
+[Execute In-Job Synthetic CI Guard] ──(FAIL)──► [ABORT Workflow]
+        │ (PASS)
+        ▼
+[Verify PARAMS.md Hash vs Frozen Registry] ──(FAIL)──► [ABORT Workflow]
+        │ (PASS)
+        ▼
+[Download & Verify 13-Month Telemetry] ──(FAIL)──► [ABORT Workflow]
+        │ (PASS)
+        ▼
+[Execute Analysis Pipeline (cwd=note_dir)]
+        │
+        ▼
+[Append Entry to history/measurement_log.json]
+        │
+        ▼
+[Open Pull Request for Human Ratification]
 ```
+
+The **In-Job Synthetic CI Guard** executes `TestSyntheticCIDeterminismFixture` on clean checkouts. It generates a temporary synthetic telemetry dataset in memory/temp directory to verify calculation logic and path anchoring without requiring multi-gigabyte historical market telemetry downloads.
 
 ---
 
-## 4. Verification Checklist for Recurrence PR Approval
+## 5. Operational Checklist & Ratification Protocol
 
-Before merging a recurrent measurement PR into `main`, the following automated checks MUST pass:
-
-- `[ ]` The `results_sha256` entry in `notes_registry.json` within the PR must exactly match the SHA-256 hash of the freshly produced `results.json` file in that same PR.
-- `[ ]` `data_manifest.json` updated with valid SHA-256 input hashes for the entire 13-month window.
-- `[ ]` `history/measurement_log.json` correctly appended with the new measurement record using `executed_at`.
-- `[ ]` Zero modified lines in `PARAMS.md` or core calculation logic.
-
----
-
-*VolMax Studio Lab · Recurrence Specification v1.0.2 (Governance & Automation Standard)*
+1. **Frozen Registry:** `notes_registry.json` is immutable for published $v1.0.0$ baselines and DOIs.
+2. **Dynamic Lineage:** All recurrent runs append to `history/measurement_log.json`.
+3. **PR Payload:** PRs contain only `results.json`, `data_manifest.json`, `history/measurement_log.json`, and generated plots (`results/*.png`).
+4. **Human Control:** The human maintainer reviews the PR diff and merges to ratify the new measurement into `main`.
