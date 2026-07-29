@@ -11,8 +11,7 @@
     "data_sha256": "c192e7ee97ac413a07db6a1357f0dbcf49c1164cdbe0a5a4c0f5e9b113b614ed",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
-    "doi": null,
-    "live_verified_at": "2026-07-29T23:20:00+02:00"
+    "doi": null
   },
   {
     "id": "OMN-002",
@@ -26,8 +25,7 @@
     "data_sha256": "90e3543b555087a0ba9404812eb142509a1faaacadf392bea5694b9389033f9c",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
-    "doi": null,
-    "live_verified_at": "2026-07-29T23:20:00+02:00"
+    "doi": null
   },
   {
     "id": "OMN-003",
@@ -41,8 +39,7 @@
     "data_sha256": "b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
-    "doi": null,
-    "live_verified_at": "2026-07-29T23:20:00+02:00"
+    "doi": null
   },
   {
     "id": "OMN-004",
@@ -56,8 +53,7 @@
     "data_sha256": "385ddfd9ed88357d6edf1dc39161468dbaa94115339671d4a39cec90446f873e",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
-    "doi": null,
-    "live_verified_at": "2026-07-29T23:20:00+02:00"
+    "doi": null
   },
   {
     "id": "OMN-005",
@@ -71,7 +67,6 @@
     "data_sha256": "d996f62a0fcf4a2ab0713519d81d01abae25251d3665e94e828dad23c27ae301",
     "status": "Published",
     "evidence_class": "Data Boundary Finding",
-    "doi": null,
-    "live_verified_at": "2026-07-29T23:20:00+02:00"
+    "doi": null
   }
 ]
