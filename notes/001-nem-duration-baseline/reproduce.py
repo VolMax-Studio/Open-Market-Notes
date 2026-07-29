@@ -226,28 +226,21 @@ def main(start_date_str="2025-06-01", end_date_str="2026-06-30"):
     print("\n### Metric 3: Fleet Monthly Average Cycling")
     print("| Month | EFC/month | EFC/day |")
     print("|:---|:---:|:---:|")
-    days_in_month = {
-        '2025-06': 30, '2025-07': 31, '2025-08': 31, '2025-09': 30,
-        '2025-10': 31, '2025-11': 30, '2025-12': 31, '2026-01': 31,
-        '2026-02': 28, '2026-03': 31, '2026-04': 30, '2026-05': 31,
-        '2026-06': 30
-    }
+    import calendar
     for ym, val in short_medium_monthly.items():
-        days = days_in_month.get(ym, 30)
+        y_str, m_str = ym.split("-")
+        days = calendar.monthrange(int(y_str), int(m_str))[1]
         daily_efc = val / days
         print(f"| **{ym}** | {val:.2f} | {daily_efc:.2f} |")
 
     # ==========================================================================
     # SAVE OUTPUTS AND GENERATE PLOTS
     # ==========================================================================
-    # Write JSON results
-    out_dir = './results' if os.path.exists('./results') else './notes/nem-duration-baseline/results'
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir, exist_ok=True)
-        
-    json_path = os.path.join(out_dir, '../results.json') if 'notes' in os.getcwd() else './notes/nem-duration-baseline/results.json'
-    # Ensure folder containing results.json exists
-    os.makedirs(os.path.dirname(os.path.abspath(json_path)), exist_ok=True)
+    # Write JSON results (Anchored to script directory)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    json_path = os.path.join(script_dir, "results.json")
+    out_dir = os.path.join(script_dir, "results")
+    os.makedirs(out_dir, exist_ok=True)
     
     with open(json_path, 'w') as f:
         json.dump(results, f, indent=4)
