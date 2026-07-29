@@ -1,0 +1,71 @@
+{
+    "market": "GB (Great Britain)",
+    "data_source": "Elexon Insights API (System Prices)",
+    "time_range": "2025-06-01 00:00:00+01:00 to 2026-06-30 23:30:00+01:00",
+    "total_intervals": 18960,
+    "m1_scarcity_100_pure_runs": {
+        "threshold_gbp": 100.0,
+        "total_qualifying_intervals": 6420,
+        "total_active_scarcity_hours": 3210.0,
+        "total_runs": 1648,
+        "mean_run_duration_h": 1.95,
+        "median_run_duration_h": 1.0,
+        "p90_run_duration_h": 4.5,
+        "max_run_duration_h": 41.0,
+        "max_run_start": "2026-03-08 07:30:00+00:00",
+        "max_run_end": "2026-03-10 00:00:00+00:00",
+        "max_run_price": 189.0
+    },
+    "m1_scarcity_100_macro_windows": {
+        "threshold_gbp": 100.0,
+        "max_bridge_periods": 2,
+        "total_macro_windows": 1137,
+        "mean_window_span_h": 3.05,
+        "median_window_span_h": 2.0,
+        "p90_window_span_h": 7.0,
+        "max_window_span_h": 72.5,
+        "max_window_start": "2026-03-07 02:00:00+00:00",
+        "max_window_end": "2026-03-10 02:00:00+00:00",
+        "max_window_price": 189.0
+    },
+    "m1_extreme_250_pure_runs": {
+        "threshold_gbp": 250.0,
+        "total_qualifying_intervals": 50,
+        "total_active_scarcity_hours": 25.0,
+        "total_runs": 17,
+        "mean_run_duration_h": 1.47,
+        "median_run_duration_h": 1.0,
+        "p90_run_duration_h": 2.7,
+        "max_run_duration_h": 4.5,
+        "max_run_start": "2026-06-23 18:00:00+01:00",
+        "max_run_end": "2026-06-23 22:00:00+01:00",
+        "max_run_price": 800.0
+    },
+    "m1_extreme_250_macro_windows": {
+        "threshold_gbp": 250.0,
+        "max_bridge_periods": 2,
+        "total_macro_windows": 15,
+        "mean_window_span_h": 1.73,
+        "median_window_span_h": 1.5,
+        "p90_window_span_h": 3.3,
+        "max_window_span_h": 4.5,
+        "max_window_start": "2026-06-23 18:00:00+01:00",
+        "max_window_end": "2026-06-23 22:00:00+01:00",
+        "max_window_price": 800.0
+    },
+    "m2_charging_windows": {
+        "cheap_threshold_gbp": 25.0,
+        "total_days": 395,
+        "bess_8h_target_hours": 9.5,
+        "bess_8h_qualifying_days": 40,
+        "bess_8h_qualifying_pct": 10.13,
+        "bess_4h_target_hours": 4.8,
+        "bess_4h_qualifying_days": 80,
+        "bess_4h_qualifying_pct": 20.25,
+        "bess_2h_target_hours": 2.4,
+        "bess_2h_qualifying_days": 119,
+        "bess_2h_qualifying_pct": 30.13,
+        "mean_daily_cheap_hours": 2.56,
+        "max_daily_cheap_hours": 22.5
+    }
+}

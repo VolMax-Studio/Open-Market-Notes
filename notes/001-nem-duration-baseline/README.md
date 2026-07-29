@@ -1,4 +1,4 @@
-# Note #001: NEM Duration Baseline
+# Open Market Note #001 — NEM Duration Baseline
 **Class of Work:** VolMax Descriptive Analytical Note (Evidence Class: Clean Baseline Measurement)
 **Status:** Published
 **Last Recalculated:** 2026-07-19T09:44:00+02:00
