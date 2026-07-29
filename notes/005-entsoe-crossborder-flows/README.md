@@ -1,6 +1,6 @@
 # Open Market Note #005 — ENTSO-E Cross-Border Physical Flow Dynamics Baseline
 
-> **Document Status:** Complete (100% Verified Empirical Telemetry — Rule D Intra-Corridor Metric M2)  
+> **Document Status:** Published (100% Complete Telemetered Coverage — Rule D Intra-Corridor Metric M2)  
 > **Evaluation Period:** June 1, 2025 – June 30, 2026 (13 Months)  
 > **Primary Data Source:** ENTSO-E Transparency Platform (DocumentType `A11` Cross-Border Physical Flow, 181,917 sub-hourly telemetered records)  
 > **Licensing Anchor:** CC BY 4.0 Verbatim (ENTSO-E Terms of Use Item #27)  
@@ -20,7 +20,7 @@
 
 This Open Market Note establishes a 13-month descriptive baseline for net physical power flow dynamics ($|P_{\text{flow}}|$ MW) across telemetered Central-Western European (CWE) bidding zone interconnections (`AT ↔ DE`, `BE ↔ NL`, `FR ↔ BE`, `NL ↔ DE`).
 
-### Key Audit Findings:
+### Key Baseline Findings:
 1. **Rule A Metric M1 Exclusion:** Metric M1 (High Utilization Ratio $U_t = |P_{\text{flow}}| / C_{\text{ref}}$) is **EXCLUDED FOR ALL CORRIDORS** per Rule A (`D-003`). ENTSO-E does not disclose directional Total NTC ($A61/A26$) under CC BY 4.0 for CWE flow-based borders. Using hardcoded static capacity guesses or commercial auction allocation results (`A09`) creates artificial capacity zeros and distorted utilization ratios. Note #005 documents this public data availability boundary rather than inventing a denominator.
 2. **Rule D Intra-Corridor Evaluation (Metric M2):** In accordance with Rule D (`D-006`), cross-corridor ranking without capacity normalization is prohibited. Metric M2 evaluates physical flow telemetry strictly within each corridor against its own temporal self-distribution (P10, P50, P90, P99) over the 13-month period.
 3. **Flow Volatility & Peak Spikes:** `NL ↔ DE` exhibits intra-corridor peak-to-mean volatility ratio ($4.07\times$), with 99th percentile physical flows reaching $4,732.9\text{ MW}$ compared to a median (P50) of $1,427.1\text{ MW}$.
@@ -55,12 +55,12 @@ This Open Market Note establishes a 13-month descriptive baseline for net physic
 
 | Decision ID | Target Area | Decision Source | Affected Downstream Artifacts |
 | :---: | :--- | :--- | :--- |
-| [`D-001`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-001--threshold-choice-for-high-utilization-metric-m_1) | Utilization Threshold | `Active` | Threshold definition |
-| [`D-002`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-002--spatial-corridor-scope) | Spatial Scope (4 Corridors evaluated) | `Active` | Ingestion loop, data_manifest.json |
-| [`D-003`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-003--denominator-hierarchy-rule) | Denominator Hierarchy | `Active` | Rule A Exclusion Enforcement |
-| [`D-004`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-004--directional-neutrality) | Directional Neutrality ($|P_{\text{flow}}|$) | `Active` | Net physical flow calculation |
-| [`D-005`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-005--sub-hourly-normalization-rule) | Sub-Hourly Normalization | `Active` | Time-weighting calculator (15m=0.25h) |
-| [`D-006`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-006--metric-m1-exclusion-and-metric-m2-pivot-to-intra-corridor-physical-flow-dynamics) | Metric M2 Pivot & Rule D | `Active` | Metric M2 pipeline & README |
+| [`D-001`](./DECISIONS.md#d-001--threshold-choice-for-high-utilization-metric-m_1) | Utilization Threshold | `Active` | Threshold definition |
+| [`D-002`](./DECISIONS.md#d-002--spatial-corridor-scope) | Spatial Scope (4 Corridors evaluated) | `Active` | Ingestion loop, data_manifest.json |
+| [`D-003`](./DECISIONS.md#d-003--denominator-hierarchy-rule) | Denominator Hierarchy | `Active` | Rule A Exclusion Enforcement |
+| [`D-004`](./DECISIONS.md#d-004--directional-neutrality) | Directional Neutrality ($|P_{\text{flow}}|$) | `Active` | Net physical flow calculation |
+| [`D-005`](./DECISIONS.md#d-005--sub-hourly-normalization-rule) | Sub-Hourly Normalization | `Active` | Time-weighting calculator (15m=0.25h) |
+| [`D-006`](./DECISIONS.md#d-006--metric-m1-exclusion-and-metric-m2-pivot-to-intra-corridor-physical-flow-dynamics) | Metric M2 Pivot & Rule D | `Active` | Metric M2 pipeline & README |
 
 ---
 
@@ -72,12 +72,13 @@ To execute deterministic regeneration of all outputs and figures:
 python3 run_pipeline.py
 ```
 
-- **Generated Visual:** [`figures/m2_flow_duration_curves.png`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/figures/m2_flow_duration_curves.png)
-- **Raw Payload Manifest:** [`data/data_manifest.json`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/data/data_manifest.json)
-- **Input Manifest:** [`data/input_manifest.json`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/data/input_manifest.json)
-- **JSON Summary:** [`summary.json`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/summary.json)
-- **Pre-Registration Ledger:** [`DECISIONS.md`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md)
-- **Frozen Parameters:** [`PARAMS.md`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/PARAMS.md)
+- **Generated Visual:** [`figures/m2_flow_duration_curves.png`](./figures/m2_flow_duration_curves.png)
+- **Raw Payload Manifest:** [`data/data_manifest.json`](./data/data_manifest.json)
+- **Input Manifest:** [`data/input_manifest.json`](./data/input_manifest.json)
+- **JSON Summary:** [`summary.json`](./summary.json)
+- **Pre-Registration Ledger:** [`DECISIONS.md`](./DECISIONS.md)
+- **Frozen Parameters:** [`PARAMS.md`](./PARAMS.md)
 
 ---
-*VolMax Studio Lab · Open Market Note #005 (v1.0.0 — Verified Empirical Release)*
+
+*VolMax Studio Lab · Open Market Note #005 (v1.0.0 — Empirical Baseline Release)*�� Verified Empirical Release)*

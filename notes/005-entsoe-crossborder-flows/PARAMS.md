@@ -48,11 +48,11 @@ Known Empirical Limitations (Data & Physical System Bounds):
 ## 3. Core Metric Definition
 
 ### Primary Metric Status: M1 Excluded (Rule A Enforcement)
-* **Decision Source:** [`D-006`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-006--metric-m1-exclusion-and-metric-m2-pivot-to-intra-corridor-physical-flow-dynamics)
+* **Decision Source:** [`D-006`](./DECISIONS.md#d-006--metric-m1-exclusion-and-metric-m2-pivot-to-intra-corridor-physical-flow-dynamics)
 - **Status:** EXCLUDED (Rule A). Directional Total NTC telemetry is unannounced under CC BY 4.0 for CWE flow-based bidding zone borders. Fallback to unverified capacity guesses or commercial allocation results is prohibited.
 
 ### Secondary Metric (Pivoted Primary): M2 — Intra-Corridor Physical Flow Dynamics
-* **Decision Source:** [`D-006`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-006--metric-m1-exclusion-and-metric-m2-pivot-to-intra-corridor-physical-flow-dynamics)
+* **Decision Source:** [`D-006`](./DECISIONS.md#d-006--metric-m1-exclusion-and-metric-m2-pivot-to-intra-corridor-physical-flow-dynamics)
 - **Definition:** The intra-temporal distribution, hourly volatility ($\sigma_{P}$), and peak load ratio ($P_{\text{peak}} / \bar{P}_{\text{flow}}$) of net physical power flow ($|P_{\text{flow}}|$) within each evaluated corridor.
 - **Rule D (Intra-Corridor Self-Distribution Boundary):** Metric M2 measures physical flow dynamics strictly *within each corridor against its own self-distribution over time*. Cross-corridor magnitude comparisons or un-normalized ranking between different bidding zone borders are explicitly prohibited without capacity normalization.
 
@@ -61,32 +61,32 @@ Known Empirical Limitations (Data & Physical System Bounds):
 ## 4. Mandatory Metric Rules (Hierarchy, Normalization, Direction)
 
 ### Rule A — Capacity Denominator Hierarchy
-* **Decision Source:** [`D-003`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-003--denominator-hierarchy-rule)
+* **Decision Source:** [`D-003`](./DECISIONS.md#d-003--denominator-hierarchy-rule)
 To eliminate ambiguity, reference capacity $C_{\text{ref}}$ MUST strictly follow this 3-tier hierarchy:
 1. **Tier 1:** Use reported Available Transfer Capacity ($ATC$) / Net Transfer Capacity ($NTC$) for period $t$, if available.
 2. **Tier 2:** If $ATC$/$NTC$ is unannounced, use reported Permanent Transmission Physical Limit ($P_{\text{max}}$).
 3. **Tier 3:** If neither $ATC$/$NTC$ nor $P_{\text{max}}$ is available, **EXCLUDE the corridor** from M1 computation (falling back to unverified guesses is prohibited).
 
 ### Rule B — Sub-Hourly Normalization Rule
-* **Decision Source:** [`D-005`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-005--sub-hourly-normalization-rule)
+* **Decision Source:** [`D-005`](./DECISIONS.md#d-005--sub-hourly-normalization-rule)
 Sub-hourly sampling intervals contribute proportionally to cumulative duration:
 - Each 15-minute interval contribute exactly **0.25 hours**.
 - Each 30-minute interval contribute exactly **0.50 hours**.
 - Each 60-minute interval contribute exactly **1.00 hour**.
 
 ### Rule C — Directional Neutrality
-* **Decision Source:** [`D-004`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-004--directional-neutrality)
+* **Decision Source:** [`D-004`](./DECISIONS.md#d-004--directional-neutrality)
 - **Absolute Value Usage:** The formula uses $|P_{\text{flow}, t}|$. Direction is intentionally ignored because physical power telemetry measures gross infrastructure load, not commercial trade direction or import/export bias.
 
 ### Rule D — Intra-Corridor Self-Distribution Boundary
-* **Decision Source:** [`D-006`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-006--metric-m1-exclusion-and-metric-m2-pivot-to-intra-corridor-physical-flow-dynamics)
+* **Decision Source:** [`D-006`](./DECISIONS.md#d-006--metric-m1-exclusion-and-metric-m2-pivot-to-intra-corridor-physical-flow-dynamics)
 - **Prohibition of Un-Normalized Cross-Corridor Ranking:** In the absence of measured capacity denominators, physical flow MW magnitudes cannot be compared across different corridor pairs. Each corridor MUST be evaluated strictly against its own temporal percentiles (P10, P50, P90, P99) over the 13-month period.
 
 
 ---
 
 ## 5. Evaluated Interconnection Corridors
-* **Decision Source:** [`D-002`](file:///home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/notes/005-entsoe-crossborder-flows/DECISIONS.md#d-002--spatial-corridor-scope)
+* **Decision Source:** [`D-002`](./DECISIONS.md#d-002--spatial-corridor-scope)
 
 The 13-month baseline (June 1, 2025 – June 30, 2026) evaluates five key ENTSO-E cross-border corridors:
 1. `NL ↔ DE` (Netherlands — Germany)
