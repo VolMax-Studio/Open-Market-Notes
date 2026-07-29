@@ -29,13 +29,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas numpy requests matplotlib jinja2 nemosis pyarrow
 
+      - name: Execute In-Job CI Determinism Guard (Pre-Run Clean Checkout)
+        run: |
+          python -m unittest discover tests
+
       - name: Execute Recurrent Measurement Script & Mandate 8 Abort Check
         run: |
           python scripts/recurrence_run.py --note-id 001
-
-      - name: Execute In-Job CI Determinism Guard
-        run: |
-          python -m unittest discover tests
 
       - name: Create Pull Request (Human-in-the-Loop Ratification)
         uses: peter-evans/create-pull-request@v6
