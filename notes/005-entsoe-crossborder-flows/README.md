@@ -81,4 +81,4 @@ python3 run_pipeline.py
 
 ---
 
-*VolMax Studio Lab · Open Market Note #005 (v1.0.0 — Empirical Baseline Release)*�� Verified Empirical Release)*
+*VolMax Studio Lab · Open Market Note #005 (v1.0.0 — Empirical Baseline Release)*

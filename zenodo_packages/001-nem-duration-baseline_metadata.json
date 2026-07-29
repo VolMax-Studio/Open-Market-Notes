@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "title": "Open Market Note #001 \u2014 NEM Duration Baseline",
+    "upload_type": "publication",
+    "publication_type": "report",
+    "description": "13-month empirical baseline for scarcity pricing duration ($300/MWh) and 8h BESS charging availability in Mainland Australia NEM (NSW1, QLD1, SA1, VIC1).\n\nPackage contains documentation (README.md), parameter ledger (PARAMS.md), reproducible python code, summary results (results.json), figures, data manifest (data_manifest.json).\n\nSource Data Attribution: Australian Energy Market Operator (AEMO) Data Terms (https://aemo.com.au/privacy-and-legal/copyright-permissions)",
+    "creators": [
+      {
+        "name": "Nestorov, Ivan",
+        "affiliation": "VolMax Studio Lab",
+        "orcid": "0009-0006-7940-9539"
+      }
+    ],
+    "access_right": "open",
+    "license": "cc-by-4.0",
+    "version": "v1.0.0"
+  }
+}

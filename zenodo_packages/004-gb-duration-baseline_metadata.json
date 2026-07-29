@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "title": "Open Market Note #004 \u2014 GB BESS Duration Baseline (Elexon BMRS)",
+    "upload_type": "publication",
+    "publication_type": "report",
+    "description": "13-month empirical baseline for 30-min settlement system prices, pure scarcity runs vs event spans in Great Britain (Elexon BMRS NGET Area).\n\nPackage contains documentation (README.md), parameter ledger (PARAMS.md), reproducible python code, summary results (results.json), figures, data manifest (data_manifest.json).\n\nSource Data Attribution: Elexon BMRS Open Data Terms (https://www.elexon.co.uk/data/)",
+    "creators": [
+      {
+        "name": "Nestorov, Ivan",
+        "affiliation": "VolMax Studio Lab",
+        "orcid": "0009-0006-7940-9539"
+      }
+    ],
+    "access_right": "open",
+    "license": "cc-by-4.0",
+    "version": "v1.0.0"
+  }
+}
