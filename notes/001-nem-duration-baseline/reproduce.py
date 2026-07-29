@@ -39,7 +39,8 @@ BESS_ENERGY_CAPACITY = {
     'CAPBES1': 200.0,   # Capital BESS
 }
 
-def main():
+def main(start_date_str="2025-06-01", end_date_str="2026-06-30"):
+    import argparse
     print("======================================================================")
     print("STARTING REPRODUCTION OF VOLMAX NOTE #1: NEM DURATION BASELINE")
     print("======================================================================")
@@ -62,9 +63,8 @@ def main():
     price_df = pd.concat(price_list, ignore_index=True)
     price_df['SETTLEMENTDATE'] = pd.to_datetime(price_df['SETTLEMENTDATE'])
     
-    # Filter strictly to the 13-month trading window
-    price_df = price_df[(price_df['SETTLEMENTDATE'] >= '2025-06-01 04:05:00') & 
-                        (price_df['SETTLEMENTDATE'] <= '2026-07-01 04:00:00')].copy()
+    # Filter strictly to the target trading window
+    price_df = price_df[(price_df['SETTLEMENTDATE'] >= f"{start_date_str} 04:05:00")].copy()
     print(f"Stitched and filtered price data shape: {price_df.shape}")
 
     # 2. Stitch and load 13 months of SCADA data
@@ -79,9 +79,8 @@ def main():
     scada_df = pd.concat(scada_list, ignore_index=True)
     scada_df['SETTLEMENTDATE'] = pd.to_datetime(scada_df['SETTLEMENTDATE'])
     
-    # Filter strictly to the 13-month trading window
-    scada_df = scada_df[(scada_df['SETTLEMENTDATE'] >= '2025-06-01 04:05:00') & 
-                        (scada_df['SETTLEMENTDATE'] <= '2026-07-01 04:00:00')].copy()
+    # Filter strictly to the target trading window
+    scada_df = scada_df[(scada_df['SETTLEMENTDATE'] >= f"{start_date_str} 04:05:00")].copy()
     print(f"Stitched and filtered BESS SCADA data shape: {scada_df.shape}")
 
     regions = ['NSW1', 'QLD1', 'SA1', 'VIC1']
@@ -325,4 +324,9 @@ def main():
     print("======================================================================")
 
 if __name__ == '__main__':
-    main()
+    import argparse
+    parser = argparse.ArgumentParser(description="Reproduce OMN-001 baseline calculations")
+    parser.add_argument("--start-date", default="2025-06-01", help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", default="2026-06-30", help="End date (YYYY-MM-DD)")
+    args = parser.parse_args()
+    main(args.start_date, args.end_date)

@@ -183,15 +183,32 @@ def download_month(year, month):
     except Exception as e:
         print(f"Error processing DISPATCHPRICE for {year}-{month:02d}: {e}")
 
-def run_pipeline():
-    # Loop over the 12 months from June 2025 to May 2026
-    months = [
-        (2025, 6), (2025, 7), (2025, 8), (2025, 9), (2025, 10), (2025, 11), (2025, 12),
-        (2026, 1), (2026, 2), (2026, 3), (2026, 4), (2026, 5), (2026, 6)
-    ]
+import argparse
+from datetime import datetime
+
+def run_pipeline(start_date_str="2025-06-01", end_date_str="2026-06-30"):
+    start_dt = datetime.strptime(start_date_str, "%Y-%m-%d")
+    end_dt = datetime.strptime(end_date_str, "%Y-%m-%d")
+    
+    months = []
+    curr = datetime(start_dt.year, start_dt.month, 1)
+    end_month = datetime(end_dt.year, end_dt.month, 1)
+    
+    while curr <= end_month:
+        months.append((curr.year, curr.month))
+        if curr.month == 12:
+            curr = datetime(curr.year + 1, 1, 1)
+        else:
+            curr = datetime(curr.year, curr.month + 1, 1)
+            
+    print(f"Executing AEMO download pipeline for window: {start_date_str} to {end_date_str} ({len(months)} months)")
     for y, m in months:
         download_month(y, m)
-    print("\n--- Pipeline Completed Successfully! ---")
+    print("\n--- Pipeline Download Completed Successfully! ---")
 
 if __name__ == '__main__':
-    run_pipeline()
+    parser = argparse.ArgumentParser(description="Download AEMO telemetry for OMN-001")
+    parser.add_argument("--start-date", default="2025-06-01", help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", default="2026-06-30", help="End date (YYYY-MM-DD)")
+    args = parser.parse_args()
+    run_pipeline(args.start_date, args.end_date)

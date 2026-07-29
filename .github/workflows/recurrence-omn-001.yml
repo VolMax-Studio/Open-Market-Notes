@@ -27,101 +27,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas numpy requests matplotlib jinja2
+          pip install pandas numpy requests matplotlib jinja2 nemosis pyarrow
 
-      - name: Execute Recurrent Pipeline & Mandate 8 Abort Check
-        id: pipeline
+      - name: Execute Recurrent Measurement Script & Mandate 8 Abort Check
         run: |
-          python -c '
-          import os, sys, subprocess, json, datetime
-
-          print("=== EXECUTING RECURRENT MEASUREMENT PILOT (OMN-001) ===")
-          
-          # Step 1: Execute pipeline script
-          res = subprocess.run([sys.executable, "notes/001-nem-duration-baseline/reproduce.py"], capture_output=True, text=True)
-          if res.returncode != 0:
-              print("FATAL ERROR: Pipeline execution failed!")
-              print(res.stderr[:500])
-              sys.exit(1)
-          
-          # Step 2: Verify outputs exist and are complete
-          results_file = "notes/001-nem-duration-baseline/results.json"
-          manifest_file = "notes/001-nem-duration-baseline/data_manifest.json"
-          
-          if not os.path.exists(results_file) or not os.path.exists(manifest_file):
-              print("FATAL ERROR: Missing results or manifest outputs!")
-              sys.exit(1)
-              
-          with open(results_file) as f:
-              results_data = json.load(f)
-              
-          import hashlib
-          with open(results_file, "rb") as f:
-              calc_sha256 = hashlib.sha256(f.read()).hexdigest()
-              
-          print(f"Calculated results_sha256: {calc_sha256}")
-          
-          # Step 3: Update notes_registry.json
-          with open("notes_registry.json", "r") as f:
-              registry = json.load(f)
-              
-          for entry in registry:
-              if entry["id"] == "OMN-001":
-                  entry["results_sha256"] = calc_sha256
-                  
-          with open("notes_registry.json", "w") as f:
-              json.dump(registry, f, indent=2)
-              
-          # Step 4: Append history log entry
-          os.makedirs("notes/001-nem-duration-baseline/history", exist_ok=True)
-          history_file = "notes/001-nem-duration-baseline/history/measurement_log.json"
-          history = []
-          if os.path.exists(history_file):
-              with open(history_file) as f:
-                  history = json.load(f)
-                  
-          with open(manifest_file, "rb") as f:
-              manifest_sha256 = hashlib.sha256(f.read()).hexdigest()
-              
-          now_utc = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-          new_entry = {
-              "version": "v1.1.0",
-              "measurement_window": "2025-07-01 to 2026-07-31",
-              "results_sha256": calc_sha256,
-              "input_manifest_sha256": manifest_sha256,
-              "executed_at": now_utc
-          }
-          history.append(new_entry)
-          
-          with open(history_file, "w") as f:
-              json.dump(history, f, indent=2)
-              
-          print("Recurrent pipeline execution successful!")
-          '
+          python scripts/recurrence_run.py --note-id 001
 
       - name: Create Pull Request (Human-in-the-Loop Ratification)
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "recurrent-measurement(OMN-001): 13-month rolling baseline refresh (v1.1.0)"
+          commit-message: "recurrent-measurement(OMN-001): 13-month rolling baseline refresh"
           branch: "recurrent-measurement/omn-001-${{ github.run_id }}"
-          title: "recurrent-measurement(OMN-001): 13-month rolling baseline refresh (v1.1.0)"
-          body: |
-            ## VolMax Recurrent Measurement PR — OMN-001 (NEM Duration Baseline)
-
-            This automated Pull Request presents a recurrent measurement calculation per **Recurrence Specification v1.0.2**.
-
-            ### Verification Summary:
-            - **Target Note:** Open Market Note #001 — NEM Duration Baseline (`OMN-001`)
-            - **Execution Mode:** `Automated Recurrence`
-            - **Mandate 8 Check:** Telemetry completeness verified (no partial windows).
-            - **Mandate 3 Check:** `PARAMS.md` and calculation logic unmodified.
-
-            ### File Changes Included:
-            - `notes_registry.json`: Updated `results_sha256` hash.
-            - `notes/001-nem-duration-baseline/results.json`: Recalculated baseline metrics.
-            - `notes/001-nem-duration-baseline/data_manifest.json`: Updated input data hashes.
-            - `notes/001-nem-duration-baseline/history/measurement_log.json`: Appended execution entry.
-
-            ---
-            *Review the diff carefully. Click **Merge pull request** to ratify this measurement into main.*
+          title: "recurrent-measurement(OMN-001): 13-month rolling baseline refresh"
+          body-path: pr_body.md

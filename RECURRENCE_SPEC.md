@@ -1,7 +1,7 @@
 # VolMax Open Market Notes — Recurrence Specification v1.0.2
 
 > **Class of Work:** VolMax Governance Specification & Automation Standard  
-> **Status:** Ratified (2026-07-30)  
+> **Status:** Draft for Ratification (v1.0.2 Gate Remediation)  
 > **Version:** 1.0.2  
 > **Target Scope:** All VolMax Open Market Notes (#001–#010+)  
 > **Enforcement Level:** Mandatory for all automated `workflow_dispatch` and scheduled `cron` executions  
