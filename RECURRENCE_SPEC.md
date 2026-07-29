@@ -1,5 +1,5 @@
 # VolMax Open Market Notes — Recurrence Specification
-**Version:** v1.0.5  
+**Version:** v1.0.6  
 **Status:** Draft for Ratification  
 **Date:** 2026-07-30  
 **Repository:** `VolMax-Studio/Open-Market-Notes`  
@@ -11,7 +11,7 @@
 This document defines the formal operational, procedural, and cryptographic governance protocol for executing **recurrent baseline refreshes** across the VolMax Open Market Notes repository (#001–#005+).
 
 The recurrence pipeline ensures that market observation baselines remain dynamically updated over a rolling 13-month calendar window while strictly maintaining:
-1. **Audit Immutability:** Core analytical logic (`reproduce.py`), parameter definitions (`PARAMS.md`), and historical baseline registries (`notes_registry.json`) are immutable. Both `PARAMS.md` and `reproduce.py` immutability are cryptographically enforced via SHA-256 verification (`params_sha256` and `reproduce_sha256`) against the frozen registry reference.
+1. **Audit Immutability:** Core analytical logic (`reproduce.py`), parameter definitions (`PARAMS.md`), and historical baseline registries (`notes_registry.json`) are immutable. Both `PARAMS.md` and `reproduce.py` immutability are cryptographically enforced via non-bypassable SHA-256 verification (`params_sha256` and `reproduce_sha256`) against the frozen registry reference.
 2. **Provenance Traceability:** Every recurrent execution appends a 4-layer Quad-Hash provenance record to `history/measurement_log.json`.
 3. **Human-in-the-Loop Ratification:** Automated executions submit Pull Requests; machine code **NEVER** writes directly to `main`.
 
@@ -19,6 +19,7 @@ The recurrence pipeline ensures that market observation baselines remain dynamic
 
 ## 2. Revision History & Governance Changelog
 
+- **v1.0.6 (2026-07-30):** Empirically verified baseline output hash reproduction (`0ddbc333...`) over real telemetry; enforced non-bypassable `reproduce_sha256` check across all notes; established Registry Code Hash Revision Policy for minor maintenance patches ($v1.x.0$); pin-locked dependency versions in `requirements.txt`; enriched synthetic CI fixture with scarcity price spikes; dynamic spec version resolution.
 - **v1.0.5 (2026-07-30):** Enforced Mandate 3 dual cryptographic check (`params_sha256` + `reproduce_sha256`); mandated isolated output directory (`--out-dir`) for synthetic CI guard; enforced upper and lower boundary date filtering; unified input path anchoring via `requirements.txt` and `--data-dir`; expanded Mandate 7 manual recurrence taxonomy.
 - **v1.0.4 (2026-07-30):** Restored Mandate 7 (Execution Modes: Automated vs Manual) and Mandate 9 (Zero Secret Leakage Control); corrected Mandate 1 calendar window phrasing; added synthetic CI guard architecture specification; enforced strict git commit SHA resolution.
 - **v1.0.3 (2026-07-30):** Aligned specification with frozen registry baseline ($v1.0.0$); updated history log schema to 4-layer Quad-Hash stack (`results_sha256`, `input_manifest_sha256`, `params_sha256`, `pipeline_commit_sha`).
@@ -32,16 +33,17 @@ The recurrence pipeline ensures that market observation baselines remain dynamic
 
 ### Mandate 1 — 13-Month Rolling Calendar Window Alignment
 - Every recurrent measurement MUST evaluate exactly 13 full calendar months ending on the last day of the last fully completed calendar month prior to execution.
-- Telemetry data MUST be filtered with strict lower AND upper boundary timestamps (e.g. `SETTLEMENTDATE >= start_date 04:05:00` AND `SETTLEMENTDATE <= end_date+1d 04:00:00`). Partial calendar months are strictly prohibited.
+- Telemetry data MUST be filtered with strict lower AND upper boundary timestamps (`SETTLEMENTDATE >= start_date 04:05:00` AND `SETTLEMENTDATE <= end_date+1d 04:00:00`). Partial calendar months are strictly prohibited.
 
 ### Mandate 2 — PR-Only Branch & Commit Isolation
 - Recurrent automation workflows MUST execute on isolated branches named `recurrent-measurement/omn-00X-${{ github.run_id }}`.
 - Machine workflows are strictly forbidden from committing directly to `main`.
 - Automated PRs MUST target `main` and require explicit human review and merge ratification.
 
-### Mandate 3 — PARAMS & Code Immutability Verification
-- Before running analytical calculations, the runner MUST verify BOTH `PARAMS.md` and the analytical script (`reproduce.py`) against the authoritative `params_sha256` and `reproduce_sha256` stored in `notes_registry.json`.
-- If either file has been modified or its hash differs, execution MUST terminate immediately (`sys.exit(1)`).
+### Mandate 3 — PARAMS & Code Immutability Verification & Registry Revision Policy
+- Before running analytical calculations, the runner MUST verify BOTH `PARAMS.md` (`params_sha256`) and the analytical script (`reproduce_sha256`) against the authoritative reference in `notes_registry.json`.
+- If either hash is missing or differs from the registry reference, execution MUST terminate immediately (`sys.exit(1)`).
+- **Registry Code Hash Revision Policy:** `results_sha256`, `params_sha256`, and DOI metadata are frozen for published $v1.0.0$ baselines. If a non-breaking maintenance patch ($v1.x.0$) is applied to `reproduce.py` (e.g. CLI path anchoring), `reproduce_sha256` in `notes_registry.json` is updated via a governance amendment PR accompanied by empirical verification that the published baseline output hash (`results_sha256`) reproduces byte-identically.
 
 ### Mandate 4 — Quad-Hash Provenance Stack
 Every recurrent measurement execution MUST record a 4-layer cryptographic provenance stack:
@@ -49,6 +51,7 @@ Every recurrent measurement execution MUST record a 4-layer cryptographic proven
 2. **`input_manifest_sha256`**: SHA-256 hash of `data_manifest.json`.
 3. **`params_sha256`**: SHA-256 hash of `PARAMS.md`.
 4. **`pipeline_commit_sha`**: Full 40-character Git commit SHA of the execution pipeline HEAD.
+*(Note: `reproduce_sha256` is verified in Mandate 3 and recorded in history logs for complete code lineage).*
 
 ### Mandate 5 — Versioning & DOI Semantics
 - **`v1.0.0`**: Initial published baseline (linked to original Zenodo DOI).
@@ -65,6 +68,7 @@ All recurrent measurement refreshes write to `history/measurement_log.json`:
     "results_sha256": "...",
     "input_manifest_sha256": "...",
     "params_sha256": "...",
+    "reproduce_sha256": "...",
     "pipeline_commit_sha": "...",
     "executed_at": "2026-08-01T04:00:00Z"
   }

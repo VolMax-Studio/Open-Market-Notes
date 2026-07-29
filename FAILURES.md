@@ -37,7 +37,7 @@ This document records procedural failures, governance violations, and anti-patte
 ### Failure Entry #004 — CI Guard Telemetry Dependency & Execution Order Flaw
 - **Date:** 2026-07-30  
 - **Target Files:** `.github/workflows/recurrence-omn-001.yml`, `tests/test_determinism.py`  
-- **Violation:** CI determinism guard relied on multi-gigabyte historical market telemetry files (`data/processed/*.feather`) gitignored from checkout, and was placed after `recurrence_run.py` instead of before it on clean checkout.  
+- **Violation:** CI determinism guard relied on ~41 MB of historical market telemetry files (`data/processed/*.feather`) gitignored from checkout, and was placed after `recurrence_run.py` instead of before it on clean checkout.  
 - **Root Cause:** Environment assumption anti-pattern. Local test pass assumed presence of gitignored telemetry on GitHub Actions runner.  
 - **Remediation:** Implemented `TestSyntheticCIDeterminismFixture` in `tests/test_determinism.py` generating a lightweight synthetic fixture dataset in a temporary directory for clean checkout CI execution.  
 - **Status:** Logged — Remediation Pending Gate Ratification.
@@ -70,4 +70,34 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** `TestSyntheticCIDeterminismFixture` executed `reproduce.py` with synthetic inputs without specifying an isolated `--out-dir`, overwriting the baseline `results.json` and plots in `notes/001-nem-duration-baseline/` with synthetic test outputs.  
 - **Root Cause:** Test side-effect anti-pattern. Test suite modified committed working tree artifacts during execution.  
 - **Remediation:** Added `--out-dir` parameter to `reproduce.py`. Updated `TestSyntheticCIDeterminismFixture` to pass an isolated temporary directory (`temp_out_dir`), guaranteeing zero modification of repository artifacts. Restored committed baseline `results.json` (`0ddbc333...`) via `git checkout`.  
+- **Status:** Logged — Remediation Pending Gate Ratification.
+
+---
+
+### Failure Entry #008 — Truthy-Guard Bypass on New Verification Checks (Recurring Class)
+- **Date:** 2026-07-30  
+- **Target File:** `scripts/recurrence_run.py`  
+- **Violation:** Mandate 3 `reproduce_sha256` check used `if expected_reproduce_sha256:` (truthy guard), silently skipping verification when the field was absent from the registry, while the next line printed `Mandate 3 Check PASSED` unconditionally. Third occurrence of same anti-pattern class (prior: Mandate 8 telemetry guard, Mandate 3 params guard).  
+- **Root Cause:** Truthy-guard bypass anti-pattern. New verification checks introduced with optional/falsy conditions that print PASSED regardless of execution path.  
+- **Remediation:** Changed to `if expected_reproduce_sha256 is None: sys.exit(1)`, enforcing non-bypassable check. Populated `reproduce_sha256` for all 5 notes in `notes_registry.json`. Classified as recurring failure class for future awareness.  
+- **Status:** Logged — Remediation Pending Gate Ratification.
+
+---
+
+### Failure Entry #009 — Incorrect `pipeline_commit_sha` in Seed Provenance Record
+- **Date:** 2026-07-30  
+- **Target File:** `notes/001-nem-duration-baseline/history/measurement_log.json`  
+- **Violation:** Seed v1.0.0 entry recorded `pipeline_commit_sha: ea275890` (DOI attachment commit from 2026-07-29), not `6df5bccd7f56` (the actual baseline commit from 2026-07-18 that produced `results.json`). The script at `ea275890` hashes to `fada4ca6…`, not `7accfd96…`, proving the seed cited the wrong commit.  
+- **Root Cause:** Entry #006 class (timestamp/provenance fabrication). Commit SHA was retroactively assigned without verification against `reproduce.py` hash lineage.  
+- **Remediation:** Corrected to `6df5bccd7f56528d27ffa50f794a31e29e1bbec0`. Verified: `git show 6df5bcc:reproduce.py | sha256sum` = `7accfd96…` (matches seed `reproduce_sha256`).  
+- **Status:** Logged — Remediation Pending Gate Ratification.
+
+---
+
+### Failure Entry #010 — Unverified `reproduce_sha256` Pins for Notes #002–#005
+- **Date:** 2026-07-30  
+- **Target File:** `notes_registry.json`  
+- **Violation:** `reproduce_sha256` was populated for all five notes in a single commit, but empirical baseline reproduction was performed only for Note #001. Four pins asserted "authoritative frozen baseline" status for scripts never independently verified to reproduce their respective `results_sha256`.  
+- **Root Cause:** Mandate 3 revision policy specifies that `reproduce_sha256` changes require empirical reproduction verification. Four of five pins violated this requirement at introduction.  
+- **Remediation:** Removed `reproduce_sha256` from Notes #002–#005 in `notes_registry.json`. Pins will be added individually upon successful reproduction of each note's baseline.  
 - **Status:** Logged — Remediation Pending Gate Ratification.

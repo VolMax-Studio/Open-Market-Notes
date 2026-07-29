@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 VolMax Open Market Notes — Automated Recurrence Script
-Governed by Recurrence Specification v1.0.4
+Governed by Recurrence Specification
 
 This script executes the rolling 13-month recurrent measurement pipeline,
 verifies telemetry completeness and PARAMS/pipeline immutability, appends to the
@@ -18,6 +18,7 @@ import subprocess
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REGISTRY_PATH = os.path.join(BASE_DIR, "notes_registry.json")
+SPEC_PATH = os.path.join(BASE_DIR, "RECURRENCE_SPEC.md")
 
 NOTE_PIPELINE_MAP = {
     "001": {
@@ -58,6 +59,14 @@ def compute_sha256(filepath):
         while chunk := f.read(65536):
             h.update(chunk)
     return h.hexdigest()
+
+def get_spec_version():
+    if os.path.exists(SPEC_PATH):
+        with open(SPEC_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("**Version:**"):
+                    return line.split("**Version:**")[1].strip()
+    return "v1.0.6"
 
 def get_git_commit_sha():
     if "GITHUB_SHA" in os.environ and os.environ["GITHUB_SHA"].strip():
@@ -114,6 +123,8 @@ def main():
     parser.add_argument("--end-date", default=None, help="Override end date (YYYY-MM-DD)")
     args = parser.parse_args()
 
+    spec_ver = get_spec_version()
+
     note_num = args.note_id.zfill(3)
     if note_num not in NOTE_PIPELINE_MAP:
         print(f"FATAL ERROR: Note #{note_num} not recognized in NOTE_PIPELINE_MAP!")
@@ -136,6 +147,7 @@ def main():
     note_dir = os.path.join(BASE_DIR, config["folder"])
     folder_name = os.path.basename(note_dir)
     print(f"=== RECURRENT MEASUREMENT RUNNER — NOTE #{note_num} ({folder_name}) ===")
+    print(f"Governed by Recurrence Specification {spec_ver}")
     
     # 2. Mandate 3: PARAMS.md & Pipeline Script Immutability Verification against Frozen Registry Reference
     params_file = os.path.join(note_dir, "PARAMS.md")
@@ -158,16 +170,19 @@ def main():
 
     reproduce_script = os.path.join(note_dir, config["analysis_script"])
     expected_reproduce_sha256 = registry_entry.get("reproduce_sha256")
-    if expected_reproduce_sha256:
-        actual_reproduce_sha256 = compute_sha256(reproduce_script)
-        if actual_reproduce_sha256 != expected_reproduce_sha256:
-            print(f"FATAL ERROR (Mandate 3 Abort): Analytical script ({config['analysis_script']}) hash mismatch!")
-            print(f"  Expected (Frozen Baseline): {expected_reproduce_sha256}")
-            print(f"  Actual:                    {actual_reproduce_sha256}")
-            print("ABORTING WORKFLOW — PIPELINE SCRIPT WAS MODIFIED. NO PULL REQUEST WILL BE OPENED.")
-            sys.exit(1)
+    if expected_reproduce_sha256 is None:
+        print(f"FATAL ERROR (Mandate 3 Abort): Frozen registry missing reproduce_sha256 for Note #{note_num}!")
+        sys.exit(1)
+
+    actual_reproduce_sha256 = compute_sha256(reproduce_script)
+    if actual_reproduce_sha256 != expected_reproduce_sha256:
+        print(f"FATAL ERROR (Mandate 3 Abort): Analytical script ({config['analysis_script']}) hash mismatch!")
+        print(f"  Expected (Frozen Baseline): {expected_reproduce_sha256}")
+        print(f"  Actual:                    {actual_reproduce_sha256}")
+        print("ABORTING WORKFLOW — PIPELINE SCRIPT WAS MODIFIED. NO PULL REQUEST WILL BE OPENED.")
+        sys.exit(1)
             
-    print(f"Mandate 3 Check PASSED: PARAMS.md ({actual_params_sha256[:12]}...) and pipeline script immutability verified.")
+    print(f"Mandate 3 Check PASSED: PARAMS.md ({actual_params_sha256[:12]}...) and pipeline script ({actual_reproduce_sha256[:12]}...) immutability verified.")
 
     # 3. Determine target rolling window dynamically if not provided
     if args.start_date and args.end_date:
@@ -191,7 +206,10 @@ def main():
             print("Telemetry download completed successfully.")
             
     # 5. Mandate 8: Telemetry Completeness & Boundary Verification (STRICT NO-BYPASS)
-    proc_dir = os.path.abspath(os.path.join(note_dir, "data", "processed"))
+    # Check root telemetry dir if present, else note-level dir
+    root_proc_dir = os.path.join(BASE_DIR, "data", "processed")
+    proc_dir = root_proc_dir if (os.path.exists(root_proc_dir) and len(os.listdir(root_proc_dir)) > 0) else os.path.abspath(os.path.join(note_dir, "data", "processed"))
+    
     expected_months = generate_expected_months(start_date, end_date)
     print(f"\n--- Mandate 8 Check: Verifying {len(expected_months)} Expected Monthly Telemetry Files in {proc_dir} ---")
     
@@ -236,6 +254,8 @@ def main():
     
     print(f"\nResults Output Hash (`results_sha256`): {calc_results_sha256}")
     print(f"Input Manifest Hash (`input_manifest_sha256`): {calc_manifest_sha256}")
+    print(f"PARAMS Parameters Hash (`params_sha256`): {actual_params_sha256}")
+    print(f"Script Pipeline Hash (`reproduce_sha256`): {actual_reproduce_sha256}")
     print(f"Pipeline Commit SHA (`pipeline_commit_sha`): {pipeline_commit_sha}")
 
     # 8. Mandate 4, 5 & 6: Appending to history/measurement_log.json
@@ -270,6 +290,7 @@ def main():
         "results_sha256": calc_results_sha256,
         "input_manifest_sha256": calc_manifest_sha256,
         "params_sha256": actual_params_sha256,
+        "reproduce_sha256": actual_reproduce_sha256,
         "pipeline_commit_sha": pipeline_commit_sha,
         "executed_at": now_utc
     }
@@ -285,20 +306,22 @@ def main():
     
     pr_body = f"""## VolMax Recurrent Measurement PR — OMN-{note_num} ({next_version})
 
-This automated Pull Request presents a recurrent measurement baseline refresh executed per **Recurrence Specification v1.0.4**.
+This automated Pull Request presents a recurrent measurement baseline refresh executed per **Recurrence Specification {spec_ver}**.
 
 ### Verification Summary:
 - **Target Note:** Open Market Note #{note_num} (`OMN-{note_num}`)
 - **Version:** `{next_version}`
 - **Calculated Rolling Window:** `{start_date} to {end_date}`
 - **Mandate 3 PARAMS Check:** PASSED (`{actual_params_sha256[:12]}...` verified against frozen registry reference).
+- **Mandate 3 Script Check:** PASSED (`{actual_reproduce_sha256[:12]}...` verified against frozen registry reference).
 - **Mandate 8 Abort Check:** PASSED ({len(expected_months)} expected monthly telemetry files verified).
 
 ### Quad-Hash Provenance Stack:
 1. **`results_sha256` (Analytical Output):** `{calc_results_sha256}`
 2. **`input_manifest_sha256` (Telemetry Input):** `{calc_manifest_sha256}`
 3. **`params_sha256` (PARAMS Parameters):** `{actual_params_sha256}`
-4. **`pipeline_commit_sha` (Pipeline Code):** `{pipeline_commit_sha}`
+4. **`reproduce_sha256` (Analytical Script):** `{actual_reproduce_sha256}`
+5. **`pipeline_commit_sha` (Pipeline Code):** `{pipeline_commit_sha}`
 - **`executed_at`:** `{now_utc}`
 
 ### Included Payload Files:
