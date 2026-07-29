@@ -1,6 +1,6 @@
 # Note #001: NEM Duration Baseline
-**Class of Work:** VolMax Descriptive Analytical Note (Evidence Class A)
-**Status:** Completed
+**Class of Work:** VolMax Descriptive Analytical Note (Evidence Class: Clean Baseline Measurement)
+**Status:** Published
 **Last Recalculated:** 2026-07-19T09:44:00+02:00
 
 ---
@@ -8,7 +8,8 @@
 ## 1. Provenance & Reproducibility
 To ensure absolute mathematical integrity and prevent hindsight bias, all parameters and rules for Note #001 were frozen and committed prior to execution.
 - **Frozen Parameters:** [`PARAMS.md`](./PARAMS.md)
-- **Frozen Commit:** `b350e9b` (AEMO Dispatch Audit Repository)
+- **Frozen Commit (Open-Market-Notes):** `6df5bcc` (Repository Freeze Commit)
+- **Origin Anchor Commit:** `b350e9b` (AEMO Dispatch Audit Repository)
 - **Primary Data Source:** AEMO 5-Minute Dispatch Price & SCADA Telemetry (1 June 2025 – 30 June 2026)
 - **Execution Script:** [`reproduce.py`](./reproduce.py)
 - **Verified Output File:** [`results.json`](./results.json)
