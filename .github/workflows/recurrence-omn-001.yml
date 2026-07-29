@@ -40,4 +40,10 @@ jobs:
           commit-message: "recurrent-measurement(OMN-001): 13-month rolling baseline refresh"
           branch: "recurrent-measurement/omn-001-${{ github.run_id }}"
           title: "recurrent-measurement(OMN-001): 13-month rolling baseline refresh"
-          body-path: pr_body.md
+          body-path: /tmp/pr_body.md
+          add-paths: |
+            notes_registry.json
+            notes/001-nem-duration-baseline/results.json
+            notes/001-nem-duration-baseline/data_manifest.json
+            notes/001-nem-duration-baseline/history/measurement_log.json
+            notes/001-nem-duration-baseline/figures/*

@@ -146,7 +146,7 @@ def main(start_date_str="2025-06-01", end_date_str="2026-06-30"):
     price_df['Trading_Date'] = (price_df['SETTLEMENTDATE'] - pd.Timedelta(minutes=245)).dt.date
     
     # Generate reference list of 395 days (1 Jun 2025 to 30 Jun 2026)
-    ref_dates = pd.date_range(start='2025-06-01', end='2026-06-30').date
+    ref_dates = pd.date_range(start=start_date_str, end=end_date_str).date
     total_days = len(ref_dates)
     print(f"  Analysis window contains {total_days} trading days.")
 
@@ -268,7 +268,7 @@ def main(start_date_str="2025-06-01", end_date_str="2026-06-30"):
     plt.bar(x - width/2, pcts_4h, width, label='4h BESS (>=4.7h/day)', color='#10b981')
     plt.bar(x + width/2, pcts_8h, width, label='8h BESS (>=9.4h/day)', color='#06b6d4')
     
-    plt.title("NEM Charging Window Availability by Region (1 Jun 2025 - 30 Jun 2026)", fontsize=13, fontweight='bold', pad=15)
+    plt.title(f"NEM Charging Window Availability by Region ({start_date_str} to {end_date_str})", fontsize=13, fontweight='bold', pad=15)
     plt.xlabel("NEM Region")
     plt.ylabel("% of Days Meeting Cumulative Charging Window")
     plt.xticks(x, regions)
