@@ -8,7 +8,7 @@
     "measurement_period": "2025-06-01 to 2026-06-30",
     "params_commit_hash": "6df5bcc",
     "code_url": "https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/001-nem-duration-baseline",
-    "results_sha256": "c192e7ee97ac413a07db6a1357f0dbcf49c1164cdbe0a5a4c0f5e9b113b614ed",
+    "results_sha256": "0ddbc333b298b298868966cfb1b49cb09867b7af179e4b9dc809cc65ed512260",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
     "doi": "https://doi.org/10.5281/zenodo.21693239"

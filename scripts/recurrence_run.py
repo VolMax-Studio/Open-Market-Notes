@@ -21,11 +21,36 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REGISTRY_PATH = os.path.join(BASE_DIR, "notes_registry.json")
 
 NOTE_PIPELINE_MAP = {
-    "001": ("notes/001-nem-duration-baseline", "download_aemo_data.py", "reproduce.py"),
-    "002": ("notes/002-ercot-duration-baseline", None, "run_analysis.py"),
-    "003": ("notes/003-entsoe-imbalance-baseline", None, "run_imbalance_analysis.py"),
-    "004": ("notes/004-gb-duration-baseline", None, "run_analysis.py"),
-    "005": ("notes/005-entsoe-crossborder-flows", None, "run_flow_analysis.py")
+    "001": {
+        "folder": "notes/001-nem-duration-baseline",
+        "download_script": "download_aemo_data.py",
+        "analysis_script": "reproduce.py",
+        "parameterized": True
+    },
+    "002": {
+        "folder": "notes/002-ercot-duration-baseline",
+        "download_script": "download_ercot_data.py",
+        "analysis_script": "reproduce.py",
+        "parameterized": False
+    },
+    "003": {
+        "folder": "notes/003-entsoe-imbalance-baseline",
+        "download_script": "download_entsoe_data.py",
+        "analysis_script": "run_imbalance_analysis.py",
+        "parameterized": False
+    },
+    "004": {
+        "folder": "notes/004-gb-duration-baseline",
+        "download_script": "download_elexon_data.py",
+        "analysis_script": "run_analysis.py",
+        "parameterized": False
+    },
+    "005": {
+        "folder": "notes/005-entsoe-crossborder-flows",
+        "download_script": "download_all_corridors.py",
+        "analysis_script": "run_pipeline.py",
+        "parameterized": False
+    }
 }
 
 def compute_sha256(filepath):
@@ -82,8 +107,13 @@ def main():
         print(f"FATAL ERROR: Note #{note_num} not recognized in NOTE_PIPELINE_MAP!")
         sys.exit(1)
         
-    rel_note_dir, download_script_name, reproduce_script_name = NOTE_PIPELINE_MAP[note_num]
-    note_dir = os.path.join(BASE_DIR, rel_note_dir)
+    config = NOTE_PIPELINE_MAP[note_num]
+    if not config["parameterized"]:
+        print(f"FATAL ERROR: Note #{note_num} pipeline is not yet date-parameterized!")
+        print("Parametric changelog and date parameterization PR required before recurrent execution.")
+        sys.exit(1)
+
+    note_dir = os.path.join(BASE_DIR, config["folder"])
     folder_name = os.path.basename(note_dir)
     print(f"=== RECURRENT MEASUREMENT RUNNER — NOTE #{note_num} ({folder_name}) ===")
     
@@ -96,42 +126,46 @@ def main():
     print(f"Calculated 13-Month Rolling Window: {start_date} to {end_date}")
     
     # 2. Step 3: Execute Telemetry Download if download script exists
+    download_script_name = config["download_script"]
     if download_script_name:
         download_script = os.path.join(note_dir, download_script_name)
         if os.path.exists(download_script):
             print("\n--- Executing Telemetry Download ---")
             cmd = [sys.executable, download_script, "--start-date", start_date, "--end-date", end_date]
-            res = subprocess.run(cmd, capture_output=True, text=True)
+            res = subprocess.run(cmd, cwd=note_dir, capture_output=True, text=True)
             if res.returncode != 0:
                 print(f"FATAL ERROR (Download Failed):\n{res.stderr[:500]}")
                 sys.exit(1)
             print("Telemetry download completed successfully.")
             
-    # 3. Mandate 8: Telemetry Completeness & Boundary Verification
+    # 3. Mandate 8: Telemetry Completeness & Boundary Verification (STRICT NO-BYPASS)
     proc_dir = os.path.join(note_dir, "data", "processed")
     expected_months = generate_expected_months(start_date, end_date)
     print(f"\n--- Mandate 8 Check: Verifying {len(expected_months)} Expected Monthly Telemetry Files ---")
     
-    if os.path.exists(proc_dir):
-        missing_months = []
-        for ym in expected_months:
-            file_pattern = os.path.join(proc_dir, f"price_{ym}.feather")
-            if not os.path.exists(file_pattern):
-                missing_months.append(ym)
-                
-        if missing_months:
-            print(f"FATAL ERROR (Mandate 8 Abort): Missing monthly telemetry files for: {missing_months}")
-            print("ABORTING WORKFLOW — NO PULL REQUEST WILL BE OPENED.")
-            sys.exit(1)
-        print(f"Mandate 8 Check PASSED: All {len(expected_months)} monthly telemetry files verified.")
-    else:
-        print("Mandate 8 Note: Processed directory missing, proceeding to pipeline verification.")
+    if not os.path.exists(proc_dir):
+        print(f"FATAL ERROR (Mandate 8 Abort): Processed telemetry directory missing: {proc_dir}")
+        print("ABORTING WORKFLOW — NO PULL REQUEST WILL BE OPENED.")
+        sys.exit(1)
+        
+    missing_months = []
+    for ym in expected_months:
+        file_pattern = os.path.join(proc_dir, f"price_{ym}.feather")
+        if not os.path.exists(file_pattern) or os.path.getsize(file_pattern) == 0:
+            missing_months.append(ym)
+            
+    if missing_months:
+        print(f"FATAL ERROR (Mandate 8 Abort): Missing or empty monthly telemetry files for: {missing_months}")
+        print("ABORTING WORKFLOW — NO PULL REQUEST WILL BE OPENED.")
+        sys.exit(1)
+        
+    print(f"Mandate 8 Check PASSED: All {len(expected_months)} monthly telemetry files verified.")
 
-    # 4. Execute Analytical Pipeline
-    reproduce_script = os.path.join(note_dir, reproduce_script_name)
+    # 4. Execute Analytical Pipeline with cwd=note_dir
+    reproduce_script = os.path.join(note_dir, config["analysis_script"])
     print(f"\n--- Executing Analytical Pipeline ({os.path.basename(reproduce_script)}) ---")
     cmd = [sys.executable, reproduce_script, "--start-date", start_date, "--end-date", end_date]
-    res = subprocess.run(cmd, capture_output=True, text=True)
+    res = subprocess.run(cmd, cwd=note_dir, capture_output=True, text=True)
     if res.returncode != 0:
         print(f"FATAL ERROR (Pipeline Failed):\n{res.stderr[:500]}")
         sys.exit(1)
@@ -207,7 +241,7 @@ def main():
     print(f"Appended entry ({next_version}) to history/measurement_log.json.")
 
     # 8. Generate Dynamic PR Body outside git repository tree
-    runner_temp = os.environ.get("RUNNER_TEMP", "/tmp")
+    runner_temp = os.environ.get("RUNNER_TEMP", os.environ.get("TMPDIR", "/tmp"))
     pr_body_path = os.path.join(runner_temp, "pr_body.md")
     
     pr_body = f"""## VolMax Recurrent Measurement PR — OMN-{note_num} ({next_version})
@@ -231,6 +265,7 @@ This automated Pull Request presents a recurrent measurement baseline refresh ex
 - `notes/{folder_name}/results.json`
 - `notes/{folder_name}/data_manifest.json`
 - `notes/{folder_name}/history/measurement_log.json`
+- `notes/{folder_name}/results/*.png`
 
 ---
 *Review the diff carefully. Click **Merge pull request** to ratify this measurement into main.*
