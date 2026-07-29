@@ -9,11 +9,10 @@
     "params_commit_hash": "6df5bcc",
     "code_url": "https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/001-nem-duration-baseline",
     "data_sha256": "c192e7ee97ac413a07db6a1357f0dbcf49c1164cdbe0a5a4c0f5e9b113b614ed",
-    "publication_link": "https://www.linkedin.com/in/ivan-nestorov-274157371",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
     "doi": null,
-    "live_verified_at": "2026-07-29T23:08:00+02:00"
+    "live_verified_at": "2026-07-29T23:20:00+02:00"
   },
   {
     "id": "OMN-002",
@@ -25,11 +24,10 @@
     "params_commit_hash": "a55af42",
     "code_url": "https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/002-ercot-duration-baseline",
     "data_sha256": "90e3543b555087a0ba9404812eb142509a1faaacadf392bea5694b9389033f9c",
-    "publication_link": "https://www.linkedin.com/in/ivan-nestorov-274157371",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
     "doi": null,
-    "live_verified_at": "2026-07-29T23:08:00+02:00"
+    "live_verified_at": "2026-07-29T23:20:00+02:00"
   },
   {
     "id": "OMN-003",
@@ -41,11 +39,10 @@
     "params_commit_hash": "a2c0b3a",
     "code_url": "https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/003-entsoe-imbalance-baseline",
     "data_sha256": "b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9",
-    "publication_link": "https://www.linkedin.com/in/ivan-nestorov-274157371",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
     "doi": null,
-    "live_verified_at": "2026-07-29T23:08:00+02:00"
+    "live_verified_at": "2026-07-29T23:20:00+02:00"
   },
   {
     "id": "OMN-004",
@@ -57,11 +54,10 @@
     "params_commit_hash": "792b4d9",
     "code_url": "https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/004-gb-duration-baseline",
     "data_sha256": "385ddfd9ed88357d6edf1dc39161468dbaa94115339671d4a39cec90446f873e",
-    "publication_link": "https://www.linkedin.com/in/ivan-nestorov-274157371",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
     "doi": null,
-    "live_verified_at": "2026-07-29T23:08:00+02:00"
+    "live_verified_at": "2026-07-29T23:20:00+02:00"
   },
   {
     "id": "OMN-005",
@@ -73,10 +69,9 @@
     "params_commit_hash": "afddbe9",
     "code_url": "https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/005-entsoe-crossborder-flows",
     "data_sha256": "d996f62a0fcf4a2ab0713519d81d01abae25251d3665e94e828dad23c27ae301",
-    "publication_link": "https://www.linkedin.com/in/ivan-nestorov-274157371",
     "status": "Published",
     "evidence_class": "Data Boundary Finding",
     "doi": null,
-    "live_verified_at": "2026-07-29T23:08:00+02:00"
+    "live_verified_at": "2026-07-29T23:20:00+02:00"
   }
 ]
