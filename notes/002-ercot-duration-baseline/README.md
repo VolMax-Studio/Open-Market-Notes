@@ -10,6 +10,7 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 - **Frozen Parameters:** [`PARAMS.md`](./PARAMS.md)
 - **Primary Data Source:** ERCOT 15-Minute Real-Time Settlement Point Prices (1 June 2025 – 30 June 2026)
 - **Execution Script:** [`reproduce.py`](./reproduce.py)
+- **Immutable Zenodo DOI:** [https://doi.org/10.5281/zenodo.21693245](https://doi.org/10.5281/zenodo.21693245)
 - **Verified Output File:** [`results.json`](./results.json)
 - **Data Ingestion Script:** [`download_ercot_data.py`](./download_ercot_data.py)
 - **Independent Execution:** [Independently re-executed on GitHub Actions: identical results (run #29687353696)](https://github.com/VolMax-Studio/Open-Market-Notes/actions/runs/29687353696)

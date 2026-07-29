@@ -3,6 +3,7 @@
 > [!IMPORTANT]
 > **Class of Work:** VolMax Descriptive Analytical Note (Market Telemetry Baseline)  
 > **Status:** Published  
+**DOI:** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693254.svg)](https://doi.org/10.5281/zenodo.21693254)  
 > **Analysis Period:** 1 June 2025 00:00:00 CEST – 30 June 2026 23:59:59 CEST (13 Months / 395 Days)  
 > **Specification Standard:** [PARAMS.md v3.1.0 (Parametric Changelog Enforced)](./PARAMS.md)  
 > **Data Provenance & License:** Primary ENTSO-E Transparency Platform (Imbalance Prices [17.1.g / 17.2.f]). Formally listed under CC BY 4.0 free re-use (Item #27). All raw files anchored with SHA-256 hashes in [`data_manifest.json`](./data/data_manifest.json).
