@@ -60,10 +60,9 @@ class TestReinforcedDeterminism(unittest.TestCase):
             print(f"\n[REINFORCED DETERMINISM TEST PASSED] Recreated results_sha256: {recreated_sha256}")
             
         finally:
-            # Always restore backup if recreated file missing or failed
-            if not os.path.exists(RESULTS_JSON) and os.path.exists(BACKUP_JSON):
-                shutil.copy2(BACKUP_JSON, RESULTS_JSON)
+            # Unconditional restore in finally block to ensure working tree is NEVER left corrupt
             if os.path.exists(BACKUP_JSON):
+                shutil.copy2(BACKUP_JSON, RESULTS_JSON)
                 os.remove(BACKUP_JSON)
 
 if __name__ == '__main__':
