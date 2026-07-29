@@ -3,7 +3,7 @@ name: Recurrent Measurement — OMN-001 (NEM Duration Baseline)
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 4 1 * *' # At 04:00 on day-of-month 1
+    - cron: '0 4 5 * *' # At 04:00 UTC on day-of-month 5 (allowing AEMO monthly archives to populate)
 
 permissions:
   contents: write
@@ -33,6 +33,10 @@ jobs:
         run: |
           python scripts/recurrence_run.py --note-id 001
 
+      - name: Execute In-Job CI Determinism Guard
+        run: |
+          python -m unittest discover tests
+
       - name: Create Pull Request (Human-in-the-Loop Ratification)
         uses: peter-evans/create-pull-request@v6
         with:
@@ -42,7 +46,6 @@ jobs:
           title: "recurrent-measurement(OMN-001): 13-month rolling baseline refresh"
           body-path: ${{ runner.temp }}/pr_body.md
           add-paths: |
-            notes_registry.json
             notes/001-nem-duration-baseline/results.json
             notes/001-nem-duration-baseline/data_manifest.json
             notes/001-nem-duration-baseline/history/measurement_log.json

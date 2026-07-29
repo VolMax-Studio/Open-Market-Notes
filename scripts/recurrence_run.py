@@ -4,8 +4,8 @@ VolMax Open Market Notes — Automated Recurrence Script
 Governed by Recurrence Specification v1.0.2
 
 This script executes the rolling 13-month recurrent measurement pipeline,
-verifies telemetry completeness, updates provenance ledgers, and generates
-a dynamic PR summary.
+verifies telemetry completeness and PARAMS immutability, appends to the
+versioned measurement log, and generates a dynamic PR summary.
 """
 
 import os
@@ -25,31 +25,36 @@ NOTE_PIPELINE_MAP = {
         "folder": "notes/001-nem-duration-baseline",
         "download_script": "download_aemo_data.py",
         "analysis_script": "reproduce.py",
-        "parameterized": True
+        "parameterized": True,
+        "params_sha256": "9efbc2ec7d69c76d4a70070bb3c0b00b7528d56c90b314f4f8444ef581a0ed09"
     },
     "002": {
         "folder": "notes/002-ercot-duration-baseline",
         "download_script": "download_ercot_data.py",
         "analysis_script": "reproduce.py",
-        "parameterized": False
+        "parameterized": False,
+        "params_sha256": None
     },
     "003": {
         "folder": "notes/003-entsoe-imbalance-baseline",
         "download_script": "download_entsoe_data.py",
         "analysis_script": "run_imbalance_analysis.py",
-        "parameterized": False
+        "parameterized": False,
+        "params_sha256": None
     },
     "004": {
         "folder": "notes/004-gb-duration-baseline",
         "download_script": "download_elexon_data.py",
         "analysis_script": "run_analysis.py",
-        "parameterized": False
+        "parameterized": False,
+        "params_sha256": None
     },
     "005": {
         "folder": "notes/005-entsoe-crossborder-flows",
         "download_script": "download_all_corridors.py",
         "analysis_script": "run_pipeline.py",
-        "parameterized": False
+        "parameterized": False,
+        "params_sha256": None
     }
 }
 
@@ -113,11 +118,35 @@ def main():
         print("Parametric changelog and date parameterization PR required before recurrent execution.")
         sys.exit(1)
 
+    # V4 Check: Verify registry entry exists (Read-Only)
+    with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
+        registry = json.load(f)
+    registry_entry = next((e for e in registry if e["note_number"] == note_num), None)
+    if not registry_entry:
+        print(f"FATAL ERROR (Registry Missing): Note #{note_num} not found in notes_registry.json!")
+        sys.exit(1)
+
     note_dir = os.path.join(BASE_DIR, config["folder"])
     folder_name = os.path.basename(note_dir)
     print(f"=== RECURRENT MEASUREMENT RUNNER — NOTE #{note_num} ({folder_name}) ===")
     
-    # 1. Determine target rolling window dynamically if not provided
+    # 1. Mandate 3: PARAMS.md Immutability Verification
+    params_file = os.path.join(note_dir, "PARAMS.md")
+    if not os.path.exists(params_file):
+        print(f"FATAL ERROR (Mandate 3 Abort): PARAMS.md missing at {params_file}")
+        sys.exit(1)
+        
+    actual_params_sha256 = compute_sha256(params_file)
+    expected_params_sha256 = config["params_sha256"]
+    if expected_params_sha256 and actual_params_sha256 != expected_params_sha256:
+        print(f"FATAL ERROR (Mandate 3 Abort): PARAMS.md hash mismatch!")
+        print(f"  Expected: {expected_params_sha256}")
+        print(f"  Actual:   {actual_params_sha256}")
+        print("ABORTING WORKFLOW — PARAMS.MD WAS MODIFIED. NO PULL REQUEST WILL BE OPENED.")
+        sys.exit(1)
+    print(f"Mandate 3 Check PASSED: PARAMS.md immutability verified ({actual_params_sha256[:12]}...).")
+
+    # 2. Determine target rolling window dynamically if not provided
     if args.start_date and args.end_date:
         start_date, end_date = args.start_date, args.end_date
     else:
@@ -125,7 +154,7 @@ def main():
         
     print(f"Calculated 13-Month Rolling Window: {start_date} to {end_date}")
     
-    # 2. Step 3: Execute Telemetry Download if download script exists
+    # 3. Step 3: Execute Telemetry Download if download script exists
     download_script_name = config["download_script"]
     if download_script_name:
         download_script = os.path.join(note_dir, download_script_name)
@@ -138,7 +167,7 @@ def main():
                 sys.exit(1)
             print("Telemetry download completed successfully.")
             
-    # 3. Mandate 8: Telemetry Completeness & Boundary Verification (STRICT NO-BYPASS)
+    # 4. Mandate 8: Telemetry Completeness & Boundary Verification (STRICT NO-BYPASS)
     proc_dir = os.path.join(note_dir, "data", "processed")
     expected_months = generate_expected_months(start_date, end_date)
     print(f"\n--- Mandate 8 Check: Verifying {len(expected_months)} Expected Monthly Telemetry Files ---")
@@ -161,7 +190,7 @@ def main():
         
     print(f"Mandate 8 Check PASSED: All {len(expected_months)} monthly telemetry files verified.")
 
-    # 4. Execute Analytical Pipeline with cwd=note_dir
+    # 5. Execute Analytical Pipeline with cwd=note_dir
     reproduce_script = os.path.join(note_dir, config["analysis_script"])
     print(f"\n--- Executing Analytical Pipeline ({os.path.basename(reproduce_script)}) ---")
     cmd = [sys.executable, reproduce_script, "--start-date", start_date, "--end-date", end_date]
@@ -171,7 +200,7 @@ def main():
         sys.exit(1)
     print("Pipeline execution completed successfully.")
     
-    # 5. Compute SHA-256 Hashes
+    # 6. Compute SHA-256 Hashes
     results_json_path = os.path.join(note_dir, "results.json")
     manifest_json_path = os.path.join(note_dir, "data_manifest.json")
     
@@ -184,22 +213,6 @@ def main():
     
     print(f"\nResults Output Hash (`results_sha256`): {calc_results_sha256}")
     print(f"Input Manifest Hash (`input_manifest_sha256`): {calc_manifest_sha256}")
-    
-    # 6. Update notes_registry.json
-    with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
-        registry = json.load(f)
-        
-    updated = False
-    for entry in registry:
-        if entry["note_number"] == note_num:
-            entry["results_sha256"] = calc_results_sha256
-            updated = True
-            break
-            
-    if updated:
-        with open(REGISTRY_PATH, "w", encoding="utf-8") as f:
-            json.dump(registry, f, indent=2)
-        print("Updated notes_registry.json with new results_sha256.")
 
     # 7. Mandate 5 & 6: Appending to history/measurement_log.json
     history_dir = os.path.join(note_dir, "history")
@@ -232,6 +245,7 @@ def main():
         "measurement_window": f"{start_date} to {end_date}",
         "results_sha256": calc_results_sha256,
         "input_manifest_sha256": calc_manifest_sha256,
+        "params_sha256": actual_params_sha256,
         "executed_at": now_utc
     }
     history_log.append(new_entry)
@@ -252,16 +266,16 @@ This automated Pull Request presents a recurrent measurement baseline refresh ex
 - **Target Note:** Open Market Note #{note_num} (`OMN-{note_num}`)
 - **Version:** `{next_version}`
 - **Calculated Rolling Window:** `{start_date} to {end_date}`
+- **Mandate 3 PARAMS Check:** PASSED (`{actual_params_sha256[:12]}...` verified against frozen baseline hash).
 - **Mandate 8 Abort Check:** PASSED ({len(expected_months)} expected monthly telemetry files verified).
-- **Mandate 3 Immutability Check:** `PARAMS.md` and core calculation logic unmodified.
 
-### Calculated Provenance Hashes:
-- **`results_sha256`:** `{calc_results_sha256}`
-- **`input_manifest_sha256`:** `{calc_manifest_sha256}`
+### Quad-Hash Provenance Stack:
+- **`results_sha256` (Analytical Output):** `{calc_results_sha256}`
+- **`input_manifest_sha256` (Telemetry Input):** `{calc_manifest_sha256}`
+- **`params_sha256` (PARM Parameters):** `{actual_params_sha256}`
 - **`executed_at`:** `{now_utc}`
 
 ### Included Payload Files:
-- `notes_registry.json`
 - `notes/{folder_name}/results.json`
 - `notes/{folder_name}/data_manifest.json`
 - `notes/{folder_name}/history/measurement_log.json`
