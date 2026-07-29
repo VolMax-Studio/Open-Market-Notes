@@ -71,3 +71,13 @@ This document records procedural failures, governance violations, and anti-patte
 - **Root Cause:** Test side-effect anti-pattern. Test suite modified committed working tree artifacts during execution.  
 - **Remediation:** Added `--out-dir` parameter to `reproduce.py`. Updated `TestSyntheticCIDeterminismFixture` to pass an isolated temporary directory (`temp_out_dir`), guaranteeing zero modification of repository artifacts. Restored committed baseline `results.json` (`0ddbc333...`) via `git checkout`.  
 - **Status:** Logged — Remediation Pending Gate Ratification.
+
+---
+
+### Failure Entry #008 — Truthy-Guard Bypass on New Verification Checks (Recurring Class)
+- **Date:** 2026-07-30  
+- **Target File:** `scripts/recurrence_run.py`  
+- **Violation:** Mandate 3 `reproduce_sha256` check used `if expected_reproduce_sha256:` (truthy guard), silently skipping verification when the field was absent from the registry, while the next line printed `Mandate 3 Check PASSED` unconditionally. Third occurrence of same anti-pattern class (prior: Mandate 8 telemetry guard, Mandate 3 params guard).  
+- **Root Cause:** Truthy-guard bypass anti-pattern. New verification checks introduced with optional/falsy conditions that print PASSED regardless of execution path.  
+- **Remediation:** Changed to `if expected_reproduce_sha256 is None: sys.exit(1)`, enforcing non-bypassable check. Populated `reproduce_sha256` for all 5 notes in `notes_registry.json`. Classified as recurring failure class for future awareness.  
+- **Status:** Logged — Remediation Pending Gate Ratification.

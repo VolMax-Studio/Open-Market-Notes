@@ -15,7 +15,7 @@ REGISTRY_PATH = os.path.join(BASE_DIR, "notes_registry.json")
 NOTE_DIR = os.path.join(BASE_DIR, "notes", "001-nem-duration-baseline")
 RESULTS_JSON = os.path.join(NOTE_DIR, "results.json")
 BACKUP_JSON = os.path.join(NOTE_DIR, "results.json.bak")
-PROC_DIR = os.path.join(NOTE_DIR, "data", "processed")
+LOCAL_PROC_DIR = os.path.join(BASE_DIR, "data", "processed")
 
 def compute_sha256(filepath):
     h = hashlib.sha256()
@@ -33,7 +33,7 @@ def get_frozen_registry_sha256(note_num="001"):
     return None
 
 def create_synthetic_telemetry_fixture(temp_proc_dir, start_date="2025-06-01", end_date="2026-06-30"):
-    """Generates synthetic feather telemetry fixture for clean checkout CI execution."""
+    """Generates synthetic feather telemetry fixture for clean checkout CI execution, exercising scarcity spikes."""
     os.makedirs(temp_proc_dir, exist_ok=True)
     months = pd.date_range(start=start_date, end=end_date, freq='MS')
     
@@ -43,13 +43,14 @@ def create_synthetic_telemetry_fixture(temp_proc_dir, start_date="2025-06-01", e
     
     for m in months:
         ym_str = m.strftime('%Y%m')
-        
-        # Synthetic Price DataFrame
-        dates = pd.date_range(start=m, periods=288, freq='5min') # 1 day sample per month for speed
+        dates = pd.date_range(start=m, periods=288, freq='5min') # 1 day sample per month
         price_records = []
-        for r in regions:
-            np.random.seed(42)
+        for i, r in enumerate(regions):
+            np.random.seed(42 + i + m.month)
             rrps = np.random.uniform(10, 100, len(dates))
+            # Inject scarcity price spikes (>= 300.0) to fully exercise Metric 1 event detection
+            rrps[10:14] = 500.0
+            rrps[50:52] = 12000.0
             for d, rrp in zip(dates, rrps):
                 price_records.append({'SETTLEMENTDATE': d, 'REGIONID': r, 'RRP': rrp})
         price_df = pd.DataFrame(price_records)
@@ -58,7 +59,7 @@ def create_synthetic_telemetry_fixture(temp_proc_dir, start_date="2025-06-01", e
         # Synthetic SCADA DataFrame
         scada_records = []
         for duid in duids:
-            np.random.seed(42)
+            np.random.seed(42 + hash(duid) % 100)
             vals = np.random.uniform(-50, 50, len(dates))
             for d, val in zip(dates, vals):
                 scada_records.append({'SETTLEMENTDATE': d, 'DUID': duid, 'SCADAVALUE': val})
@@ -77,6 +78,13 @@ class TestSyntheticCIDeterminismFixture(unittest.TestCase):
             cmd1 = [sys.executable, reproduce_script, "--start-date", "2025-06-01", "--end-date", "2026-06-30", "--data-dir", temp_proc_dir, "--out-dir", temp_out_dir]
             res1 = subprocess.run(cmd1, cwd=BASE_DIR, capture_output=True, text=True)
             self.assertEqual(res1.returncode, 0, f"Synthetic Run 1 failed:\n{res1.stderr}")
+            
+            with open(temp_results_json, "r") as f:
+                res_data = json.load(f)
+            # Assert Metric 1 event detection was executed
+            nsw_events = res_data["Metric_1_Scarcity_Pricing_Duration"]["NSW1"]["Total_Events"]
+            self.assertGreater(nsw_events, 0, "Synthetic fixture failed to exercise Metric 1 event detection!")
+            
             hash1 = compute_sha256(temp_results_json)
             
             # Delete temp output and Run 2
@@ -86,14 +94,16 @@ class TestSyntheticCIDeterminismFixture(unittest.TestCase):
             hash2 = compute_sha256(temp_results_json)
             
             self.assertEqual(hash1, hash2, "Synthetic fixture output is non-deterministic!")
-            print(f"\n[SYNTHETIC CI DETERMINISM GUARD PASSED] Verified byte-identity on synthetic fixture (isolated temp_out_dir): {hash1}")
+            print(f"\n[SYNTHETIC CI DETERMINISM GUARD PASSED] Verified byte-identity on scarcity-spiked synthetic fixture (isolated temp_out_dir): {hash1}")
 
 class TestReinforcedDeterminism(unittest.TestCase):
     def test_rename_recreate_byte_identity(self):
-        # Skip local telemetry test if data/processed is missing (e.g. clean CI runner checkout)
-        has_telemetry = os.path.exists(PROC_DIR) and len(os.listdir(PROC_DIR)) > 0
+        # Determine actual local telemetry directory
+        data_dir = LOCAL_PROC_DIR if (os.path.exists(LOCAL_PROC_DIR) and len(os.listdir(LOCAL_PROC_DIR)) > 0) else os.path.join(NOTE_DIR, "data", "processed")
+        has_telemetry = os.path.exists(data_dir) and len(os.listdir(data_dir)) > 0
+        
         if not has_telemetry:
-            self.skipTest("Skipping full telemetry determinism test — telemetry directory missing (handled by TestSyntheticCIDeterminismFixture).")
+            self.skipTest(f"Skipping full telemetry determinism test — no telemetry files in {data_dir} (handled by TestSyntheticCIDeterminismFixture).")
 
         self.assertTrue(os.path.exists(RESULTS_JSON), f"Source results.json missing at {RESULTS_JSON}")
         frozen_registry_sha256 = get_frozen_registry_sha256("001")
@@ -105,11 +115,11 @@ class TestReinforcedDeterminism(unittest.TestCase):
         self.assertFalse(os.path.exists(RESULTS_JSON), "results.json was not successfully deleted for recreation test!")
 
         try:
-            # 2. RUN pipeline with explicit baseline dates from root CWD
+            # 2. RUN pipeline with explicit baseline dates and explicit --data-dir from root CWD
             reproduce_script = os.path.join(NOTE_DIR, "reproduce.py")
-            cmd = [sys.executable, reproduce_script, "--start-date", "2025-06-01", "--end-date", "2026-06-30"]
+            cmd = [sys.executable, reproduce_script, "--start-date", "2025-06-01", "--end-date", "2026-06-30", "--data-dir", data_dir]
             
-            # Execute with root CWD to verify path anchor independence (Blocker 1)
+            # Execute with root CWD to verify path anchor independence
             res = subprocess.run(cmd, cwd=BASE_DIR, capture_output=True, text=True)
             self.assertEqual(res.returncode, 0, f"Pipeline execution failed:\n{res.stderr}")
             
