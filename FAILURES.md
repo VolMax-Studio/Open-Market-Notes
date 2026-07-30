@@ -40,7 +40,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** CI determinism guard relied on ~41 MB of historical market telemetry files (`data/processed/*.feather`) gitignored from checkout, and was placed after `recurrence_run.py` instead of before it on clean checkout.  
 - **Root Cause:** Environment assumption anti-pattern. Local test pass assumed presence of gitignored telemetry on GitHub Actions runner.  
 - **Remediation:** Implemented `TestSyntheticCIDeterminismFixture` in `tests/test_determinism.py` generating a lightweight synthetic fixture dataset in a temporary directory for clean checkout CI execution.  
-- **Status:** Logged — Remediation Merged (2026-07-30).
+- **Status:** Logged — Remediation Verified (2026-07-30 via live runner smoke test).
 
 ---
 
@@ -70,7 +70,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** `TestSyntheticCIDeterminismFixture` executed `reproduce.py` with synthetic inputs without specifying an isolated `--out-dir`, overwriting the baseline `results.json` and plots in `notes/001-nem-duration-baseline/` with synthetic test outputs.  
 - **Root Cause:** Test side-effect anti-pattern. Test suite modified committed working tree artifacts during execution.  
 - **Remediation:** Added `--out-dir` parameter to `reproduce.py`. Updated `TestSyntheticCIDeterminismFixture` to pass an isolated temporary directory (`temp_out_dir`), guaranteeing zero modification of repository artifacts. Restored committed baseline `results.json` via `git checkout`. Note: The restored hash `0ddbc333...` was subsequently identified as an 11-month incomplete telemetry artifact and corrected to `c192e7ee...` per Entry #011.  
-- **Status:** Logged — Remediation Merged (2026-07-30).
+- **Status:** Logged — Remediation Verified (2026-07-30 via live runner smoke test).
 
 ---
 
@@ -110,7 +110,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** Empirical baseline reproduction in v9 was executed against an incomplete local telemetry directory (`data/processed`) containing only 11 months (`2025-06` to `2026-04`), producing `0ddbc333...`. This 11-month output hash was erroneously certified as the published $v1.0.0$ baseline, when the published Zenodo package, README tables, and public posts were based on the complete 13-month dataset (`c192e7ee...`).  
 - **Root Cause:** Input completeness assumption anti-pattern. Reproduction test validated determinism over available local telemetry without verifying input window boundary completeness against Mandate 1 (13 calendar months).  
 - **Remediation:** Downloaded missing May & June 2026 telemetry files via `download_aemo_data.py` (restoring full 13-month telemetry: 13 price + 13 scada files). Executed `reproduce.py` (`f6f6c261`), empirically proving byte-identical output `c192e7ee97ac413a07db6a1357f0dbcf49c1164cdbe0a5a4c0f5e9b113b614ed` matching published Zenodo record. Note: Re-fetching May & June 2026 telemetry from AEMO on 2026-07-30 reproduced `c192e7ee...` byte-identically, confirming zero retro-revision of AEMO public archive data since the July 18 baseline execution. Updated `notes_registry.json` and `PARAMETRIC_CHANGELOG.md`. Upgraded Mandate 8 to enforce dual-prefix (`price_` + `scada_`) 26-file telemetry completeness check.  
-- **Status:** Logged — Remediation Merged (2026-07-30).
+- **Status:** Logged — Remediation Verified (2026-07-30 via live runner smoke test).
 
 ---
 
@@ -131,3 +131,14 @@ This document records procedural failures, governance violations, and anti-patte
 - **Root Cause:** Procedural assumption anti-pattern. Machine assumed the oldest git log commit for `results.json` was the producing commit, without searching git history for the exact commit that produced the target output hash `c192e7ee...`.  
 - **Remediation:** Executed full git history hash search (`git log --format='%H %aI' --follow -- notes/001-nem-duration-baseline/results.json`), identifying commit `29012c8` (19 July 2026 07:40:07Z) as the authoritative first commit producing `c192e7ee...`. Corrected `pipeline_commit_sha` to `29012c8`, `reproduce_sha256` to `acfb4c6f...`, `executed_at` to `2026-07-19T07:40:07Z` in `measurement_log.json`, and reverted `params_commit_hash` in `notes_registry.json` to pre-registration freeze commit `6df5bcc`. Established mandatory provenance rule: *Provenance commit SHAs must never be guessed or tail-extracted; they must be identified by searching commit history for the commit that reproduces the target output hash.*  
 - **Status:** Logged — Remediation Merged (2026-07-30).
+
+---
+
+### Failure Entry #014 — Telemetry File Size Check Inadequate for Truncated Downloads
+- **Date:** 2026-07-30  
+- **Target Files:** `scripts/recurrence_run.py`, `RECURRENCE_SPEC.md`  
+- **Violation:** Mandate 8 pre-execution check verified telemetry file existence via `os.path.getsize(f) == 0`. A download interrupted mid-stream leaves a non-empty truncated `.feather` file (size > 0 bytes) that bypasses `getsize() == 0`, potentially corrupting downstream analysis.  
+- **Root Cause:** Non-empty file size assumption anti-pattern. Verified file existence/non-zero size without validating binary file structural integrity or parquet format readability.  
+- **Remediation:** Upgraded Mandate 8 check in `scripts/recurrence_run.py` to enforce structural readability via `pd.read_feather(f)`.  
+- **Status:** Logged — Remediation Merged (2026-07-30).
+
