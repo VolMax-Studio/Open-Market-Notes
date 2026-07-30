@@ -46,17 +46,18 @@ notes/[id]-[slug]/
 ├── PARAMS.md         # Frozen parameters (committed before analysis starts)
 ├── DECISIONS.md      # Append-only pre-registration decision ledger
 ├── README.md         # Method, dataset provenance, and execution guide
-├── run_pipeline.py   # Executable script (regenerates results from primary data)
-└── summary.json      # Output dictionary of verified metrics
+├── reproduce.py      # Executable script (regenerates results from primary data)
+├── data_manifest.json# Canonical dataset input manifest
+└── results.json      # Verified metric output dictionary
 ```
 
 ---
 
 ## The Parametric Changelog (Notes Integrity)
 
-Unlike Verification Audits, Open Market Notes do not carry a formal **Failure Registry** because they do not pronounce a PASS/FAIL/DEFERRED verdict on specific assets.
+Unlike Verification Audits, Open Market Notes do not carry a formal **Per-Asset Failure Registry** because they do not pronounce a PASS/FAIL/DEFERRED verdict on specific commercial power assets. *(Note: The repository maintains an infrastructure process Failure Registry in [`FAILURES.md`](./FAILURES.md) to track pipeline governance defects, cryptographic audit discoveries, and remediation history).*
 
-Instead, they maintain a **Parametric Changelog** in this repository. If a frozen parameter proves uninformative or physically inappropriate after analysis (e.g., a scarcity price threshold that captures zero events due to changing grid dynamics):
+Instead, they maintain a **Parametric Changelog** within each note directory. If a frozen parameter proves uninformative or physically inappropriate after analysis (e.g., a scarcity price threshold that captures zero events due to changing grid dynamics):
 1. The original result is published under the frozen parameters.
 2. The mismatch is documented openly.
 3. A new set of parameters is frozen and committed under a new version, preserving the lineage.
@@ -69,7 +70,7 @@ Instead, they maintain a **Parametric Changelog** in this repository. If a froze
 1. **[Note #001: NEM Duration Baseline](./notes/001-nem-duration-baseline)**
    * *Scope:* Mainland Australia NEM (NSW1, QLD1, SA1, VIC1) from 1 Jun 2025 – 30 Jun 2026.
    * *Focus:* Scarcity price duration ($300/MWh threshold) and charging window availability (8h BESS at 0.85 RTE).
-   * *Status:* Complete & Verified (Timestamp: `2026-07-18T20:52:00+02:00`).
+   * *Status:* Complete & Verified (Timestamp: `2026-07-19T09:40:07+02:00`).
 
 2. **[Note #002: ERCOT Duration Baseline](./notes/002-ercot-duration-baseline)**
    * *Scope:* ERCOT Hubs (West, North, South, Houston) from 1 Jun 2025 – 30 Jun 2026.
