@@ -140,5 +140,5 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** Mandate 8 pre-execution check verified telemetry file existence via `os.path.getsize(f) == 0`. A download interrupted mid-stream leaves a non-empty truncated `.feather` file (size > 0 bytes) that bypasses `getsize() == 0`, potentially corrupting downstream analysis.  
 - **Root Cause:** Non-empty file size assumption anti-pattern. Verified file existence/non-zero size without validating binary file structural integrity or parquet format readability.  
 - **Remediation:** Upgraded Mandate 8 check in `scripts/recurrence_run.py` to enforce structural readability via `pd.read_feather(f)`.  
-- **Status:** Logged — Remediation Merged (2026-07-30).
+- **Status:** Pending Ratification (Pre-Merge)
 
