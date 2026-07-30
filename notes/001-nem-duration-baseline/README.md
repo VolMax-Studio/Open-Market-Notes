@@ -82,7 +82,7 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 ![Fleet Monthly EFC](./results/plot2_fleet_monthly_efc.png)
 
 ### Key Observations
-1. **Fleet Cycling Decline:** The monthly average EFC per unit shows a visible decline over the 13-month window. Comparing June 2025 vs June 2026 (the only same-month pair in our analysis window to control for seasonality), the fleet daily average fell from **1.06 → 0.91 EFC/day per unit (−14%)**. At the individual asset level, 13 of 15 established units cycled less in June 2026 than June 2025 (median asset-level decline: −22%, range −51% to +58%). One unit (ULPBESS1) was in commissioning during June 2025 (0.74 EFC/month) and is excluded from the established per-unit comparison; including it, the fleet mean falls 1.06 → 0.91 EFC/day (−14%), rendering the fleet-wide aggregate metric conservative. Furthermore, the 13-month monthly series is non-monotonic: daily cycling troughs at 0.81 EFC/day in March 2026 (−24% from June 2025) before partially recovering to 0.91 EFC/day by June 2026, meaning the same-month June pair understates the mid-window trough.
+1. **Fleet Cycling Decline:** The monthly average EFC per unit shows a visible decline over the 13-month window. Comparing June 2025 vs June 2026 (the only same-month pair in our analysis window to control for seasonality), the fleet daily average fell from **1.06 → 0.91 EFC/day per unit (−14%)**. At the individual asset level, 13 of 15 established units cycled less in June 2026 than June 2025 (median asset-level decline: −22%, range −51% to +58%). One unit (ULPBESS1) was in commissioning during June 2025 (0.74 EFC/month) and is excluded from the established per-unit comparison; including it, the fleet mean falls 1.06 → 0.91 EFC/day (−14%), rendering the fleet-wide aggregate metric conservative. Furthermore, the 13-month monthly series is non-monotonic: daily cycling troughs at 0.81 EFC/day in March 2026 (−24% from June 2025) before partially recovering to 0.91 EFC/day by June 2026, meaning the same-month June pair understates the mid-window trough. Per the frozen parameters constraint, no trend model or OLS regression is fitted: 13 months cannot separate seasonality from structural fleet change, so the series is reported purely descriptively and the June-to-June pair is the only seasonality-controlled comparison.
 2. **Absence of Long-Duration Assets:** There are currently no operational $\ge 4$-hour duration BESS assets in our filtered 16-unit analysis subsample, meaning long-duration cycling is not yet represented in our active fleet metrics.
 
 ---
@@ -91,7 +91,7 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 - **Draft Revision 3** (2026-07-19T09:44:00+02:00):
   - Formatted Metric 3 (Fleet Cycling) EFC values as a table and added a normalized `EFC/day` column to remove month-length biases (e.g. February).
   - Rewrote Observation 1 under Metric 3 to highlight the same-month seasonal comparison (June 2025 vs June 2026), documenting a 14% drop in daily cycling per unit observed alongside fleet capacity growth.
-- **Draft Revision 2** (2026-07-19T07:40:00+02:00 — Baseline Producing Commit `29012c8`):
+- **Draft Revision 2** (2026-07-19T09:40:07+02:00 / 07:40:07Z — Baseline Producing Commit `29012c8`):
   - Aligned Metric 3 (Fleet Cycling) asset selection strictly to the 16 accepted operational units from `l1_integrity_report.json` (removing `TARBESS1` and `TEMPB1`, which were rejected due to mid-window commissioning).
   - Verified and corrected BESS nameplate energy capacities (MWh denominators) against the AEMO National Electricity Market Registration and Exemption List (published on 15 May 2026):
     - Corrected `BHB1` (Broken Hill BESS) to 50.0 MWh (previously incorrectly mapped to Bulgana's 34.0 MWh).
@@ -101,7 +101,7 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
     - Corrected `WDBESS1` (Western Downs BESS) to 540.0 MWh (previously listed as 512.0 MWh).
     - Corrected `BLYTHB1` (Blyth BESS) to 477.0 MWh (previously listed as 476.0 MWh).
   - Regenerated all Metric 3 fleet cycling values, monthly averages, and plots using the updated 16-unit registry (producing `c192e7ee...`).
-- **Draft Revision 1** (2026-07-19T07:22:00+02:00):
+- **Draft Revision 1** (2026-07-19T09:22:00+02:00 / 07:22:00Z):
   - Corrected Metric 1 summary table in README.md to match the final `results.json` output. (An earlier draft table was hand-transcribed from a superseded, timezone-unfiltered execution run).
   - Clarified Section 4 (Metric 3) observation to note that the absence of long-duration assets applies strictly to our filtered 16-unit analysis subsample rather than the entire market.
   - Aligned causal language in Section 3 (Metric 2) observations to "observed alongside" to comply with VolMax style rules.
