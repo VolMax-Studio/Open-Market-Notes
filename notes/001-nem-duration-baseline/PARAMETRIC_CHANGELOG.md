@@ -25,8 +25,8 @@
   python reproduce.py --start-date 2025-06-01 --end-date 2026-06-30 \
     --data-dir ./data/processed --out-dir /tmp/repro_check
   sha256sum /tmp/repro_check/results.json
-  0ddbc333b298b298868966cfb1b49cb09867b7af179e4b9dc809cc65ed512260
+  c192e7ee97ac413a07db6a1357f0dbcf49c1164cdbe0a5a4c0f5e9b113b614ed
   ```
-  Baseline output hash (`results_sha256`) byte-identical to published $v1.0.0$ Zenodo record. Upper-bound filter had zero effect on baseline data (all telemetry files fall within window).  
+  Baseline output hash (`results_sha256`) byte-identical to published $v1.0.0$ Zenodo record (`c192e7ee...`) over complete 13-month telemetry. Upper-bound date filtering guarantees boundary safety for future rolling window executions.  
 - **Classification:** Non-breaking maintenance patch ($v1.x.0$). No new Zenodo DOI required per Mandate 5.  
 - **Status:** Pending Ratification (Pre-Merge)

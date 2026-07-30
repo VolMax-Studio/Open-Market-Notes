@@ -69,7 +69,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Target Files:** `tests/test_determinism.py`, `notes/001-nem-duration-baseline/results.json`  
 - **Violation:** `TestSyntheticCIDeterminismFixture` executed `reproduce.py` with synthetic inputs without specifying an isolated `--out-dir`, overwriting the baseline `results.json` and plots in `notes/001-nem-duration-baseline/` with synthetic test outputs.  
 - **Root Cause:** Test side-effect anti-pattern. Test suite modified committed working tree artifacts during execution.  
-- **Remediation:** Added `--out-dir` parameter to `reproduce.py`. Updated `TestSyntheticCIDeterminismFixture` to pass an isolated temporary directory (`temp_out_dir`), guaranteeing zero modification of repository artifacts. Restored committed baseline `results.json` (`0ddbc333...`) via `git checkout`.  
+- **Remediation:** Added `--out-dir` parameter to `reproduce.py`. Updated `TestSyntheticCIDeterminismFixture` to pass an isolated temporary directory (`temp_out_dir`), guaranteeing zero modification of repository artifacts. Restored committed baseline `results.json` via `git checkout`. Note: The restored hash `0ddbc333...` was subsequently identified as an 11-month incomplete telemetry artifact and corrected to `c192e7ee...` per Entry #011.  
 - **Status:** Logged — Remediation Pending Gate Ratification.
 
 ---
@@ -79,7 +79,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Target File:** `scripts/recurrence_run.py`  
 - **Violation:** Mandate 3 `reproduce_sha256` check used `if expected_reproduce_sha256:` (truthy guard), silently skipping verification when the field was absent from the registry, while the next line printed `Mandate 3 Check PASSED` unconditionally. Third occurrence of same anti-pattern class (prior: Mandate 8 telemetry guard, Mandate 3 params guard).  
 - **Root Cause:** Truthy-guard bypass anti-pattern. New verification checks introduced with optional/falsy conditions that print PASSED regardless of execution path.  
-- **Remediation:** Changed to `if expected_reproduce_sha256 is None: sys.exit(1)`, enforcing non-bypassable check. Populated `reproduce_sha256` for all 5 notes in `notes_registry.json`. Classified as recurring failure class for future awareness.  
+- **Remediation:** Changed to `if expected_reproduce_sha256 is None: sys.exit(1)`, enforcing non-bypassable check. Note: Initial batch population of `reproduce_sha256` for Notes #002–#005 was subsequently reverted per Entry #010.  
 - **Status:** Logged — Remediation Pending Gate Ratification.
 
 ---
@@ -100,4 +100,14 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** `reproduce_sha256` was populated for all five notes in a single commit, but empirical baseline reproduction was performed only for Note #001. Four pins asserted "authoritative frozen baseline" status for scripts never independently verified to reproduce their respective `results_sha256`.  
 - **Root Cause:** Mandate 3 revision policy specifies that `reproduce_sha256` changes require empirical reproduction verification. Four of five pins violated this requirement at introduction.  
 - **Remediation:** Removed `reproduce_sha256` from Notes #002–#005 in `notes_registry.json`. Pins will be added individually upon successful reproduction of each note's baseline.  
+- **Status:** Logged — Remediation Pending Gate Ratification.
+
+---
+
+### Failure Entry #011 — Baseline Verification Executed Over Incomplete Telemetry Dataset
+- **Date:** 2026-07-30  
+- **Target Files:** `PARAMETRIC_CHANGELOG.md`, `notes_registry.json`, `tests/test_determinism.py`  
+- **Violation:** Empirical baseline reproduction in v9 was executed against an incomplete local telemetry directory (`data/processed`) containing only 11 months (`2025-06` to `2026-04`), producing `0ddbc333...`. This 11-month output hash was erroneously certified as the published $v1.0.0$ baseline, when the published Zenodo package, README tables, and public posts were based on the complete 13-month dataset (`c192e7ee...`).  
+- **Root Cause:** Input completeness assumption anti-pattern. Reproduction test validated determinism over available local telemetry without verifying input window boundary completeness against Mandate 1 (13 calendar months).  
+- **Remediation:** Downloaded missing May & June 2026 telemetry files via `download_aemo_data.py` (restoring full 13-month telemetry: 13 price + 13 scada files). Executed `reproduce.py` (`f6f6c261`), empirically proving byte-identical output `c192e7ee97ac413a07db6a1357f0dbcf49c1164cdbe0a5a4c0f5e9b113b614ed` matching published Zenodo record. Note: Re-fetching May & June 2026 telemetry from AEMO on 2026-07-30 reproduced `c192e7ee...` byte-identically, confirming zero retro-revision of AEMO public archive data since the July 18 baseline execution. Updated `notes_registry.json` and `PARAMETRIC_CHANGELOG.md`. Upgraded Mandate 8 to enforce dual-prefix (`price_` + `scada_`) 26-file telemetry completeness check.  
 - **Status:** Logged — Remediation Pending Gate Ratification.

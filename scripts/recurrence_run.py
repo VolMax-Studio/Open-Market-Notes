@@ -218,18 +218,21 @@ def main():
         print("ABORTING WORKFLOW — NO PULL REQUEST WILL BE OPENED.")
         sys.exit(1)
         
-    missing_months = []
+    missing_files = []
     for ym in expected_months:
-        file_pattern = os.path.join(proc_dir, f"price_{ym}.feather")
-        if not os.path.exists(file_pattern) or os.path.getsize(file_pattern) == 0:
-            missing_months.append(ym)
+        price_file = os.path.join(proc_dir, f"price_{ym}.feather")
+        scada_file = os.path.join(proc_dir, f"scada_{ym}.feather")
+        if not os.path.exists(price_file) or os.path.getsize(price_file) == 0:
+            missing_files.append(f"price_{ym}.feather")
+        if not os.path.exists(scada_file) or os.path.getsize(scada_file) == 0:
+            missing_files.append(f"scada_{ym}.feather")
             
-    if missing_months:
-        print(f"FATAL ERROR (Mandate 8 Abort): Missing or empty monthly telemetry files for: {missing_months}")
+    if missing_files:
+        print(f"FATAL ERROR (Mandate 8 Abort): Missing or empty monthly telemetry files for: {missing_files}")
         print("ABORTING WORKFLOW — NO PULL REQUEST WILL BE OPENED.")
         sys.exit(1)
         
-    print(f"Mandate 8 Check PASSED: All {len(expected_months)} monthly telemetry files verified in {proc_dir}.")
+    print(f"Mandate 8 Check PASSED: All {len(expected_months)*2} monthly telemetry files (price + scada) verified in {proc_dir}.")
 
     # 6. Execute Analytical Pipeline with cwd=note_dir and explicit --data-dir
     print(f"\n--- Executing Analytical Pipeline ({os.path.basename(reproduce_script)}) ---")

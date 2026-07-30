@@ -1,399 +1,106 @@
 {
-  "manifest_version": "1.0.0",
-  "note_id": "OMN-001",
-  "data_source_class": "Primary Market Operator (AEMO Public Data Archive)",
-  "analysis_period": "2025-06-01 to 2026-06-30",
-  "acquired_at_utc": "2026-07-19T12:00:00Z",
-  "files": [
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202506010000.CSV",
-      "sha256": {
-        "sha256": "249a65222d58eac6bc49dd55ea4f5947c798fbc41192d0278556920ccdb48874",
-        "size_bytes": 1009322645
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202506.feather": {
+        "sha256": "f3c0943780231acc260ee3db44ec272aad6b447cb0c2caec237df066d71f014b",
+        "size_bytes": 1157954
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202507010000.CSV",
-      "sha256": {
-        "sha256": "e4de843c64c15682196b8a086729966b49756925ab5f799f5d63cb13f8d14c2c",
-        "size_bytes": 1060493421
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202507.feather": {
+        "sha256": "efd9850379368d39f6af7295fa30a5c84360ccee765d3ad89589d4fee3a76075",
+        "size_bytes": 1240306
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202508010000.CSV",
-      "sha256": {
-        "sha256": "4d7b6266006a86daee66fbea2ffef8b96098a0515735586000834c0833dc9acf",
-        "size_bytes": 1062660729
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202508.feather": {
+        "sha256": "9e8c3caad4e2338de265f7bf1076068eca6d4a8ce4a42edf130de9b1306623bc",
+        "size_bytes": 1253082
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202509010000.CSV",
-      "sha256": {
-        "sha256": "302b85f0a0602100ea69bad489d60a571100579b87ad866d999316e5786b0f2d",
-        "size_bytes": 1008125594
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202509.feather": {
+        "sha256": "a7bb337d4a78fe4f077f9ce39b483b3a5fb40659639f5e495d7387acf82519a4",
+        "size_bytes": 1227578
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202510010000.CSV",
-      "sha256": {
-        "sha256": "3f1b92ce8f2481048dcddb1065af27770c46bc237ebe646062eca2f00491f94a",
-        "size_bytes": 1076200108
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202510.feather": {
+        "sha256": "36c563aae38714e3509893b07e94e1a255c6c5c8afe7d8e1d031cc0f79db1baf",
+        "size_bytes": 1284914
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202511010000.CSV",
-      "sha256": {
-        "sha256": "2875f442f45c44ef01c781ff5c126de2fcb85e4d67c568e5dccc3a9f814865c5",
-        "size_bytes": 1060786778
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202511.feather": {
+        "sha256": "d42c4ce57465ea6462c6f2ee9bffe2ce4c26e44f0651a134165c2aa61741af42",
+        "size_bytes": 1231250
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202512010000.CSV",
-      "sha256": {
-        "sha256": "4d961bf8ebc2750ec1c919d0fc4f227a6b8cda015fecac3a4a4898769f1e4d0e",
-        "size_bytes": 1111935487
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202512.feather": {
+        "sha256": "d79528604f291fa826a6bb936b8268dc9242e337690ef0ca3d476553de9dacda",
+        "size_bytes": 1203770
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202601010000.CSV",
-      "sha256": {
-        "sha256": "ad247ce5972c73dd798deb62672ce1a1d5aaf2967dde71e8314b09dee8c3b489",
-        "size_bytes": 1123021837
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202601.feather": {
+        "sha256": "24b7421e4dd9040b4278713b5c669724f01399a72b9d4be2d8c2289f3f5de91c",
+        "size_bytes": 1179498
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202602010000.CSV",
-      "sha256": {
-        "sha256": "083aa47331d8fa3ff48f011202dec44d5b0cd8e6e7bf42589f7fd63c387e1f4c",
-        "size_bytes": 1023596822
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202602.feather": {
+        "sha256": "eb035d3c03a8aaf5e6c45ea830c7ab5e0e5f60c87c674feb67ccb5712d7d7178",
+        "size_bytes": 1097602
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202603010000.CSV",
-      "sha256": {
-        "sha256": "272ab24f70c352d6d6b2b41e6328209e7b96860faad397727b1644cce789fe32",
-        "size_bytes": 1142639824
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202603.feather": {
+        "sha256": "4045e6fb048b6bbd3ff49fefc542819aab2bbe15df0764b254f9d63ccb8235c7",
+        "size_bytes": 1235706
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202604010000.CSV",
-      "sha256": {
-        "sha256": "ca7596d1730c0969d7089bd772dbd2a26031adf959a76f404018d4b62fb6293a",
-        "size_bytes": 1110336499
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202604.feather": {
+        "sha256": "b32d9db126f8c5d0ee20a74dfd963c05e580f2eae6292350f6b80068b86a3bb9",
+        "size_bytes": 1194842
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202605010000.CSV",
-      "sha256": {
-        "sha256": "47ae3ab35d84e161c20ba9e72f8fffd36155323a306832bfa1993f816670be2a",
-        "size_bytes": 1152134150
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202605.feather": {
+        "sha256": "b53153727191cbd6fb57143437bd9bebfea59561de8e099a2ef5a0a6d318a788",
+        "size_bytes": 1202970
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHLOAD#FILE01#202606010000.CSV",
-      "sha256": {
-        "sha256": "83dfe9a67d5d80a89e0064623dd3471149302a41dd3d579431cc73963bfb8248",
-        "size_bytes": 1122816578
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "price_202606.feather": {
+        "sha256": "3c8474e41efd39341a62f8ab7ee14b61d5a872ef9f71862307c4a3255b2ef98a",
+        "size_bytes": 1185706
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202506010000.CSV",
-      "sha256": {
-        "sha256": "85a24420a36b14605de821990f1e7f814e85250a0ddd3cff36d1aa8714440b9b",
-        "size_bytes": 17110937
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202506.feather": {
+        "sha256": "943ef54d2e3020bf4add7f845a96dfd9bf913ebf77f5b61eccf39c7af10d71e0",
+        "size_bytes": 2578986
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202507010000.CSV",
-      "sha256": {
-        "sha256": "351f71337ebc2db67d331d698e821028219f452b48570713c6aaecf1b760b1f1",
-        "size_bytes": 17774466
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202507.feather": {
+        "sha256": "995602d0d53768899474bf7967cf571ccf11793b67eb3257ba4a3041ff7d6b63",
+        "size_bytes": 2773906
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202508010000.CSV",
-      "sha256": {
-        "sha256": "bad2f74f3cb49f23db3d77f6605e04e224907a691dc32ab3470a569ce30aba51",
-        "size_bytes": 17953521
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202508.feather": {
+        "sha256": "e3e24134facd18876d24914bce24132379f79dba22383f2752caef37963f68d1",
+        "size_bytes": 2769378
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202509010000.CSV",
-      "sha256": {
-        "sha256": "00eb13593b559c298cfe8040c699a4d0eb0a555005b399cf914f0317b6328633",
-        "size_bytes": 17448302
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202509.feather": {
+        "sha256": "bfb0a2556c2f9c802a0272856223ebef6eaf3c38cc8b44b0bc2db3acbcf6f0d7",
+        "size_bytes": 2616826
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202510010000.CSV",
-      "sha256": {
-        "sha256": "8a3d8414a4e571c09c77f227ca30b05492d82fd646c79278d1516c84e3afa154",
-        "size_bytes": 17725820
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202510.feather": {
+        "sha256": "d3eb86e61a3fd1264f0145a7a8bbcda0429ab38108bf8e23cdbbbfc80eb8d169",
+        "size_bytes": 2713378
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202511010000.CSV",
-      "sha256": {
-        "sha256": "67e9f6090d8f5e98a631482fc52090629263967e546a649b45d905cf21ed60ea",
-        "size_bytes": 16888635
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202511.feather": {
+        "sha256": "ce3d0fca70b130169a2b89bb2e94a4e70c3e65a42aa4dc24a423ae6bb472c295",
+        "size_bytes": 2682410
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202512010000.CSV",
-      "sha256": {
-        "sha256": "1e431766aa268a04f3047aa9e0baf28c25d23091a7205a6aa08ed9634d5fbb7a",
-        "size_bytes": 17175452
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202512.feather": {
+        "sha256": "29b323720acd537dc7e054bc9dd5aa6732789b121fa67086c6ca088a0a7dd193",
+        "size_bytes": 2772410
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202601010000.CSV",
-      "sha256": {
-        "sha256": "3591ca57a58d13cefd6e783dd4bd700c5348769b773e31d9329f21801dd09f50",
-        "size_bytes": 17112671
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202601.feather": {
+        "sha256": "20534bc08f3847b585fe35787cbd5aa409a15e74ac0bd4237fd0207e6b20d0c3",
+        "size_bytes": 2746778
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202602010000.CSV",
-      "sha256": {
-        "sha256": "cdc6742ee01e9cb8a080507a394491d8f98b080ef7e4d577d5e70e38aaf25438",
-        "size_bytes": 15428816
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202602.feather": {
+        "sha256": "0106350afc9466c0648fda34a4f207d1e852b641b7c8feb349fb4e71bf15bd34",
+        "size_bytes": 2474330
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202603010000.CSV",
-      "sha256": {
-        "sha256": "21151765bf857721d70fc6f71e8c301ac63284876a14b875bd0c28b1caf425f5",
-        "size_bytes": 16949963
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202603.feather": {
+        "sha256": "f54cd204330b7aff7845a311d78aafc62f45e6f5850442406336bf0bdf2416ea",
+        "size_bytes": 2742130
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202604010000.CSV",
-      "sha256": {
-        "sha256": "9f85f62d53e425d07ea1ae2494ff10adb9cc30af609ea2bfa22f0e5afeec85d3",
-        "size_bytes": 16498150
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202604.feather": {
+        "sha256": "db502c3a9fa249f499f14134e2bcd4556dff64e874911ccf3adb1a63dcd895b2",
+        "size_bytes": 2650634
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202605010000.CSV",
-      "sha256": {
-        "sha256": "2ee80c70730a2100aa19c0a81d7c8176a9dd231a7b90bcda7c7b3f616cca339b",
-        "size_bytes": 17099067
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202605.feather": {
+        "sha256": "d9e01697edc1b501ad87f9430dcedc7e0d32c8803b2ada82ca47d2294c69ac5d",
+        "size_bytes": 2730770
     },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCHPRICE#FILE01#202606010000.CSV",
-      "sha256": {
-        "sha256": "181eaf2a68d14349a8e13808d1ab2a6767e61a8a7142f922186f85f8cfeeeb8d",
-        "size_bytes": 16493864
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202506010000.CSV",
-      "sha256": {
-        "sha256": "bc24a50571e15d9743230379d5540cd009df22e9109d727d1366f3a9ceedc6d4",
-        "size_bytes": 329682146
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202507010000.CSV",
-      "sha256": {
-        "sha256": "7dd4a875499b15bf9583ed1143d308815890631ea8eab378bffd00b1bb12ff30",
-        "size_bytes": 343376333
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202508010000.CSV",
-      "sha256": {
-        "sha256": "c220387a2d04f17cb6b383568fc698c1fb64413cf0d0c7afff23abeda03a32f9",
-        "size_bytes": 343836707
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202509010000.CSV",
-      "sha256": {
-        "sha256": "6d4cab7c613bf514e8d8d4134fd249e01986c7ef5f3701330cd37eb4250ec51f",
-        "size_bytes": 335500656
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202510010000.CSV",
-      "sha256": {
-        "sha256": "bf6bb6a9d9a22308e3cdb692424b90dbc3d3d39483fee0063b3a89656327b328",
-        "size_bytes": 349656817
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202511010000.CSV",
-      "sha256": {
-        "sha256": "947bb0fe634c7357b486a869a25d5723e69d7c1975b94d7d4897826fc0ccbe8a",
-        "size_bytes": 342642865
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202512010000.CSV",
-      "sha256": {
-        "sha256": "058447cb23750757c964bfd253b598c61153503c8663dc9c2f99940451fbd359",
-        "size_bytes": 357516575
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202601010000.CSV",
-      "sha256": {
-        "sha256": "b66675c304d5e2f95a899faa9885ecd4d5ed9dd6f06b107940c6377a64a09f43",
-        "size_bytes": 360136780
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202602010000.CSV",
-      "sha256": {
-        "sha256": "6f4d89738497d263c3e39dae690031b8989a74174d81294969800263f4a3da42",
-        "size_bytes": 328647780
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202603010000.CSV",
-      "sha256": {
-        "sha256": "15c5c60eb7609541597f73f9fb31a41b5a81604068dcef334a7b76dc0f23c12a",
-        "size_bytes": 367189077
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202604010000.CSV",
-      "sha256": {
-        "sha256": "63c3e82f80604949f9aeb525d34528be9ebb99cb96e65109151e6896347578e8",
-        "size_bytes": 356653272
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202605010000.CSV",
-      "sha256": {
-        "sha256": "6ffaaa6b6137de3d923aaabc849f735fc536ea8387a21117932b24fa6a87aef8",
-        "size_bytes": 369868376
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
-    },
-    {
-      "file_name": "PUBLIC_ARCHIVE#DISPATCH_UNIT_SCADA#FILE01#202606010000.CSV",
-      "sha256": {
-        "sha256": "aff3206a5ad0f57029c0679e5c5283287ec3bf11b7a1e171e4ffbf3dc77aa184",
-        "size_bytes": 359881761
-      },
-      "size_bytes": 0,
-      "source_url": "https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem",
-      "acquisition_mode": "archive_fetch"
+    "scada_202606.feather": {
+        "sha256": "38e2b9d0f1cce16f513d23ee2a006862b7599f00d53df21e16bc020059cea832",
+        "size_bytes": 2652186
     }
-  ]
 }
