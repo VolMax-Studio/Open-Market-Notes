@@ -1,6 +1,6 @@
 # VolMax Open Market Notes — Recurrence Specification
 **Version:** v1.0.7  
-**Status:** Draft for Ratification  
+**Status:** Ratified Baseline Specification  
 **Date:** 2026-07-30  
 **Repository:** `VolMax-Studio/Open-Market-Notes`  
 
