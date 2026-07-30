@@ -61,7 +61,7 @@ Every recurrent measurement execution MUST record a 4-layer cryptographic proven
 - **DOI Revision & Erratum Policy:** Updating the `doi` field in `notes_registry.json` is strictly prohibited except via a formal, ratified erratum PR accompanied by a new Zenodo version release. If a DOI is updated, the previous published DOI MUST be preserved in the `superseded_doi` field of `notes_registry.json` for complete historical reference.
 
 ### Mandate 6 — History Log Ledger
-All recurrent measurement refreshes write to `history/measurement_log.json`:
+All recurrent measurement refreshes write to `history/measurement_log.json`. Core schema required fields are:
 ```json
 [
   {
@@ -76,6 +76,7 @@ All recurrent measurement refreshes write to `history/measurement_log.json`:
   }
 ]
 ```
+*(Optional additive fields: `packaging_commit_sha` may record the packaging commit SHA when distinct from the producing commit; `manifest_provenance` may record manifest reconstruction notes).*
 
 ### Mandate 7 — Execution Modes (Automated vs Manual Recurrence)
 - **Automated Recurrence (`parameterized: True`)**: Fully parameterized pipelines (e.g. Note #001) dispatched automatically via GitHub Actions schedule or manual workflow_dispatch.

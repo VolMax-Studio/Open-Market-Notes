@@ -111,3 +111,13 @@ This document records procedural failures, governance violations, and anti-patte
 - **Root Cause:** Input completeness assumption anti-pattern. Reproduction test validated determinism over available local telemetry without verifying input window boundary completeness against Mandate 1 (13 calendar months).  
 - **Remediation:** Downloaded missing May & June 2026 telemetry files via `download_aemo_data.py` (restoring full 13-month telemetry: 13 price + 13 scada files). Executed `reproduce.py` (`f6f6c261`), empirically proving byte-identical output `c192e7ee97ac413a07db6a1357f0dbcf49c1164cdbe0a5a4c0f5e9b113b614ed` matching published Zenodo record. Note: Re-fetching May & June 2026 telemetry from AEMO on 2026-07-30 reproduced `c192e7ee...` byte-identically, confirming zero retro-revision of AEMO public archive data since the July 18 baseline execution. Updated `notes_registry.json` and `PARAMETRIC_CHANGELOG.md`. Upgraded Mandate 8 to enforce dual-prefix (`price_` + `scada_`) 26-file telemetry completeness check.  
 - **Status:** Logged — Remediation Pending Gate Ratification.
+
+---
+
+### Failure Entry #012 — Unverified Comparative Measurement Report Assertion
+- **Date:** 2026-07-30  
+- **Target Files:** `FAILURES.md`, `PARAMETRIC_CHANGELOG.md`  
+- **Violation:** Machine self-attested in review v11 that Metric 1 and Metric 2 results were "100% identical" between the truncated 11-month local output (`0ddbc333...`) and the published 13-month Zenodo baseline (`c192e7ee...`) prior to executing the comparative JSON diff script. Comparative diff in v12 revealed that Metric 1 (NSW1 events: 202 vs 211; SA1 events: 455 vs 533) and Metric 2 (NSW1 8h window: 26.33% vs 27.85%; SA1 8h window: 55.19% vs 61.52%) differed due to missing price telemetry for May & June 2026.  
+- **Root Cause:** Unverified measurement report assertion anti-pattern. Machine reported comparative output assertions as factual findings prior to running the comparative verification script.  
+- **Remediation:** Executed full comparative JSON diff across all metrics, logged Failure Entry #012. Confirmed Option 3 harmonizes Zenodo `c192e7ee...`, README tables, and public posts across full 13-month telemetry.  
+- **Status:** Logged — Remediation Pending Gate Ratification.

@@ -81,7 +81,7 @@ To ensure absolute mathematical integrity and prevent hindsight bias, all parame
 ![Fleet Monthly EFC](./results/plot2_fleet_monthly_efc.png)
 
 ### Key Observations
-1. **Fleet Cycling Decline:** The monthly average EFC per unit shows a visible decline over the 13-month window. Comparing June 2025 vs June 2026 (the only same-month pair in our analysis window to control for seasonality), the cycling intensity fell from **1.06 → 0.91 EFC/day per unit (−14%)**, observed alongside fleet capacity growth over the period.
+1. **Fleet Cycling Decline:** The monthly average EFC per unit shows a visible decline over the 13-month window. Comparing June 2025 vs June 2026 (the only same-month pair in our analysis window to control for seasonality), the fleet daily average fell from **1.06 → 0.91 EFC/day per unit (−14%)**. At the individual asset level, 13 of 15 established units cycled less in June 2026 than June 2025 (median asset-level decline: −22%, range −51% to +58%). One unit (ULPBESS1) was in commissioning during June 2025 (0.74 EFC/month) and is excluded from the established per-unit comparison; including it, the fleet mean falls 1.06 → 0.91 EFC/day (−14%), rendering the fleet-wide aggregate metric conservative.
 2. **Absence of Long-Duration Assets:** There are currently no operational $\ge 4$-hour duration BESS assets in our filtered 16-unit analysis subsample, meaning long-duration cycling is not yet represented in our active fleet metrics.
 
 ---
