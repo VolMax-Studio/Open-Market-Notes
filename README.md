@@ -84,7 +84,7 @@ Instead, they maintain a **Parametric Changelog** within each note directory. If
 
 4. **[Note #004: GB BESS Duration Baseline (Elexon BMRS)](./notes/004-gb-duration-baseline)**
    * *Scope:* Great Britain (NGET Grid Area) 30-minute settlement periods from 1 Jun 2025 – 30 Jun 2026 (18,960 settlement periods).
-   * *Focus:* Elexon System Prices, pure active scarcity runs vs macro event window spans (£100/£200/£300/MWh).
+   * *Focus:* Elexon System Prices, pure active scarcity runs vs macro event window spans (£100/£250/MWh) and charging window availability (£25/MWh).
    * *Status:* Complete & Verified (Timestamp: `2026-07-25T20:00:00+02:00`).
 
 5. **[Note #005: ENTSO-E Cross-Border Physical Flow Dynamics Baseline](./notes/005-entsoe-crossborder-flows)**
