@@ -121,3 +121,13 @@ This document records procedural failures, governance violations, and anti-patte
 - **Root Cause:** Unverified measurement report assertion anti-pattern. Machine reported comparative output assertions as factual findings prior to running the comparative verification script.  
 - **Remediation:** Executed full comparative JSON diff across all metrics, logged Failure Entry #012. Confirmed Option 3 harmonizes Zenodo `c192e7ee...`, README tables, and public posts across full 13-month telemetry.  
 - **Status:** Logged — Remediation Pending Gate Ratification.
+
+---
+
+### Failure Entry #013 — Methodological Error in Provenance Commit SHA Extraction
+- **Date:** 2026-07-30  
+- **Target Files:** `FAILURES.md`, `notes/001-nem-duration-baseline/history/measurement_log.json`, `notes_registry.json`  
+- **Violation:** Entry #009 attempted to correct `pipeline_commit_sha` by running `git log --format=%aI --follow -- results.json | tail -1`. `tail -1` extracted the oldest commit (`6df5bcc`, 18 July 2026 18:52Z) which held pre-calibration capacity constants and produced hash `7d24f0a6...`. This erroneously attributed `c192e7ee...` baseline output to a commit that did not produce it.  
+- **Root Cause:** Procedural assumption anti-pattern. Machine assumed the oldest git log commit for `results.json` was the producing commit, without searching git history for the exact commit that produced the target output hash `c192e7ee...`.  
+- **Remediation:** Executed full git history hash search (`git log --format='%H %aI' --follow -- notes/001-nem-duration-baseline/results.json`), identifying commit `29012c8` (19 July 2026 07:40:07Z) as the authoritative first commit producing `c192e7ee...`. Corrected `pipeline_commit_sha` to `29012c8`, `reproduce_sha256` to `acfb4c6f...`, `executed_at` to `2026-07-19T07:40:07Z` in `measurement_log.json`, and reverted `params_commit_hash` in `notes_registry.json` to pre-registration freeze commit `6df5bcc`. Established mandatory provenance rule: *Provenance commit SHAs must never be guessed or tail-extracted; they must be identified by searching commit history for the commit that reproduces the target output hash.*  
+- **Status:** Logged — Remediation Pending Gate Ratification.

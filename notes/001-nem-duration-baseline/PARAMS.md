@@ -9,7 +9,35 @@
 - **Analysis Period:** 1 June 2025 – 30 June 2026 (13 months).
 - **Regions:** NSW1, QLD1, SA1, VIC1 (Mainland NEM).
 - **Data Source:** Primary AEMO 5-minute dispatch interval data (NEMWEB DISPATCHPRICE).
-- **BESS Fleet Subsample:** 16 BESS units from the active NEM dispatch audit repository.
+- **BESS Fleet Subsample:** 16 accepted BESS units from the active NEM dispatch audit repository.
+
+### BESS Energy Capacity Denominator Table & Source Attribution
+*Nameplate energy capacities (MWh) verified against the official AEMO National Electricity Market Registration and Exemption List (published 15 May 2026):*
+
+| DUID | Asset Name | Registered Energy Capacity (MWh) | Registered Power Capacity (MW) | Subsample Status |
+|:---|:---|:---:|:---:|:---:|
+| **HPR1** | Hornsdale Power Reserve | 193.5 | 150.0 | Accepted Established |
+| **VBB1** | Victorian Big Battery | 450.0 | 300.0 | Accepted Established |
+| **WANDB1** | Wandoan South BESS | 150.0 | 100.0 | Accepted Established |
+| **WDBESS1** | Western Downs BESS | 540.0 | 270.0 | Accepted Established |
+| **TIB1** | Torrens Island BESS | 250.0 | 250.0 | Accepted Established |
+| **HBESS1** | Hazelwood BESS | 150.0 | 150.0 | Accepted Established |
+| **RANGEB1** | Rangebank BESS | 260.0 | 200.0 | Accepted Established |
+| **CHBESS1** | Chinchilla BESS | 200.0 | 100.0 | Accepted Established |
+| **BLYTHB1** | Blyth BESS | 477.0 | 200.0 | Accepted Established |
+| **BHB1** | Broken Hill BESS | 50.0 | 50.0 | Accepted Established |
+| **BBATTERY1** | Bouldercombe BESS | 100.0 | 50.0 | Accepted Established |
+| **ULPBESS1** | Ulinda Park BESS | 298.0 | 149.0 | Accepted Commissioning |
+| **WALGRV1** | Wallgrove Grid Battery | 75.0 | 50.0 | Accepted Established |
+| **RESS1** | Riverina BESS 1 | 120.0 | 60.0 | Accepted Established |
+| **RIVNB2** | Riverina BESS 2 | 130.0 | 65.0 | Accepted Established |
+| **CAPBES1** | Capital BESS | 200.0 | 100.0 | Accepted Established |
+
+### Uniform Fleet Inclusion & Exclusion Criteria
+1. **Registered Power Threshold:** Utility-scale grid-connected BESS assets with registered power capacity $\ge 50\text{ MW}$.
+2. **Established Operational Status:** Assets with commercial registration prior to the analysis start date (`2025-06-01`).
+3. **Mid-Window Initial Commissioning Exclusion:** Assets entering registration or initial testing mid-window without complete prior operational history (e.g. `TARBESS1`, `TEMPB1`) are excluded from the baseline cohort to prevent denominator/throughput skew.
+4. **Commissioning Nuance Handling:** Units registered prior to the window but undergoing commercial ramp-up in Month 1 (e.g. `ULPBESS1` at 0.74 EFC in June 2025) are retained in the 16-unit aggregate metric for conservative lower-bound estimation, but excluded from established per-unit median comparisons in analytical observations.
 
 ---
 

@@ -6,13 +6,13 @@
     "market": "Mainland Australia NEM (NSW1, QLD1, SA1, VIC1)",
     "signal": "Scarcity Price Duration ($300/MWh) & 8h BESS Charging Availability",
     "measurement_period": "2025-06-01 to 2026-06-30",
-    "params_commit_hash": "29012c8",
+    "params_commit_hash": "6df5bcc",
     "code_url": "https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/001-nem-duration-baseline",
     "results_sha256": "c192e7ee97ac413a07db6a1357f0dbcf49c1164cdbe0a5a4c0f5e9b113b614ed",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
     "doi": "https://doi.org/10.5281/zenodo.21693239",
-    "params_sha256": "9efbc2ec7d69c76d4a70070bb3c0b00b7528d56c90b314f4f8444ef581a0ed09",
+    "params_sha256": "66b15e7f59554cd821c5bf06ab26fe40723f6b5c7a89147d52c155a0af8182cb",
     "reproduce_sha256": "f6f6c2617bcfc0e09bf3cf8625542352b63ee74209eee3e9605607198b53fc81"
   },
   {

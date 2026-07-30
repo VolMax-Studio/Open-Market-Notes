@@ -1,5 +1,15 @@
 # Parametric Changelog — Open Market Note #001 (NEM Duration Baseline)
 
+### Entry #000 — Pre-Publication BESS Denominator Alignment & Fleet Subsample Calibration
+- **Date:** 2026-07-19  
+- **Producing Commit:** `29012c8d27376c729dd73fe31fb84a0c8cb0bbf3`  
+- **Scope:** `reproduce.py`, `PARAMS.md`, `results.json`  
+- **Change:** Verified nameplate energy capacities against official AEMO National Electricity Market Registration and Exemption List (15 May 2026). Corrected 6 BESS energy denominators (BHB1: 50.0 MWh, WALGRV1: 75.0 MWh, ULPBESS1: 298.0 MWh, HBESS1: 150.0 MWh, WDBESS1: 540.0 MWh, BLYTHB1: 477.0 MWh) and aligned fleet subsample to 16 accepted operational units (excluding mid-window commissioning units TARBESS1 and TEMPB1).  
+- **Output Hash Transition:** Output hash transitioned from pre-calibration draft `7d24f0a6...` (at freeze commit `6df5bcc`) to authoritative baseline output hash `c192e7ee...` (at producing commit `29012c8`).  
+- **Status:** Published Baseline Reference
+
+---
+
 ### Entry #001 — Date Window Parameterization for Recurrence Spec v1.0.2 Compatibility
 - **Date:** 2026-07-30  
 - **Scope:** `download_aemo_data.py`, `reproduce.py`  
@@ -13,7 +23,7 @@
 ### Entry #002 — `reproduce_sha256` Registry Transition: Path Anchoring & Upper-Bound Date Filtering
 - **Date:** 2026-07-30  
 - **Scope:** `reproduce.py`, `notes_registry.json`  
-- **Previous Hash (`v1.0.0` baseline script):** `7accfd96e6f9c03c4bea9e76435b9afa87f969862d9f8ec2cf07d028d5d3d279` (commit `6df5bcc`)  
+- **Previous Hash (`v1.0.0` baseline script @ producing commit `29012c8`):** `acfb4c6f48fe68daee6d7c945b7ff48c8f07ad627dbf8e4cb2721ad902a5209c`  
 - **Current Hash (Mandate 3 enforced):** `f6f6c2617bcfc0e09bf3cf8625542352b63ee74209eee3e9605607198b53fc81` (commit `668677a`)  
 - **Changes Applied:**  
   1. Input path anchored to `os.path.abspath(os.path.join(script_dir, "data", "processed"))` instead of CWD-relative `../../data/processed`.  

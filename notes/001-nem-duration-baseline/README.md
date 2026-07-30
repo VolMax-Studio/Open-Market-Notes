@@ -9,7 +9,8 @@
 ## 1. Provenance & Reproducibility
 To ensure absolute mathematical integrity and prevent hindsight bias, all parameters and rules for Note #001 were frozen and committed prior to execution.
 - **Frozen Parameters:** [`PARAMS.md`](./PARAMS.md)
-- **Frozen Baseline Commit (Open-Market-Notes):** `29012c8` (Authoritative Baseline Producing Commit)
+- **Frozen Parameters Commit (Open-Market-Notes):** `6df5bcc` (Pre-Execution Parameter Freeze Commit)
+- **Baseline Producing Commit (Open-Market-Notes):** `29012c8` (Authoritative Baseline Producing Commit)
 - **Origin Anchor Commit:** `b350e9b` (AEMO Dispatch Audit Repository)
 - **Primary Data Source:** AEMO 5-Minute Dispatch Price & SCADA Telemetry (1 June 2025 – 30 June 2026)
 - **Execution Script:** [`reproduce.py`](./reproduce.py)
