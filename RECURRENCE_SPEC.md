@@ -1,5 +1,5 @@
 # VolMax Open Market Notes — Recurrence Specification
-**Version:** v1.0.6  
+**Version:** v1.0.7  
 **Status:** Draft for Ratification  
 **Date:** 2026-07-30  
 **Repository:** `VolMax-Studio/Open-Market-Notes`  
@@ -19,7 +19,8 @@ The recurrence pipeline ensures that market observation baselines remain dynamic
 
 ## 2. Revision History & Governance Changelog
 
-- **v1.0.6 (2026-07-30):** Empirically verified baseline output hash reproduction (`0ddbc333...`) over real telemetry; enforced non-bypassable `reproduce_sha256` check across all notes; established Registry Code Hash Revision Policy for minor maintenance patches ($v1.x.0$); pin-locked dependency versions in `requirements.txt`; enriched synthetic CI fixture with scarcity price spikes; dynamic spec version resolution.
+- **v1.0.7 (2026-07-30):** Ratified Option 3 alignment of `notes_registry.json` and `results.json` to the canonical 13-month published Zenodo baseline hash (`c192e7ee...`) after restoring complete 13-month telemetry; formalized DOI Revision & `superseded_doi` Erratum Policy in Mandate 5; upgraded Mandate 8 to enforce dual-prefix monthly telemetry completeness (`price_` AND `scada_` files for all 13 months); logged Failure Entry #011.
+- **v1.0.6 (2026-07-30):** Enforced non-bypassable `reproduce_sha256` check across all notes; established Registry Code Hash Revision Policy for minor maintenance patches ($v1.x.0$); pin-locked dependency versions in `requirements.txt`; enriched synthetic CI fixture with scarcity price spikes; dynamic spec version resolution.
 - **v1.0.5 (2026-07-30):** Enforced Mandate 3 dual cryptographic check (`params_sha256` + `reproduce_sha256`); mandated isolated output directory (`--out-dir`) for synthetic CI guard; enforced upper and lower boundary date filtering; unified input path anchoring via `requirements.txt` and `--data-dir`; expanded Mandate 7 manual recurrence taxonomy.
 - **v1.0.4 (2026-07-30):** Restored Mandate 7 (Execution Modes: Automated vs Manual) and Mandate 9 (Zero Secret Leakage Control); corrected Mandate 1 calendar window phrasing; added synthetic CI guard architecture specification; enforced strict git commit SHA resolution.
 - **v1.0.3 (2026-07-30):** Aligned specification with frozen registry baseline ($v1.0.0$); updated history log schema to 4-layer Quad-Hash stack (`results_sha256`, `input_manifest_sha256`, `params_sha256`, `pipeline_commit_sha`).
@@ -81,7 +82,7 @@ All recurrent measurement refreshes write to `history/measurement_log.json`:
 - **Manual Recurrence (`parameterized: False` OR IP/WAF Restrictions)**: Non-parameterized pipelines (e.g. Notes #003–#005) OR pipelines subject to cloud runner IP blocks (e.g. Note #002 ERCOT grid telemetry WAF) executed manually in controlled local environments using parametric changelog protocol until resolved.
 
 ### Mandate 8 — Telemetry Completeness & Boundary Verification
-- The pipeline MUST verify the presence and non-zero size of all 13 monthly telemetry files in the explicitly passed data directory. If telemetry is missing or incomplete, the workflow MUST terminate immediately (`sys.exit(1)`).
+- The pipeline MUST verify the presence and non-zero size of ALL 13 monthly telemetry files across ALL required dataset types (`price_YYYYMM.feather` AND `scada_YYYYMM.feather`) in the explicitly passed data directory. If any telemetry file is missing or empty, the workflow MUST terminate immediately (`sys.exit(1)`).
 
 ### Mandate 9 — Zero Secret Leakage Control
 - Automated workflows and scripts MUST NOT dump environment variables or print secrets. Log output must remain strictly limited to provenance hashes and execution status.

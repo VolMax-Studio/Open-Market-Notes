@@ -8,6 +8,7 @@
     "reproduce_sha256": "7accfd96e6f9c03c4bea9e76435b9afa87f969862d9f8ec2cf07d028d5d3d279",
     "pipeline_commit_sha": "6df5bccd7f56528d27ffa50f794a31e29e1bbec0",
     "packaging_commit_sha": "ea275890a86743e3d2db1aaff05a441d19310d90",
+    "manifest_provenance": "Reconstructed from AEMO archive re-fetch (2026-07-30)",
     "executed_at": "2026-07-18T18:52:18Z"
   }
 ]
