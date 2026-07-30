@@ -16,7 +16,7 @@ REGISTRY_PATH = os.path.join(BASE_DIR, "notes_registry.json")
 NOTE_DIR = os.path.join(BASE_DIR, "notes", "001-nem-duration-baseline")
 RESULTS_JSON = os.path.join(NOTE_DIR, "results.json")
 BACKUP_JSON = os.path.join(NOTE_DIR, "results.json.bak")
-LOCAL_PROC_DIR = os.path.join(BASE_DIR, "data", "processed")
+LOCAL_PROC_DIR = os.path.join(BASE_DIR, "notes", "001-nem-duration-baseline", "data", "processed")
 
 def compute_sha256(filepath):
     h = hashlib.sha256()
