@@ -15,6 +15,7 @@ import hashlib
 import datetime
 import argparse
 import subprocess
+import pandas as pd
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REGISTRY_PATH = os.path.join(BASE_DIR, "notes_registry.json")
@@ -206,9 +207,8 @@ def main():
             print("Telemetry download completed successfully.")
             
     # 5. Mandate 8: Telemetry Completeness & Boundary Verification (STRICT NO-BYPASS)
-    # Check root telemetry dir if present, else note-level dir
-    root_proc_dir = os.path.join(BASE_DIR, "data", "processed")
-    proc_dir = root_proc_dir if (os.path.exists(root_proc_dir) and len(os.listdir(root_proc_dir)) > 0) else os.path.abspath(os.path.join(note_dir, "data", "processed"))
+    # Enforce single canonical note-level telemetry directory
+    proc_dir = os.path.abspath(os.path.join(note_dir, "data", "processed"))
     
     expected_months = generate_expected_months(start_date, end_date)
     print(f"\n--- Mandate 8 Check: Verifying {len(expected_months)} Expected Monthly Telemetry Files in {proc_dir} ---")
@@ -224,14 +224,14 @@ def main():
         scada_file = os.path.join(proc_dir, f"scada_{ym}.feather")
         for filepath, label in [(price_file, f"price_{ym}.feather"), (scada_file, f"scada_{ym}.feather")]:
             if not os.path.exists(filepath) or os.path.getsize(filepath) == 0:
-                missing_files.append(label)
+                missing_files.append(f"{label} (missing or 0 bytes)")
             else:
                 try:
                     df = pd.read_feather(filepath)
                     if len(df) == 0:
                         missing_files.append(f"{label} (0 rows)")
-                except Exception:
-                    missing_files.append(f"{label} (corrupt/unreadable)")
+                except Exception as e:
+                    missing_files.append(f"{label} (unreadable: {type(e).__name__}: {e})")
             
     if missing_files:
         print(f"FATAL ERROR (Mandate 8 Abort): Missing or empty monthly telemetry files for: {missing_files}")
