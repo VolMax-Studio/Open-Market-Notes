@@ -40,3 +40,17 @@
   Baseline output hash (`results_sha256`) byte-identical to published $v1.0.0$ Zenodo record (`c192e7ee...`) over complete 13-month telemetry. Upper-bound date filtering guarantees boundary safety for future rolling window executions.  
 - **Classification:** Non-breaking maintenance patch ($v1.x.0$). No new Zenodo DOI required per Mandate 5.  
 - **Status:** Pending Ratification (Pre-Merge)
+
+---
+
+### Entry #003 — Frozen-Parameter Deviations Identified in Post-Publication Review
+- **Date:** 2026-07-30  
+- **Scope:** `PARAMS.md`, `reproduce.py`, `results.json`  
+- **Governance Mandate:** `PARAMS.md` remains strictly byte-identical to the published Zenodo record (`9efbc2ec7d69c76d4a70070bb3c0b00b7528d56c90b314f4f8444ef581a0ed09`). Rather than modifying the frozen parameter document retroactively, five deviations between `PARAMS.md` (frozen at `6df5bcc`) and the execution code that produced `c192e7ee...` (at commit `29012c8`) are recorded here:
+  1. **Separation Rule (Metric 1):** `PARAMS.md` specifies a 30-minute / 6-interval event merging separation threshold. The producing code (`reproduce.py`) evaluates continuous sequences of $\ge \$300/\text{MWh}$ intervals and splits on any single interval below $\$300/\text{MWh}$ without multi-interval merging (as correctly documented in Note README Section 2).
+  2. **Data Source (Metric 3):** `PARAMS.md` specifies pre-existing NEM dispatch audit summary dataset. The producing code calculates Equivalent Full Cycles (EFC) directly from primary AEMO 5-minute `DISPATCH_UNIT_SCADA` telemetry (`abs(SCADAVALUE).sum() * 5/60 / (2 * capacity)`).
+  3. **Stratification Cohort (Metric 3):** `PARAMS.md` specifies short-to-medium duration $\le 2\text{ hours}$. Blyth BESS (`BLYTHB1`, 477.0 MWh / 200.0 MW = 2.385 hours duration) is included within this short-to-medium duration cohort in the execution script and baseline output.
+  4. **BESS Denominator Capacities:** `PARAMS.md` at `6df5bcc` contained no explicit BESS nameplate capacity table. Energy denominators reside in `reproduce.py` (`BESS_ENERGY_CAPACITY`) and were calibrated prior to publication against the official AEMO NEM Registration and Exemption List (published 15 May 2026; e.g. Rangebank BESS `RANGEB1` = 400.0 MWh / 200.0 MW), as recorded in Entry #000.
+  5. **Fleet Size Alignment:** `PARAMS.md` specified 16 BESS units. The draft script at freeze commit `6df5bcc` included 18 units; pre-publication calibration commit `29012c8` removed `TARBESS1` and `TEMPB1` (mid-window commissioning), bringing the executed codebase into 100% alignment with the pre-registered 16-unit specification.
+- **Rule of Precedence:** *Where the frozen text and the executed code differ, the executed code governs the published numbers; the frozen text governs what was pre-registered.*  
+- **Status:** Ratified Baseline Record
