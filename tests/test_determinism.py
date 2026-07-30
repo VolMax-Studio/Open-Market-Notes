@@ -2,6 +2,7 @@
 import os
 import sys
 import json
+import glob
 import shutil
 import hashlib
 import tempfile
@@ -98,12 +99,14 @@ class TestSyntheticCIDeterminismFixture(unittest.TestCase):
 
 class TestReinforcedDeterminism(unittest.TestCase):
     def test_rename_recreate_byte_identity(self):
-        # Determine actual local telemetry directory
-        data_dir = LOCAL_PROC_DIR if (os.path.exists(LOCAL_PROC_DIR) and len(os.listdir(LOCAL_PROC_DIR)) > 0) else os.path.join(NOTE_DIR, "data", "processed")
-        has_telemetry = os.path.exists(data_dir) and len(os.listdir(data_dir)) > 0
+        # Canonical telemetry directory
+        data_dir = LOCAL_PROC_DIR
+        price_files = glob.glob(os.path.join(data_dir, "price_*.feather"))
+        scada_files = glob.glob(os.path.join(data_dir, "scada_*.feather"))
+        has_full_telemetry = len(price_files) == 13 and len(scada_files) == 13
         
-        if not has_telemetry:
-            self.skipTest(f"Skipping full telemetry determinism test — no telemetry files in {data_dir} (handled by TestSyntheticCIDeterminismFixture).")
+        if not has_full_telemetry:
+            self.skipTest(f"Skipping full telemetry determinism test — complete 13-month telemetry (13 price + 13 scada files) not present in {data_dir} (found {len(price_files)} price, {len(scada_files)} scada). Handled by TestSyntheticCIDeterminismFixture.")
 
         self.assertTrue(os.path.exists(RESULTS_JSON), f"Source results.json missing at {RESULTS_JSON}")
         frozen_registry_sha256 = get_frozen_registry_sha256("001")

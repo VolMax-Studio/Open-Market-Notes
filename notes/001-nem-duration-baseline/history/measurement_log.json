@@ -2,11 +2,12 @@
   {
     "version": "v1.0.0",
     "measurement_window": "2025-06-01 to 2026-06-30",
-    "results_sha256": "0ddbc333b298b298868966cfb1b49cb09867b7af179e4b9dc809cc65ed512260",
-    "input_manifest_sha256": "cf83638b3c68aef09ae9e0698b8260b09d7891097e9f76481ec2356e66e9eba9",
+    "results_sha256": "c192e7ee97ac413a07db6a1357f0dbcf49c1164cdbe0a5a4c0f5e9b113b614ed",
+    "input_manifest_sha256": "d4ff4cb29243dcff944aca6dc9243d6648f8b25522e558c2c3e5004a25b90f94",
     "params_sha256": "9efbc2ec7d69c76d4a70070bb3c0b00b7528d56c90b314f4f8444ef581a0ed09",
     "reproduce_sha256": "7accfd96e6f9c03c4bea9e76435b9afa87f969862d9f8ec2cf07d028d5d3d279",
     "pipeline_commit_sha": "6df5bccd7f56528d27ffa50f794a31e29e1bbec0",
+    "packaging_commit_sha": "ea275890a86743e3d2db1aaff05a441d19310d90",
     "executed_at": "2026-07-18T18:52:18Z"
   }
 ]

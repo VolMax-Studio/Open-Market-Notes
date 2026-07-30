@@ -57,6 +57,7 @@ Every recurrent measurement execution MUST record a 4-layer cryptographic proven
 - **`v1.0.0`**: Initial published baseline (linked to original Zenodo DOI).
 - **`v1.x.0`**: Recurrent 13-month rolling measurement refresh (recorded in `history/measurement_log.json`). Recurrent runs update history lineage and DO NOT mint new Zenodo DOIs.
 - **`v2.0.0`**: Major structural or parameter methodology change (requires new Zenodo DOI minting).
+- **DOI Revision & Erratum Policy:** Updating the `doi` field in `notes_registry.json` is strictly prohibited except via a formal, ratified erratum PR accompanied by a new Zenodo version release. If a DOI is updated, the previous published DOI MUST be preserved in the `superseded_doi` field of `notes_registry.json` for complete historical reference.
 
 ### Mandate 6 — History Log Ledger
 All recurrent measurement refreshes write to `history/measurement_log.json`:
