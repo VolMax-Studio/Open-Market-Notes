@@ -40,7 +40,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** CI determinism guard relied on ~41 MB of historical market telemetry files (`data/processed/*.feather`) gitignored from checkout, and was placed after `recurrence_run.py` instead of before it on clean checkout.  
 - **Root Cause:** Environment assumption anti-pattern. Local test pass assumed presence of gitignored telemetry on GitHub Actions runner.  
 - **Remediation:** Implemented `TestSyntheticCIDeterminismFixture` in `tests/test_determinism.py` generating a lightweight synthetic fixture dataset in a temporary directory for clean checkout CI execution.  
-- **Status:** Logged — Remediation Verified (2026-07-30 via live runner smoke test).
+- **Status:** Logged — Remediation Verified (2026-07-31 via live runner smoke test #3).
 
 ---
 
@@ -70,7 +70,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** `TestSyntheticCIDeterminismFixture` executed `reproduce.py` with synthetic inputs without specifying an isolated `--out-dir`, overwriting the baseline `results.json` and plots in `notes/001-nem-duration-baseline/` with synthetic test outputs.  
 - **Root Cause:** Test side-effect anti-pattern. Test suite modified committed working tree artifacts during execution.  
 - **Remediation:** Added `--out-dir` parameter to `reproduce.py`. Updated `TestSyntheticCIDeterminismFixture` to pass an isolated temporary directory (`temp_out_dir`), guaranteeing zero modification of repository artifacts. Restored committed baseline `results.json` via `git checkout`. Note: The restored hash `0ddbc333...` was subsequently identified as an 11-month incomplete telemetry artifact and corrected to `c192e7ee...` per Entry #011.  
-- **Status:** Logged — Remediation Verified (2026-07-30 via live runner smoke test).
+- **Status:** Logged — Remediation Verified (2026-07-31 via live runner smoke test #3).
 
 ---
 
@@ -110,7 +110,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** Empirical baseline reproduction in v9 was executed against an incomplete local telemetry directory (`data/processed`) containing only 11 months (`2025-06` to `2026-04`), producing `0ddbc333...`. This 11-month output hash was erroneously certified as the published $v1.0.0$ baseline, when the published Zenodo package, README tables, and public posts were based on the complete 13-month dataset (`c192e7ee...`).  
 - **Root Cause:** Input completeness assumption anti-pattern. Reproduction test validated determinism over available local telemetry without verifying input window boundary completeness against Mandate 1 (13 calendar months).  
 - **Remediation:** Downloaded missing May & June 2026 telemetry files via `download_aemo_data.py` (restoring full 13-month telemetry: 13 price + 13 scada files). Executed `reproduce.py` (`f6f6c261`), empirically proving byte-identical output `c192e7ee97ac413a07db6a1357f0dbcf49c1164cdbe0a5a4c0f5e9b113b614ed` matching published Zenodo record. Note: Re-fetching May & June 2026 telemetry from AEMO on 2026-07-30 reproduced `c192e7ee...` byte-identically, confirming zero retro-revision of AEMO public archive data since the July 18 baseline execution. Updated `notes_registry.json` and `PARAMETRIC_CHANGELOG.md`. Upgraded Mandate 8 to enforce dual-prefix (`price_` + `scada_`) 26-file telemetry completeness check.  
-- **Status:** Logged — Remediation Verified (2026-07-30 via live runner smoke test).
+- **Status:** Logged — Remediation Verified (2026-07-31 via live runner smoke test #3).
 
 ---
 
@@ -140,5 +140,5 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** Mandate 8 pre-execution check verified telemetry file existence via `os.path.getsize(f) == 0`. A download interrupted mid-stream leaves a non-empty truncated `.feather` file (size > 0 bytes) that bypasses `getsize() == 0`, potentially corrupting downstream analysis.  
 - **Root Cause:** Non-empty file size assumption anti-pattern. Verified file existence/non-zero size without validating binary file structural integrity or parquet format readability.  
 - **Remediation:** Upgraded Mandate 8 check in `scripts/recurrence_run.py` to enforce structural readability via `pd.read_feather(f)`.  
-- **Status:** Pending Ratification (Pre-Merge)
+- **Status:** Logged — Remediation Verified (2026-07-31 via live runner smoke test #3).
 
