@@ -2,7 +2,7 @@
   {
     "id": "OMN-001",
     "note_number": "001",
-    "title": "Open Market Note #001 \u2014 NEM Duration Baseline",
+    "title": "Open Market Note #001 — NEM Duration Baseline",
     "market": "Mainland Australia NEM (NSW1, QLD1, SA1, VIC1)",
     "signal": "Scarcity Price Duration ($300/MWh) & 8h BESS Charging Availability",
     "measurement_period": "2025-06-01 to 2026-06-30",
@@ -18,35 +18,37 @@
   {
     "id": "OMN-002",
     "note_number": "002",
-    "title": "Open Market Note #002 \u2014 ERCOT Duration Baseline",
+    "title": "Open Market Note #002 — ERCOT Duration Baseline",
     "market": "ERCOT (West, North, South, Houston)",
     "signal": "Scarcity Pricing Duration ($100 & $250/MWh) & 8h BESS Charging Availability",
     "measurement_period": "2025-06-01 to 2026-06-30",
-    "params_commit_hash": "a55af42",
+    "params_commit_hash": "90b29a4",
     "code_url": "https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/002-ercot-duration-baseline",
     "results_sha256": "90e3543b555087a0ba9404812eb142509a1faaacadf392bea5694b9389033f9c",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
-    "doi": "https://doi.org/10.5281/zenodo.21693245"
+    "doi": "https://doi.org/10.5281/zenodo.21693245",
+    "params_sha256": "558d0f04a11834ca28fc8efe81d8d03c05f5ea196b117467dd2c5da1ca8d947a"
   },
   {
     "id": "OMN-003",
     "note_number": "003",
-    "title": "Open Market Note #003 \u2014 ENTSO-E Imbalance Price Duration Baseline",
+    "title": "Open Market Note #003 — ENTSO-E Imbalance Price Duration Baseline",
     "market": "ENTSO-E Imbalance (NL, BE, FR, DK1, DK2, AT)",
     "signal": "15-min Imbalance Price Duration, Shortage vs Surplus, TSO Incentive Windows",
     "measurement_period": "2025-06-01 to 2026-06-30",
-    "params_commit_hash": "a2c0b3a",
+    "params_commit_hash": "99f87bb",
     "code_url": "https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/003-entsoe-imbalance-baseline",
     "results_sha256": "b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
-    "doi": "https://doi.org/10.5281/zenodo.21693254"
+    "doi": "https://doi.org/10.5281/zenodo.21693254",
+    "params_sha256": "acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58"
   },
   {
     "id": "OMN-004",
     "note_number": "004",
-    "title": "Open Market Note #004 \u2014 GB BESS Duration Baseline (Elexon BMRS)",
+    "title": "Open Market Note #004 — GB BESS Duration Baseline (Elexon BMRS)",
     "market": "Great Britain (Elexon BMRS NGET Area)",
     "signal": "30-min Settlement System Prices, Pure Scarcity Runs vs Event Spans",
     "measurement_period": "2025-06-01 to 2026-06-30",
@@ -55,12 +57,13 @@
     "results_sha256": "385ddfd9ed88357d6edf1dc39161468dbaa94115339671d4a39cec90446f873e",
     "status": "Published",
     "evidence_class": "Clean Baseline Measurement",
-    "doi": "https://doi.org/10.5281/zenodo.21693262"
+    "doi": "https://doi.org/10.5281/zenodo.21693262",
+    "params_sha256": "6efc418bc25829ad276dada62e2919b918e99438a1a64953326fc2e77a9d16d5"
   },
   {
     "id": "OMN-005",
     "note_number": "005",
-    "title": "Open Market Note #005 \u2014 ENTSO-E Cross-Border Physical Flow Dynamics Baseline",
+    "title": "Open Market Note #005 — ENTSO-E Cross-Border Physical Flow Dynamics Baseline",
     "market": "ENTSO-E CWE Interconnections (AT-DE, BE-NL, FR-BE, NL-DE)",
     "signal": "Metric M2 Intra-Corridor Physical Flow Dynamics & Flow Duration Curves",
     "measurement_period": "2025-06-01 to 2026-06-30",
@@ -69,6 +72,7 @@
     "results_sha256": "60314bd2764e58b90656e09843ef88392e7b5a59d3dc2945ade9936f559a719b",
     "status": "Published",
     "evidence_class": "Data Boundary Finding",
-    "doi": "https://doi.org/10.5281/zenodo.21693276"
+    "doi": "https://doi.org/10.5281/zenodo.21693276",
+    "params_sha256": "6bdbb82853e9e5c3e29539f560ce22b40aefbcbaf26483727c5c4ad6a9222387"
   }
 ]
