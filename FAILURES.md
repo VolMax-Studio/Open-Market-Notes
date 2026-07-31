@@ -149,7 +149,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Target Files:** `zenodo_packages/003-entsoe-imbalance-baseline_zenodo_v1.0.0.zip` (`entsoe_dry_run.py`), `FAILURES.md`  
 - **Violation:** `entsoe_dry_run.py` contained `print(f"Loaded API Token from {token_path}: {api_key[:8]}...{api_key[-4:]}")`, printing 12 characters of the ENTSO-E security token to stdout, violating Mandate 9 (Zero Secret Leakage). Automated audit reported Mandate 9 as clean based on regular expression scanning for full UUID strings without inspecting stdout printing logic.  
 - **Root Cause:** Partial-match credential assumption anti-pattern. Certified credential security using literal/UUID pattern matching without detecting partial string slicing and stdout echo statements.  
-- **Remediation:** Logged Entry #015. Verified `entsoe_dry_run.py` was never executed on public runners or committed with captured stdout logs. ENTSO-E API token rotated at source as precautionary remediation. Hardcoded absolute key paths (`/home/volmax-studio/Documents/...`) slated for environment variable replacement across future package releases.  
-- **Status:** Logged — Remediation Pending Gate Ratification (2026-07-31).
+- **Remediation:** Logged Entry #015. Sanitized `entsoe_dry_run.py` in repository working tree to remove token print logic. Note: The published Zenodo v1.0.0 package (DOI `10.5281/zenodo.21693254`) remains unmodified on Zenodo; token rotation at ENTSO-E renders the published partial string inert without minting a new Zenodo version (Mandate 5). Hardcoded absolute key paths (`/home/volmax-studio/Documents/...`) slated for environment variable replacement across future package releases.  
+- **Status:** Logged — Remediation Verified (2026-07-31) — Pending Merge.
 
 
