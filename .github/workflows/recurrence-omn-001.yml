@@ -50,3 +50,4 @@ jobs:
             notes/001-nem-duration-baseline/data_manifest.json
             notes/001-nem-duration-baseline/history/measurement_log.json
             notes/001-nem-duration-baseline/results/*.png
+          delete-branch: true
