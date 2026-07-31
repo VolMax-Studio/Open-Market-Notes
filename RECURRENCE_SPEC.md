@@ -43,6 +43,9 @@ The recurrence pipeline ensures that market observation baselines remain dynamic
 
 ### Mandate 3 — PARAMS & Code Immutability Verification & Registry Revision Policy
 - Before running analytical calculations, the runner MUST verify BOTH `PARAMS.md` (`params_sha256`) and the analytical script (`reproduce_sha256`) against the authoritative reference in `notes_registry.json`.
+- **Dual Parameter Field Semantics:** `notes_registry.json` tracks two distinct parameter attributes:
+  1. **`params_commit_hash`**: The Git commit SHA of the pre-execution parameter freeze (governance & pre-registration lineage).
+  2. **`params_sha256`**: The cryptographic SHA-256 hash of `PARAMS.md` inside the published Zenodo v1.0.0 package (empirical verification).
 - If either hash is missing or differs from the registry reference, execution MUST terminate immediately (`sys.exit(1)`).
 - **Registry Code Hash Revision Policy:** `results_sha256`, `params_sha256`, and DOI metadata are frozen for published $v1.0.0$ baselines. If a non-breaking maintenance patch ($v1.x.0$) is applied to `reproduce.py` (e.g. CLI path anchoring), `reproduce_sha256` in `notes_registry.json` is updated via a governance amendment PR accompanied by empirical verification that the published baseline output hash (`results_sha256`) reproduces byte-identically.
 
