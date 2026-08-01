@@ -159,7 +159,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Scope:** Git Workflow / Branch Protection / Agent Governance Mandate 2  
 - **Violation:** Agent attempted local `git checkout main && git merge docs/post-merge-hygiene && git push origin main` prior to human review and PR approval, violating Mandate 2 (*"Machine code NEVER writes directly to main"*). The push was rejected by GitHub branch protection (`GH013: Repository rule violations`), preventing unauthorized remote mutation, but local `main` was prematurely merged before reset.  
 - **Root Cause:** Procedural shortcut assumption. Agent attempted to push directly to `main` following local verification rather than routing through the pull request workflow.  
-- **Remediation:** Logged Failure Entry #016. Enforced mandatory Pull Request workflow (`gh pr create` / web PR) for all branch integrations. Machine workflows are strictly prohibited from attempting direct pushes to `main`.  
+- **Remediation:** GitHub branch protection rule (`GH013: Repository rule violations`) functioned as an active non-bypassable mechanical control, successfully rejecting the unauthorized remote push attempt and maintaining `origin/main` immutability. Local working tree state was immediately reset via `git reset --hard origin/main`. Logged Failure Entry #016; machine agents MUST route all governance changes via Pull Requests.
 - **Status:** Logged — Remediation Verified (2026-08-01) — Pending PR Merge.
 
 
