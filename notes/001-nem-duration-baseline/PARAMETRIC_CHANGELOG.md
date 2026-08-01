@@ -1,6 +1,6 @@
 # Parametric Changelog — Open Market Note #001 (NEM Duration Baseline)
 
-*(Governance Note: All entries marked `Ratified (Merged to main)` transition to `Ratified` upon PR merge to `main`).*
+*(Governance Note: All entries marked `Pending Ratification (Pre-Merge)` transition to `Ratified` upon PR merge to `main`).*
 
 ### Entry #000 — Pre-Publication BESS Denominator Alignment & Fleet Subsample Calibration
 - **Date:** 2026-07-19  

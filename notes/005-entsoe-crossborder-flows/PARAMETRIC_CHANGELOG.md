@@ -1,6 +1,6 @@
 # Open Market Note #005 — Parametric Changelog
 
-*(Governance Note: All entries marked `Ratified (Merged to main)` transition to `Ratified` upon PR merge to `main`).*
+*(Governance Note: All entries marked `Pending Ratification (Pre-Merge)` transition to `Ratified` upon PR merge to `main`).*
 
 ---
 
