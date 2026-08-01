@@ -1,6 +1,6 @@
 # VolMax Open Market Notes — Recurrence Specification
 **Version:** v1.0.8  
-**Status:** Draft for Ratification (Pre-Merge)  
+**Status:** Ratified Baseline Specification  
 **Date:** 2026-08-01  
 **Repository:** `VolMax-Studio/Open-Market-Notes`  
 
@@ -19,7 +19,7 @@ The recurrence pipeline ensures that market observation baselines remain dynamic
 
 ## 2. Revision History & Governance Changelog
 
-- **v1.0.8 (2026-08-01):** Draft for Ratification. Formally defined dual parameter field semantics (`params_commit_hash` for pre-execution freeze lineage vs `params_sha256` for cryptographic verification of published package `PARAMS.md`) under Mandate 3; distinguished baseline registry initial establishment (2026-07-31) from post-ratification immutability freezing; updated Mandate 3 verification wording.
+- **v1.0.8 (2026-08-01):** Ratified Baseline Specification. Formally defined dual parameter field semantics (`params_commit_hash` for pre-execution freeze lineage vs `params_sha256` for cryptographic verification of published package `PARAMS.md`) under Mandate 3; distinguished baseline registry initial establishment (2026-07-31) from post-ratification immutability freezing; updated Mandate 3 verification wording.
 - **v1.0.7 (2026-07-30):** Ratified Option 3 alignment of `notes_registry.json` and `results.json` to the canonical 13-month published Zenodo baseline hash (`c192e7ee...`) after restoring complete 13-month telemetry; formalized DOI Revision & `superseded_doi` Erratum Policy in Mandate 5; upgraded Mandate 8 to enforce dual-prefix monthly telemetry completeness (`price_` AND `scada_` files for all 13 months); logged Failure Entries #011, #012, and #013; explicitly supersedes and corrects the erroneous v1.0.6 changelog claim regarding `0ddbc333...` baseline output verification.
 - **v1.0.6 (2026-07-30):** Enforced non-bypassable `reproduce_sha256` check across all notes; established Registry Code Hash Revision Policy for minor maintenance patches ($v1.x.0$); pin-locked dependency versions in `requirements.txt`; enriched synthetic CI fixture with scarcity price spikes; dynamic spec version resolution.
 - **v1.0.5 (2026-07-30):** Enforced Mandate 3 dual cryptographic check (`params_sha256` + `reproduce_sha256`); mandated isolated output directory (`--out-dir`) for synthetic CI guard; enforced upper and lower boundary date filtering; unified input path anchoring via `requirements.txt` and `--data-dir`; expanded Mandate 7 manual recurrence taxonomy.

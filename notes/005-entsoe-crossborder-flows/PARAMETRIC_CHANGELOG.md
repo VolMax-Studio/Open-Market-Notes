@@ -12,4 +12,4 @@
   2. **Post-Execution Edit:** `PARAMS.md` in the published Zenodo package matches commit `afe7120` (29 July 2026 23:08Z), updated post-execution.
   3. **Registry Hash Discrepancy:** `notes_registry.json` records `params_commit_hash: afddbe9` (pre-execution freeze), whereas the published Zenodo v1.0.0 package contains `PARAMS.md` matching commit `afe7120`.
 - **Rule of Precedence:** *The published Zenodo package is authoritative (`PARAMS.md` matches commit `afe7120`).*
-- **Status:** Pending Ratification (Pre-Merge)
+- **Status:** Ratified (Merged to main)
