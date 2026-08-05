@@ -1,6 +1,9 @@
 # VolMax Open Market Notes — Failure Registry
 
-This document records procedural failures, governance violations, and anti-patterns identified during the development and maintenance of VolMax Open Market Notes.
+This document records procedural failures, governance violations, anti-patterns, and production control verification events identified during the development and maintenance of VolMax Open Market Notes.
+
+> [!NOTE]
+> Entries in this registry document both defect remediations (#001–#016) and production verification events of mechanical governance controls (#017).
 
 ---
 
@@ -140,7 +143,7 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** Mandate 8 pre-execution check verified telemetry file existence via `os.path.getsize(f) == 0`. A download interrupted mid-stream leaves a non-empty truncated `.feather` file (size > 0 bytes) that bypasses `getsize() == 0`, potentially corrupting downstream analysis.  
 - **Root Cause:** Non-empty file size assumption anti-pattern. Verified file existence/non-zero size without validating binary file structural integrity or parquet format readability.  
 - **Remediation:** Upgraded Mandate 8 check in `scripts/recurrence_run.py` to enforce structural readability via `pd.read_feather(f)`.  
-- **Status:** Logged — Remediation Verified (2026-07-31 via live runner smoke test #3) — Ratified on main.
+- **Status:** Logged — Remediation Verified (2026-07-31 via live runner smoke test #3; 2026-08-05 via production AEMO archive latency event) — Ratified on main.
 
 ---
 
@@ -160,6 +163,16 @@ This document records procedural failures, governance violations, and anti-patte
 - **Violation:** Agent attempted local `git checkout main && git merge docs/post-merge-hygiene && git push origin main` prior to human review and PR approval, violating Mandate 2 (*"Machine code NEVER writes directly to main"*). The push was rejected by GitHub branch protection (`GH013: Repository rule violations`), preventing unauthorized remote mutation, but local `main` was prematurely merged before reset.  
 - **Root Cause:** Procedural shortcut assumption. Agent attempted to push directly to `main` following local verification rather than routing through the pull request workflow.  
 - **Remediation:** GitHub branch protection rule (`GH013: Repository rule violations`) functioned as an active non-bypassable mechanical control, successfully rejecting the unauthorized remote push attempt and maintaining `origin/main` immutability. Local working tree state was immediately reset via `git reset --hard origin/main`. Logged Failure Entry #016; machine agents MUST route all governance changes via Pull Requests.
-- **Status:** Logged — Remediation Verified (2026-08-01) — Pending PR Merge.
+- **Status:** Logged — Remediation Verified (2026-08-01) — Ratified on main.
+
+---
+
+### Failure Entry #017 — Mandate 8 Abort Triggered by Upstream Archive Latency (First Production Event)
+- **Date:** 2026-08-05  
+- **Target Files:** `scripts/recurrence_run.py`, `.github/workflows/recurrence-omn-001.yml`, `FAILURES.md`  
+- **Observation / Incident:** Scheduled cron run (2026-08-05 04:00 UTC) computed rolling window `2025-07-01` to `2026-07-31`. The AEMO monthly archive for July 2026 was not yet published on NEMWEB; `nemosis` returned an empty DataFrame without raising an exception, writing both `price_202607.feather` and `scada_202607.feather` with 0 rows. Mandate 8 structural row-count verification (`len(df) == 0`, implemented per Failure Entry #014) detected the empty frames and triggered a mechanical workflow abort prior to PR creation.  
+- **Root Cause:** Upstream data availability latency (>5 days after month-end). `nemosis` silently swallows missing monthly archive HTTP errors and returns zero-row DataFrames instead of raising an exception.  
+- **Remediation & Mechanical Verification:** No code defect. The Mandate 8 row-count guard performed exactly as specified on its first production encounter, successfully preventing the creation of a corrupted or incomplete Pull Request. Lower bound on AEMO monthly archive latency confirmed at >5 days post month-end. Entry #014 remediation formally verified in production.  
+- **Status:** Logged — Remediation Verified (2026-08-05) — Pending Ratification.
 
 
