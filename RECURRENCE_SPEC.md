@@ -35,7 +35,11 @@ The recurrence pipeline ensures that market observation baselines remain dynamic
 
 ### Mandate 1 — 13-Month Rolling Calendar Window Alignment
 - Every recurrent measurement MUST evaluate exactly 13 full calendar months ending on the last day of the last fully completed calendar month prior to execution.
-- Telemetry data MUST be filtered with strict lower AND upper boundary timestamps (`SETTLEMENTDATE >= start_date 04:05:00` AND `SETTLEMENTDATE <= end_date+1d 04:00:00`). Partial calendar months are strictly prohibited.
+- Telemetry data MUST be filtered with source-specific strict lower AND upper boundary timestamps:
+  - **AEMO (NEM / OMN-001)**: AEMO market trading day convention (`SETTLEMENTDATE >= start_date 04:05:00` AND `<= end_date+1d 04:00:00`).
+  - **Elexon (GB / OMN-004)**: Market timezone calendar day convention (`startTime >= start_date 00:00:00 Europe/London` AND `<= end_date 23:59:59 Europe/London`).
+  - **ENTSO-E (Europe / OMN-003, OMN-005)**: Target zone calendar day convention (`startTime >= start_date 00:00:00 CET/CEST` AND `<= end_date 23:59:59 CET/CEST`).
+- Partial calendar months are strictly prohibited.
 
 ### Mandate 2 — PR-Only Branch & Commit Isolation
 - Recurrent automation workflows MUST execute on isolated branches named `recurrent-measurement/omn-00X-${{ github.run_id }}`.

@@ -224,9 +224,11 @@ def main():
             sys.exit(1)
         try:
             df = pd.read_feather(single_file)
-            min_expected_rows = len(expected_months) * 28 * 48
-            if len(df) < min_expected_rows:
-                print(f"FATAL ERROR (Mandate 8 Abort): Insufficient row count ({len(df)} rows < {min_expected_rows} threshold)")
+            from datetime import date
+            expected_days = (date.fromisoformat(end_date) - date.fromisoformat(start_date)).days + 1
+            exact_expected_rows = expected_days * 48
+            if len(df) < exact_expected_rows:
+                print(f"FATAL ERROR (Mandate 8 Abort): Insufficient row count ({len(df)} rows < {exact_expected_rows} exact threshold for {expected_days} days)")
                 sys.exit(1)
             df['startTime'] = pd.to_datetime(df['startTime'])
             df_sorted = df.sort_values('startTime')

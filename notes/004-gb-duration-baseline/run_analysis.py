@@ -3,8 +3,6 @@ import json
 import pandas as pd
 import numpy as np
 
-proc_path = './data/processed/gb_system_prices.feather'
-
 def calculate_pure_scarcity_runs(df, price_col='systemSellPrice', threshold=100.0):
     """
     Calculates Pure Continuous Scarcity Runs (strictly >= threshold, zero tolerance for sub-threshold dips).
@@ -208,13 +206,19 @@ def run_full_analysis(start_date=None, end_date=None, data_dir=None, out_dir=Non
     if end_date is None:
         end_date = "2026-06-30"
         
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     if data_dir is None:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        data_dir = os.path.join(base_dir, 'data', 'processed')
+        baseline_file = os.path.join(base_dir, 'data', 'baseline', 'gb_system_prices_202506_202606.feather')
+        if os.path.exists(baseline_file):
+            feather_file = baseline_file
+        else:
+            feather_file = os.path.join(base_dir, 'data', 'processed', 'gb_system_prices.feather')
+    else:
+        feather_file = os.path.join(data_dir, 'gb_system_prices.feather')
+
     if out_dir is None:
         out_dir = '.'
         
-    feather_file = os.path.join(data_dir, 'gb_system_prices.feather')
     df = pd.read_feather(feather_file)
     df['startTime'] = pd.to_datetime(df['startTime'])
     df = df.set_index('startTime')
