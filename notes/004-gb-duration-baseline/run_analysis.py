@@ -200,10 +200,24 @@ def calculate_m2_charging_windows(df, price_col='systemSellPrice', cheap_thresho
         'max_daily_cheap_hours': round(float(daily_hours.max()), 2)
     }
 
-def run_full_analysis():
-    df = pd.read_feather(proc_path)
+import argparse
+
+def run_full_analysis(start_date=None, end_date=None, data_dir=None, out_dir=None):
+    if data_dir is None:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        data_dir = os.path.join(base_dir, 'data', 'processed')
+    if out_dir is None:
+        out_dir = '.'
+        
+    feather_file = os.path.join(data_dir, 'gb_system_prices.feather')
+    df = pd.read_feather(feather_file)
     df['startTime'] = pd.to_datetime(df['startTime'])
     df = df.set_index('startTime')
+    
+    if start_date and end_date:
+        start_dt = pd.to_datetime(start_date, utc=True)
+        end_dt = pd.to_datetime(end_date, utc=True)
+        df = df[(df.index >= start_dt) & (df.index <= end_dt)]
     
     print("==========================================")
     print("RUNNING METRIC CALCULATIONS FOR GB BASELINE")
@@ -229,12 +243,13 @@ def run_full_analysis():
         'm2_charging_windows': m2
     }
     
-    out_json = './data/processed/gb_baseline_results.json'
+    os.makedirs(out_dir, exist_ok=True)
+    out_json = os.path.join(out_dir, 'results.json')
+    summary_json = os.path.join(out_dir, 'summary.json')
+    
     with open(out_json, 'w') as f:
         json.dump(results, f, indent=4)
-    with open('results.json', 'w') as f:
-        json.dump(results, f, indent=4)
-    with open('summary.json', 'w') as f:
+    with open(summary_json, 'w') as f:
         json.dump(results, f, indent=4)
         
     print("\n--- METRIC 1: PURE CONTINUOUS SCARCITY RUNS (GBP >= 100/MWh) ---")
@@ -252,4 +267,11 @@ def run_full_analysis():
     return results
 
 if __name__ == '__main__':
-    run_full_analysis()
+    parser = argparse.ArgumentParser(description="Run GB BESS Duration Baseline Analysis")
+    parser.add_argument("--start-date", help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", help="End date (YYYY-MM-DD)")
+    parser.add_argument("--data-dir", help="Directory containing gb_system_prices.feather")
+    parser.add_argument("--out-dir", help="Directory to write results.json")
+    args = parser.parse_args()
+    
+    run_full_analysis(start_date=args.start_date, end_date=args.end_date, data_dir=args.data_dir, out_dir=args.out_dir)

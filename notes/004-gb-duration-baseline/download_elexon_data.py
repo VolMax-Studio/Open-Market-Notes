@@ -149,4 +149,9 @@ def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
     return df
 
 if __name__ == '__main__':
-    fetch_elexon_system_prices()
+    import argparse
+    parser = argparse.ArgumentParser(description="Download Elexon telemetry for OMN-004")
+    parser.add_argument("--start-date", default="2025-06-01", help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", default="2026-06-30", help="End date (YYYY-MM-DD)")
+    args = parser.parse_args()
+    fetch_elexon_system_prices(args.start_date, args.end_date)
