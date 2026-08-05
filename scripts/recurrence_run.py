@@ -224,16 +224,28 @@ def main():
             sys.exit(1)
         try:
             df = pd.read_feather(single_file)
-            if len(df) < 18000:
-                print(f"FATAL ERROR (Mandate 8 Abort): Insufficient row count ({len(df)} rows < 18,000 threshold)")
+            min_expected_rows = len(expected_months) * 28 * 48
+            if len(df) < min_expected_rows:
+                print(f"FATAL ERROR (Mandate 8 Abort): Insufficient row count ({len(df)} rows < {min_expected_rows} threshold)")
                 sys.exit(1)
             df['startTime'] = pd.to_datetime(df['startTime'])
-            df_ym = df['startTime'].dt.strftime("%Y%m")
+            df_sorted = df.sort_values('startTime')
+            
+            # 1. Non-zero monthly row count check
+            df_ym = df_sorted['startTime'].dt.strftime("%Y%m")
             missing_months = [ym for ym in expected_months if (df_ym == ym).sum() == 0]
             if missing_months:
                 print(f"FATAL ERROR (Mandate 8 Abort): Zero telemetry rows for expected months: {missing_months}")
                 sys.exit(1)
-            print(f"Mandate 8 Check PASSED: Elexon single-file telemetry verified ({len(df)} rows across {len(expected_months)} months).")
+                
+            # 2. Timestamp continuity check (max gap > 35 min)
+            time_diffs = df_sorted['startTime'].diff().dropna()
+            max_gap_min = time_diffs.max().total_seconds() / 60.0
+            if max_gap_min > 35.0:
+                print(f"FATAL ERROR (Mandate 8 Abort): Temporal continuity breach detected (max gap: {max_gap_min:.1f} min > 35 min limit)")
+                sys.exit(1)
+                
+            print(f"Mandate 8 Check PASSED: Elexon single-file telemetry verified ({len(df)} rows across {len(expected_months)} months, max gap {max_gap_min:.1f} min).")
         except Exception as e:
             print(f"FATAL ERROR (Mandate 8 Abort): Unreadable Elexon telemetry file: {e}")
             sys.exit(1)

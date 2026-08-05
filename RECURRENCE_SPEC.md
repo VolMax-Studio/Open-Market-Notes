@@ -85,15 +85,15 @@ All recurrent measurement refreshes write to `history/measurement_log.json`. Cor
 *(Optional additive fields: `packaging_commit_sha` may record the packaging commit SHA when distinct from the producing commit; `manifest_provenance` may record manifest reconstruction notes).*
 
 ### Mandate 7 — Execution Modes (Automated vs Manual Recurrence)
-- **Automated Recurrence (`parameterized: True`)**: Fully parameterized pipelines (e.g. Note #001) dispatched automatically via GitHub Actions schedule or manual workflow_dispatch.
-- **Manual Recurrence (`parameterized: False` OR IP/WAF Restrictions)**: Non-parameterized pipelines (e.g. Notes #003–#005) OR pipelines subject to cloud runner IP blocks (e.g. Note #002 ERCOT grid telemetry WAF) executed manually in controlled local environments using parametric changelog protocol until resolved.
+- **Automated Recurrence (`parameterized: True`)**: Fully parameterized pipelines (e.g. Note #001, Note #004) dispatched automatically via GitHub Actions schedule or manual workflow_dispatch.
+- **Manual Recurrence (`parameterized: False` OR IP/WAF Restrictions)**: Non-parameterized pipelines (e.g. Notes #003, #005) OR pipelines subject to cloud runner IP blocks (e.g. Note #002 ERCOT grid telemetry WAF) executed manually in controlled local environments using parametric changelog protocol until resolved.
 
 ### Mandate 8 — Telemetry Completeness & Boundary Verification
 - **Multi-File Monthly Layouts (e.g. AEMO OMN-001)**: The pipeline MUST verify the presence, structural readability (`pd.read_feather()`), and non-zero row count (`len(df) > 0`) of ALL 13 monthly telemetry files across ALL required dataset types (`price_YYYYMM.feather` AND `scada_YYYYMM.feather`) in the explicitly passed data directory.
 - **Single-File & Consolidated Layouts (e.g. Elexon OMN-004)**: For single-file datasets (`gb_system_prices.feather`), the pipeline MUST verify:
-  1. Total row count meets expected rolling window threshold ($\ge 18,960$ 30-min settlement intervals for a 13-month window).
-  2. Non-zero monthly row count for EVERY month within the calculated 13-month rolling window.
-  3. Strict timestamp continuity without unexpected temporal gaps ($>35$ min).
+  1. Total row count meets expected rolling window threshold ($\ge \text{expected\_months} \times 28 \times 48$, e.g., $\ge 17,472$ intervals for a 13-month window).
+  2. Non-zero monthly row count for EVERY month within the calculated rolling window (`df['startTime'].dt.strftime('%Y%m')`).
+  3. Strict timestamp continuity without unexpected temporal gaps ($>35$ min limit).
 - **Abort Policy**: If any telemetry file, month, or structural check fails or returns 0 rows, the workflow MUST terminate immediately (`sys.exit(1)`) prior to PR creation.
 
 ### Mandate 9 — Zero Secret Leakage Control

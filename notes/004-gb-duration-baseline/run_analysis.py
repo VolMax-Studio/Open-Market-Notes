@@ -203,6 +203,11 @@ def calculate_m2_charging_windows(df, price_col='systemSellPrice', cheap_thresho
 import argparse
 
 def run_full_analysis(start_date=None, end_date=None, data_dir=None, out_dir=None):
+    if start_date is None:
+        start_date = "2025-06-01"
+    if end_date is None:
+        end_date = "2026-06-30"
+        
     if data_dir is None:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         data_dir = os.path.join(base_dir, 'data', 'processed')
@@ -215,8 +220,8 @@ def run_full_analysis(start_date=None, end_date=None, data_dir=None, out_dir=Non
     df = df.set_index('startTime')
     
     if start_date and end_date:
-        start_dt = pd.to_datetime(start_date, utc=True)
-        end_dt = pd.to_datetime(end_date, utc=True)
+        start_dt = pd.Timestamp(start_date, tz=df.index.tz)
+        end_dt = pd.Timestamp(end_date, tz=df.index.tz) + pd.Timedelta(days=1) - pd.Timedelta(nanoseconds=1)
         df = df[(df.index >= start_dt) & (df.index <= end_dt)]
     
     print("==========================================")
@@ -245,11 +250,8 @@ def run_full_analysis(start_date=None, end_date=None, data_dir=None, out_dir=Non
     
     os.makedirs(out_dir, exist_ok=True)
     out_json = os.path.join(out_dir, 'results.json')
-    summary_json = os.path.join(out_dir, 'summary.json')
     
     with open(out_json, 'w') as f:
-        json.dump(results, f, indent=4)
-    with open(summary_json, 'w') as f:
         json.dump(results, f, indent=4)
         
     print("\n--- METRIC 1: PURE CONTINUOUS SCARCITY RUNS (GBP >= 100/MWh) ---")
