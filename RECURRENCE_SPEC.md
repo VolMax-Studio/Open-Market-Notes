@@ -96,7 +96,7 @@ All recurrent measurement refreshes write to `history/measurement_log.json`. Cor
 ### Mandate 8 — Telemetry Completeness & Boundary Verification
 - **Multi-File Monthly Layouts (e.g. AEMO OMN-001)**: The pipeline MUST verify the presence, structural readability (`pd.read_feather()`), and non-zero row count (`len(df) > 0`) of ALL 13 monthly telemetry files across ALL required dataset types (`price_YYYYMM.feather` AND `scada_YYYYMM.feather`) in the explicitly passed data directory.
 - **Single-File & Consolidated Layouts (e.g. Elexon OMN-004)**: For single-file datasets (`gb_system_prices.feather`), the pipeline MUST verify:
-  1. Total row count meets exact expected rolling window threshold ($\text{expected\_days} \times 48$, e.g., $18,960$ intervals for 395 baseline days, $19,008$ intervals for 396 rolling window days).
+  1. Total row count is at least the exact expected count ($\ge \text{expected\_days} \times 48$, e.g., $18,960$ intervals for 395 baseline days, $19,008$ intervals for 396 rolling window days).
   2. Non-zero monthly row count for EVERY month within the calculated rolling window (`df['startTime'].dt.strftime('%Y%m')`).
   3. Strict timestamp continuity without unexpected temporal gaps ($>35$ min limit).
 - **Abort Policy**: If any telemetry file, month, or structural check fails or returns 0 rows, the workflow MUST terminate immediately (`sys.exit(1)`) prior to PR creation.
