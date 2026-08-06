@@ -19,5 +19,5 @@
 ## Entry #002: Typographical Artifact Retention in Frozen PARAMS.md (2026-08-06)
 
 - **Scope:** Note #005 ENTSO-E Cross-Border Flows (`PARAMS.md`)
-- **Governance Finding:** Typographical artifact ('u' for 'in') in Section 1 of the frozen `PARAMS.md`; not corrected, as the document is byte-frozen against the published Zenodo record (`6bdbb82853e9e5c3e29539f560ce22b40aefbcbaf26483727c5c4ad6a9222387`).
+- **Governance Finding:** Typographical artifact ('u' for 'in') in the Known Empirical Limitations block of Section 1 of the frozen `PARAMS.md`; not corrected, as the document is byte-frozen against the published Zenodo record (`6bdbb82853e9e5c3e29539f560ce22b40aefbcbaf26483727c5c4ad6a9222387`).
 - **Status:** Pending Ratification (Pre-Merge)
