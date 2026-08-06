@@ -6,7 +6,7 @@
 **Dataset Scope:** 1 June 2025 00:00:00 BST – 30 June 2026 23:59:59 BST (13 months, 395 calendar days, 18,960 30-minute settlement periods)  
 **Data Source:** Elexon Insights Solution REST API (System Prices Endpoint: `https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{settlementDate}`)  
 **Data License:** Open Data under Elexon Open Data License / Open Government License v3.0  
-**Data Manifest:** `data/data_manifest.json` (SHA-256 registered)  
+**Data Manifest:** `data_manifest.json` (SHA-256 registered)  
 
 ---
 
@@ -17,7 +17,7 @@
 | **1. Total Interval & DST Verification** | Scope = **395 calendar days** (393 standard days + 2 DST days). Autumn DST (26 Oct 2025) = **50 periods**; Spring DST (29 Mar 2026) = **46 periods**; 393 standard days = $18,864$ periods. Total = $18,864 + 50 + 46 = 18,960$ periods. Net zero DST shift. Time range verified: `2025-05-31T23:00:00Z` (1 June 00:00 BST) to `2026-06-30 23:30:00 BST`. | **VERIFIED** |
 | **2. Pure Scarcity vs Macro Window Semantics** | Metrics are strictly decoupled into two separate tables: **Pure Active Scarcity Runs** (uninterrupted periods strictly $\ge \text{threshold}$, excluding sub-threshold dips) and **Macro Event Window Spans** (wall-clock duration of scarcity clusters allowing $<60\text{ min}$ sub-threshold dips). Time-aware continuity ($\Delta t \le 30\text{ min}$) enforced. | **VERIFIED** |
 | **3. Raw Data Column Mapping** | Raw Elexon JSON payload explicitly contains independent fields `"systemSellPrice"` and `"systemBuyPrice"`. Imbalance settlement price confirmed. | **VERIFIED** |
-| **4. Parameter Lineage & Git Order** | `PARAMS.md` parameter definitions were declared in code prior to execution (`2026-07-25T20:00:00+02:00`), but were co-committed alongside initial data ingestion u commit `792b4d9`. Git commit pre-registration lineage is **PARTIAL** (co-committed history, weaker than Note #003). | **PARTIAL** |
+| **4. Parameter Lineage & Git Order** | `PARAMS.md` parameter definitions were declared in code prior to execution (`2026-07-25T20:00:00+02:00`), but were co-committed alongside initial data ingestion in commit `792b4d9`. Git commit pre-registration lineage is **PARTIAL** (co-committed history, weaker than Note #003). | **PARTIAL** |
 | **5. Procedural Regime Branch Verification** | Ingestion pipeline executed the dual-column comparison branch: `systemSellPrice` and `systemBuyPrice` were evaluated independently, yielding 18,960/18,960 exact matches (0.0000 GBP/MWh max diff), empirically confirming Single Imbalance Pricing. | **VERIFIED** |
 
 ---
@@ -76,12 +76,20 @@ Charging availability evaluates cumulative daily half-hourly periods $\le £25/\
 ## 4. Key Strategic Insights for GB BESS Developers
 
 1. **2-Hour Asset Alignment:** In GB, 2-hour duration BESS assets capture **30.13%** of cheap charging days ($\le £25/\text{MWh}$), whereas 4-hour assets drop to **20.25%**, demonstrating that 2-hour duration assets align with the largest share of qualifying charging days without requiring longer accumulation windows.
-2. **Extreme Scarcity Profile:** Extreme scarcity ($\ge £250/\text{MWh}$) is rare (17 pure continuous runs u 13 meseci, total 25.0 active hours) and short-lived (median 1.0 hour, P90 2.7 hours), peaking at **£800/MWh**. Fast-responding 1-hour to 2-hour BESS units capture nearly 100% of available extreme scarcity value.
+2. **Extreme Scarcity Profile:** Extreme scarcity ($\ge £250/\text{MWh}$) is rare (17 pure continuous runs in 13 months, total 25.0 active hours) and short-lived (median 1.0 hour, P90 2.7 hours), peaking at **£800/MWh**. Fast-responding 1-hour to 2-hour BESS units capture nearly 100% of available extreme scarcity value.
+
+---
+
+## 5. BSC Settlement Reconciliation Governance & Data Limitations
+
+* **Multi-Stage BSC Settlement Reconciliation Lifecycle:** Elexon System Prices undergo multi-stage Balancing and Settlement Code (BSC) reconciliations (Interim, Initial SF, R1, R2, R3 over ~14 months). The baseline dataset captures active system prices (`priceDerivationCode` P/R) at acquisition.
+* **Empirical Baseline Stability:** Re-acquisition of the 13-month baseline telemetry on 5 August 2026 yielded a 100% byte-identical raw CSV hash (`3c63f78a...`, original hash recorded in `data_manifest.json` at commit `792b4d9`), empirically confirming zero upstream settlement revisions for the baseline window over that period.
+* **Recurrent Measurement Policy:** Recurrent 13-month rolling window refreshes fetch active system prices from Elexon Insights API. Any retrospective settlement revisions performed during BSC reconciliation runs will be captured dynamically upon query.
 
 ---
 
 ## Data Provenance & Lineage
-* Raw data manifest: `data/data_manifest.json`
+* Raw data manifest: `data_manifest.json`
 * Ingestion script: `download_elexon_data.py`
 * Calculation script: `run_analysis.py`
-* Output metrics: `data/processed/gb_baseline_results.json`
+* Output metrics: `results.json`

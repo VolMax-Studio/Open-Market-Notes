@@ -3,7 +3,7 @@ name: Recurrent Measurement — OMN-001 (NEM Duration Baseline)
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 4 5 * *' # At 04:00 UTC on day-of-month 5 (allowing AEMO monthly archives to populate)
+    - cron: '0 4 20 * *' # At 04:00 UTC on day-of-month 20 (accommodating empirical >6 day AEMO archive publication lag)
 
 permissions:
   contents: write
