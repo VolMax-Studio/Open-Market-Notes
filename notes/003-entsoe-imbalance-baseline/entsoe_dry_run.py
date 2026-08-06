@@ -8,7 +8,7 @@ token_path = '/home/volmax-studio/Documents/Kljucevi/apientso.txt'
 with open(token_path, 'r') as f:
     api_key = f.read().strip()
 
-print(f"Loaded API Token from {token_path}: {api_key[:8]}...{api_key[-4:]}")
+print(f"Loaded API Token from {token_path} (Credentials redacted per Mandate 9)")
 
 # Test parameters: Imbalance Prices (DocumentType A85) for DE-LU (10Y1001A1001A82H)
 # Period: 2025-06-01 00:00 UTC to 2025-06-02 00:00 UTC
