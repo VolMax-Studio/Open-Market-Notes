@@ -10,7 +10,6 @@
 - **Market / Bidding Zone:** Great Britain (GB / NGET Grid Area).
 - **Resolution:** 30-minute Settlement Periods (48 settlement periods per calendar day).
 - **Data Source:** Primary Elexon Insights Solution REST API (System Prices Endpoint: `https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{settlementDate}`). Formally listed as Open Data under the Elexon Open Data License / Open Government License v3.0 (free commercial and non-commercial re-use).
-- **BSC Settlement Run Governance & Revisions:** System Prices $P_{sys}$ undergo multi-stage BSC settlement reconciliations (Interim, SF, R1, R2, R3 over ~14 months). The baseline dataset captures active system prices (`priceDerivationCode` P/R) at acquisition. Recurrent rolling window refreshes fetch active settlement state from Elexon Insights API.
 - **Data Provenance Rule:** All raw data files must be accompanied by explicit provenance metadata in `data_manifest.json` (including exact REST API query URL, UTC acquisition timestamp, sha256 hash, and byte count).
 - **BESS Fleet Subsample:** N/A for baseline pricing duration.
 

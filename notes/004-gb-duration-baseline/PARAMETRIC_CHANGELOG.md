@@ -34,3 +34,11 @@
   Baseline output hash (`results_sha256`) is **100% byte-identical** to published $v1.0.0$ Zenodo record (`385ddfd9...`) over complete 13-month telemetry.  
 - **Classification:** Non-breaking maintenance patch ($v1.x.0$).  
 - **Status:** Pending Ratification (Pre-Merge)
+
+---
+
+### Entry #002 — BSC Settlement Reconciliation Lifecycle & Ingestion Provenance Alignment
+- **Date:** 2026-08-06  
+- **Scope:** `data_manifest.json`, `README.md`, `PARAMETRIC_CHANGELOG.md`  
+- **Governance Finding:** Elexon System Prices undergo multi-stage BSC settlement reconciliations (Interim, SF, R1, R2, R3 over ~14 months). In accordance with Mandate 3, frozen baseline parameters (`PARAMS.md` sha256 `6efc418b...`) remain immutable. Retrospective findings regarding Elexon settlement run revision mechanics (`priceDerivationCode` P/R) are recorded here and in `README.md` rather than retroactively altering frozen parameter definitions.  
+- **Status:** Pending Ratification (Pre-Merge)
