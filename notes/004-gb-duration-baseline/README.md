@@ -83,7 +83,7 @@ Charging availability evaluates cumulative daily half-hourly periods $\le £25/\
 ## 5. BSC Settlement Reconciliation Governance & Data Limitations
 
 * **Multi-Stage BSC Settlement Reconciliation Lifecycle:** Elexon System Prices undergo multi-stage Balancing and Settlement Code (BSC) reconciliations (Interim, Initial SF, R1, R2, R3 over ~14 months). The baseline dataset captures active system prices (`priceDerivationCode` P/R) at acquisition.
-* **Empirical Baseline Stability:** Re-acquisition of the 13-month baseline telemetry on 5 August 2026 yielded a 100% byte-identical raw CSV hash (`3c63f78a...`), empirically confirming zero upstream settlement revisions for the baseline window over that period.
+* **Empirical Baseline Stability:** Re-acquisition of the 13-month baseline telemetry on 5 August 2026 yielded a 100% byte-identical raw CSV hash (`3c63f78a...`, original hash recorded in `data_manifest.json` at commit `792b4d9`), empirically confirming zero upstream settlement revisions for the baseline window over that period.
 * **Recurrent Measurement Policy:** Recurrent 13-month rolling window refreshes fetch active system prices from Elexon Insights API. Any retrospective settlement revisions performed during BSC reconciliation runs will be captured dynamically upon query.
 
 ---

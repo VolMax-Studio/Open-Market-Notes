@@ -27,7 +27,7 @@ Out of Scope (Intentionally Unanswered Questions):
 Known Empirical Limitations (Data & Physical System Bounds):
 - Missing or unannounced ATC values trigger corridor exclusion (Rule A / D-003).
 - ENTSO-E API server maintenance or transmission outages propagate into dataset gaps.
-- Mixed sampling resolutions (15m vs 60m) are normalized per Rule B (D-005), but sub-hourly dynamics are smoothed in 60m zones.
+- Mixed sampling resolutions (15m vs 60m) are normalized per Rule B (D-005), but sub-hourly dynamics are smoothed u 60m zones.
 - TSO settlement publication delays may cause minor historical revisions in raw ENTSO-E payloads.
 ```
 
