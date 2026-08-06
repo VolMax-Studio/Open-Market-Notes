@@ -63,7 +63,7 @@
 - **Date:** 2026-08-06  
 - **Scope:** `.github/workflows/recurrence-omn-001.yml`  
 - **Audit Findings:**  
-  1. **Empirical Publication Lag:** On 6 August 2026 21:45 UTC, dynamic AEMO archive query (`nemosis`) for the July 2026 monthly dispatch archive (`DISPATCHPRICE` and `DISPATCH_UNIT_SCADA`) failed with `NoDataToReturn`, empirically proving that AEMO monthly archives are not published within the first 6 calendar days following month-end. Conversely, the June 2026 archive was successfully retrieved on 18 July 2026 (18 days after month-end), bounding the observed publication latency to between 7 and 18 days.  
+  1. **Empirical Publication Lag:** On 6 August 2026 21:45 UTC, dynamic AEMO archive query (`nemosis`) for the July 2026 monthly dispatch archive (`DISPATCHPRICE` and `DISPATCH_UNIT_SCADA`) failed with `NoDataToReturn`, empirically proving that AEMO monthly archives are not published within the first 6 calendar days following month-end. Conversely, the June 2026 archive was already available on 18 July 2026 (18 days after month-end), bounding the observed publication latency to between 7 and 18 days.  
   2. **Mandate 8 Abort Safety:** Recurrent runner execution correctly aborted without opening a PR (`FATAL ERROR: Missing or empty monthly telemetry files for price_202607.feather (0 rows)`), preserving registry integrity.  
   3. **Workflow Cron Shift:** Recurrence workflow schedule updated from day 5 (`0 4 5 * *`) to day 20 of each month (`0 4 20 * *`) to align automated execution with measured upstream AEMO publication latency.  
 - **Status:** Pending Ratification (Pre-Merge)

@@ -24,5 +24,20 @@
             "acquired_at_utc": "2026-08-05T17:42:22Z"
         }
     },
-    "recurrent_telemetry": {}
+    "recurrent_telemetry": {
+        "gb_system_prices_202507_202607.csv": {
+            "sha256": "6ce1ea205a79f16aeb0f4f84bb08ae4b45e675cc82504bfc1eba9c03a587347c",
+            "size_bytes": 3938611,
+            "source_url": "https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{settlementDate} (Open Elexon Insights API)",
+            "acquisition_mode": "live_open_api_query",
+            "acquired_at_utc": "2026-08-06T20:38:26.179744+00:00"
+        },
+        "gb_system_prices.feather": {
+            "sha256": "6060af4434f0af6c183e3fa5a6368effe5e7bdeab612140acd6d054be0467528",
+            "size_bytes": 1613178,
+            "source_url": "Elexon Ingestion Pipeline",
+            "acquisition_mode": "feather_serialization",
+            "acquired_at_utc": "2026-08-06T20:38:26.197790+00:00"
+        }
+    }
 }
