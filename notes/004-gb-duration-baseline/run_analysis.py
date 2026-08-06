@@ -3,8 +3,6 @@ import json
 import pandas as pd
 import numpy as np
 
-proc_path = './data/processed/gb_system_prices.feather'
-
 def calculate_pure_scarcity_runs(df, price_col='systemSellPrice', threshold=100.0):
     """
     Calculates Pure Continuous Scarcity Runs (strictly >= threshold, zero tolerance for sub-threshold dips).
@@ -200,10 +198,39 @@ def calculate_m2_charging_windows(df, price_col='systemSellPrice', cheap_thresho
         'max_daily_cheap_hours': round(float(daily_hours.max()), 2)
     }
 
-def run_full_analysis():
-    df = pd.read_feather(proc_path)
+import argparse
+
+def run_full_analysis(start_date=None, end_date=None, data_dir=None, out_dir=None):
+    if start_date is None:
+        start_date = "2025-06-01"
+    if end_date is None:
+        end_date = "2026-06-30"
+        
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    if data_dir is None:
+        if (start_date, end_date) == ("2025-06-01", "2026-06-30"):
+            baseline_file = os.path.join(base_dir, 'data', 'baseline', 'gb_system_prices_202506_202606.feather')
+            if os.path.exists(baseline_file):
+                feather_file = baseline_file
+            else:
+                feather_file = os.path.join(base_dir, 'data', 'processed', 'gb_system_prices.feather')
+        else:
+            import sys
+            sys.exit("FATAL ERROR: Non-baseline measurement window requires explicit --data-dir argument")
+    else:
+        feather_file = os.path.join(data_dir, 'gb_system_prices.feather')
+
+    if out_dir is None:
+        out_dir = '.'
+        
+    df = pd.read_feather(feather_file)
     df['startTime'] = pd.to_datetime(df['startTime'])
     df = df.set_index('startTime')
+    
+    if start_date and end_date:
+        start_dt = pd.Timestamp(start_date, tz=df.index.tz)
+        end_dt = pd.Timestamp(end_date, tz=df.index.tz) + pd.Timedelta(days=1) - pd.Timedelta(nanoseconds=1)
+        df = df[(df.index >= start_dt) & (df.index <= end_dt)]
     
     print("==========================================")
     print("RUNNING METRIC CALCULATIONS FOR GB BASELINE")
@@ -229,12 +256,10 @@ def run_full_analysis():
         'm2_charging_windows': m2
     }
     
-    out_json = './data/processed/gb_baseline_results.json'
+    os.makedirs(out_dir, exist_ok=True)
+    out_json = os.path.join(out_dir, 'results.json')
+    
     with open(out_json, 'w') as f:
-        json.dump(results, f, indent=4)
-    with open('results.json', 'w') as f:
-        json.dump(results, f, indent=4)
-    with open('summary.json', 'w') as f:
         json.dump(results, f, indent=4)
         
     print("\n--- METRIC 1: PURE CONTINUOUS SCARCITY RUNS (GBP >= 100/MWh) ---")
@@ -252,4 +277,11 @@ def run_full_analysis():
     return results
 
 if __name__ == '__main__':
-    run_full_analysis()
+    parser = argparse.ArgumentParser(description="Run GB BESS Duration Baseline Analysis")
+    parser.add_argument("--start-date", help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", help="End date (YYYY-MM-DD)")
+    parser.add_argument("--data-dir", help="Directory containing gb_system_prices.feather")
+    parser.add_argument("--out-dir", help="Directory to write results.json")
+    args = parser.parse_args()
+    
+    run_full_analysis(start_date=args.start_date, end_date=args.end_date, data_dir=args.data_dir, out_dir=args.out_dir)

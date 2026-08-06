@@ -19,7 +19,8 @@ def compute_sha256(filepath):
     return sha256_hash.hexdigest()
 
 def update_manifest(filepath, file_hash, source_url, acquisition_mode):
-    manifest_path = './data/data_manifest.json'
+    note_dir = os.path.dirname(os.path.abspath(__file__))
+    manifest_path = os.path.join(note_dir, 'data_manifest.json')
     manifest = {}
     if os.path.exists(manifest_path):
         with open(manifest_path, 'r') as f:
@@ -87,15 +88,16 @@ def analyze_regime_classification(df):
     }
 
 def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
-    raw_dir = './data/raw_cache'
-    proc_dir = './data/processed'
+    note_dir = os.path.dirname(os.path.abspath(__file__))
+    raw_dir = os.path.join(note_dir, 'data', 'raw_cache')
+    proc_dir = os.path.join(note_dir, 'data', 'processed')
     os.makedirs(raw_dir, exist_ok=True)
     os.makedirs(proc_dir, exist_ok=True)
 
-    csv_path = os.path.join(raw_dir, "gb_system_prices_202506_202606.csv")
-    
     start_dt = date.fromisoformat(start_date)
     end_dt = date.fromisoformat(end_date)
+    csv_name = f"gb_system_prices_{start_dt.strftime('%Y%m')}_{end_dt.strftime('%Y%m')}.csv"
+    csv_path = os.path.join(raw_dir, csv_name)
     
     print(f"Fetching GB System Prices from Elexon Insights API ({start_date} to {end_date})...")
     records = []
@@ -145,8 +147,15 @@ def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
     # Save processed Feather
     proc_path = os.path.join(proc_dir, "gb_system_prices.feather")
     df.reset_index().to_feather(proc_path)
+    feather_hash = compute_sha256(proc_path)
+    update_manifest(proc_path, feather_hash, source_url="Elexon Ingestion Pipeline", acquisition_mode="feather_serialization")
     print(f"Saved processed data to {proc_path}")
     return df
 
 if __name__ == '__main__':
-    fetch_elexon_system_prices()
+    import argparse
+    parser = argparse.ArgumentParser(description="Download Elexon telemetry for OMN-004")
+    parser.add_argument("--start-date", default="2025-06-01", help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", default="2026-06-30", help="End date (YYYY-MM-DD)")
+    args = parser.parse_args()
+    fetch_elexon_system_prices(args.start_date, args.end_date)

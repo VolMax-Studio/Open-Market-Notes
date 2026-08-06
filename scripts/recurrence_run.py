@@ -44,7 +44,7 @@ NOTE_PIPELINE_MAP = {
         "folder": "notes/004-gb-duration-baseline",
         "download_script": "download_elexon_data.py",
         "analysis_script": "run_analysis.py",
-        "parameterized": False
+        "parameterized": True
     },
     "005": {
         "folder": "notes/005-entsoe-crossborder-flows",
@@ -209,36 +209,71 @@ def main():
     # 5. Mandate 8: Telemetry Completeness & Boundary Verification (STRICT NO-BYPASS)
     # Enforce single canonical note-level telemetry directory
     proc_dir = os.path.abspath(os.path.join(note_dir, "data", "processed"))
-    
     expected_months = generate_expected_months(start_date, end_date)
-    print(f"\n--- Mandate 8 Check: Verifying {len(expected_months)} Expected Monthly Telemetry Files in {proc_dir} ---")
     
     if not os.path.exists(proc_dir):
         print(f"FATAL ERROR (Mandate 8 Abort): Processed telemetry directory missing: {proc_dir}")
         print("ABORTING WORKFLOW — NO PULL REQUEST WILL BE OPENED.")
         sys.exit(1)
         
-    missing_files = []
-    for ym in expected_months:
-        price_file = os.path.join(proc_dir, f"price_{ym}.feather")
-        scada_file = os.path.join(proc_dir, f"scada_{ym}.feather")
-        for filepath, label in [(price_file, f"price_{ym}.feather"), (scada_file, f"scada_{ym}.feather")]:
-            if not os.path.exists(filepath) or os.path.getsize(filepath) == 0:
-                missing_files.append(f"{label} (missing or 0 bytes)")
-            else:
-                try:
-                    df = pd.read_feather(filepath)
-                    if len(df) == 0:
-                        missing_files.append(f"{label} (0 rows)")
-                except Exception as e:
-                    missing_files.append(f"{label} (unreadable: {type(e).__name__}: {e})")
+    if note_num == "004":
+        single_file = os.path.join(proc_dir, "gb_system_prices.feather")
+        print(f"\n--- Mandate 8 Check: Verifying Elexon Single-File Telemetry in {single_file} ---")
+        if not os.path.exists(single_file) or os.path.getsize(single_file) == 0:
+            print(f"FATAL ERROR (Mandate 8 Abort): Missing or 0-byte Elexon telemetry file: {single_file}")
+            sys.exit(1)
+        try:
+            df = pd.read_feather(single_file)
+            from datetime import date
+            expected_days = (date.fromisoformat(end_date) - date.fromisoformat(start_date)).days + 1
+            exact_expected_rows = expected_days * 48
+            if len(df) < exact_expected_rows:
+                print(f"FATAL ERROR (Mandate 8 Abort): Insufficient row count ({len(df)} rows < {exact_expected_rows} exact threshold for {expected_days} days)")
+                sys.exit(1)
+            df['startTime'] = pd.to_datetime(df['startTime'])
+            df_sorted = df.sort_values('startTime')
             
-    if missing_files:
-        print(f"FATAL ERROR (Mandate 8 Abort): Missing or empty monthly telemetry files for: {missing_files}")
-        print("ABORTING WORKFLOW — NO PULL REQUEST WILL BE OPENED.")
-        sys.exit(1)
-        
-    print(f"Mandate 8 Check PASSED: All {len(expected_months)*2} monthly telemetry files (price + scada) verified in {proc_dir}.")
+            # 1. Non-zero monthly row count check
+            df_ym = df_sorted['startTime'].dt.strftime("%Y%m")
+            missing_months = [ym for ym in expected_months if (df_ym == ym).sum() == 0]
+            if missing_months:
+                print(f"FATAL ERROR (Mandate 8 Abort): Zero telemetry rows for expected months: {missing_months}")
+                sys.exit(1)
+                
+            # 2. Timestamp continuity check (max gap > 35 min)
+            time_diffs = df_sorted['startTime'].diff().dropna()
+            max_gap_min = time_diffs.max().total_seconds() / 60.0
+            if max_gap_min > 35.0:
+                print(f"FATAL ERROR (Mandate 8 Abort): Temporal continuity breach detected (max gap: {max_gap_min:.1f} min > 35 min limit)")
+                sys.exit(1)
+                
+            print(f"Mandate 8 Check PASSED: Elexon single-file telemetry verified ({len(df)} rows across {len(expected_months)} months, max gap {max_gap_min:.1f} min).")
+        except Exception as e:
+            print(f"FATAL ERROR (Mandate 8 Abort): Unreadable Elexon telemetry file: {e}")
+            sys.exit(1)
+    else:
+        print(f"\n--- Mandate 8 Check: Verifying {len(expected_months)} Expected Monthly Telemetry Files in {proc_dir} ---")
+        missing_files = []
+        for ym in expected_months:
+            price_file = os.path.join(proc_dir, f"price_{ym}.feather")
+            scada_file = os.path.join(proc_dir, f"scada_{ym}.feather")
+            for filepath, label in [(price_file, f"price_{ym}.feather"), (scada_file, f"scada_{ym}.feather")]:
+                if not os.path.exists(filepath) or os.path.getsize(filepath) == 0:
+                    missing_files.append(f"{label} (missing or 0 bytes)")
+                else:
+                    try:
+                        df = pd.read_feather(filepath)
+                        if len(df) == 0:
+                            missing_files.append(f"{label} (0 rows)")
+                    except Exception as e:
+                        missing_files.append(f"{label} (unreadable: {type(e).__name__}: {e})")
+                
+        if missing_files:
+            print(f"FATAL ERROR (Mandate 8 Abort): Missing or empty monthly telemetry files for: {missing_files}")
+            print("ABORTING WORKFLOW — NO PULL REQUEST WILL BE OPENED.")
+            sys.exit(1)
+            
+        print(f"Mandate 8 Check PASSED: All {len(expected_months)*2} monthly telemetry files (price + scada) verified in {proc_dir}.")
 
     # 6. Execute Analytical Pipeline with cwd=note_dir and explicit --data-dir
     print(f"\n--- Executing Analytical Pipeline ({os.path.basename(reproduce_script)}) ---")
