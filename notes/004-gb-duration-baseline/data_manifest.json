@@ -2,6 +2,10 @@
     "manifest_version": "1.0.0",
     "note_id": "OMN-004",
     "data_source_class": "Primary Settlement Administrator (Elexon BMRS API)",
+    "bsc_settlement_governance": {
+        "settlement_run_lifecycle": "Elexon System Prices undergo multi-stage BSC settlement reconciliations (Interim, SF, R1, R2, R3 over ~14 months). Baseline telemetry represents active system prices (priceDerivationCode P/R) at acquisition.",
+        "settlement_revision_policy": "Recurrent rolling window refreshes fetch active settlement state from Elexon Insights API. Retrospective revisions during settlement reconciliation runs will update rolling window historical values if re-queried."
+    },
     "analysis_period": "2025-06-01 to 2026-06-30",
     "acquired_at_utc": "2026-07-19T12:00:00Z",
     "files": [

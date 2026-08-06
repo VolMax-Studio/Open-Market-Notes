@@ -67,6 +67,25 @@ def create_synthetic_telemetry_fixture(temp_proc_dir, start_date="2025-06-01", e
         scada_df = pd.DataFrame(scada_records)
         scada_df.to_feather(os.path.join(temp_proc_dir, f"scada_{ym_str}.feather"))
 
+def create_synthetic_elexon_telemetry_fixture(temp_proc_dir, start_date="2025-06-01", end_date="2025-06-30"):
+    """Generates synthetic Elexon feather telemetry fixture for clean checkout CI execution of Note #004."""
+    os.makedirs(temp_proc_dir, exist_ok=True)
+    timestamps = pd.date_range(start="2025-06-01 00:00:00", end="2025-06-30 23:30:00", freq='30min', tz='Europe/London')
+    np.random.seed(42)
+    prices = np.random.uniform(30, 80, len(timestamps))
+    # Inject scarcity price spikes (>= £100 and >= £250)
+    prices[10:14] = 150.0
+    prices[100:104] = 300.0
+    # Inject cheap energy periods (<= £25)
+    prices[200:220] = 15.0
+    
+    df = pd.DataFrame({
+        'startTime': timestamps,
+        'systemSellPrice': prices,
+        'systemBuyPrice': prices
+    })
+    df.to_feather(os.path.join(temp_proc_dir, "gb_system_prices.feather"))
+
 class TestSyntheticCIDeterminismFixture(unittest.TestCase):
     """Guarantees CI Determinism Guard passes 100% reliably on clean checkout without modifying repository working tree."""
     def test_synthetic_reproduction_determinism(self):
@@ -96,6 +115,37 @@ class TestSyntheticCIDeterminismFixture(unittest.TestCase):
             
             self.assertEqual(hash1, hash2, "Synthetic fixture output is non-deterministic!")
             print(f"\n[SYNTHETIC CI DETERMINISM GUARD PASSED] Verified byte-identity on scarcity-spiked synthetic fixture (isolated temp_out_dir): {hash1}")
+
+class TestNote004SyntheticCIDeterminism(unittest.TestCase):
+    """Guarantees CI Determinism Guard passes 100% reliably for Note #004 (GB BESS Duration Baseline) on clean checkout."""
+    def test_note004_synthetic_determinism(self):
+        note004_dir = os.path.join(BASE_DIR, "notes", "004-gb-duration-baseline")
+        run_analysis_script = os.path.join(note004_dir, "run_analysis.py")
+        
+        with tempfile.TemporaryDirectory() as temp_proc_dir, tempfile.TemporaryDirectory() as temp_out_dir:
+            create_synthetic_elexon_telemetry_fixture(temp_proc_dir)
+            temp_results_json = os.path.join(temp_out_dir, "results.json")
+            
+            cmd1 = [sys.executable, run_analysis_script, "--start-date", "2025-06-01", "--end-date", "2025-06-30", "--data-dir", temp_proc_dir, "--out-dir", temp_out_dir]
+            res1 = subprocess.run(cmd1, cwd=BASE_DIR, capture_output=True, text=True)
+            self.assertEqual(res1.returncode, 0, f"Note #004 Synthetic Run 1 failed:\n{res1.stderr}")
+            
+            with open(temp_results_json, "r") as f:
+                res_data = json.load(f)
+            # Assert Note #004 metrics were executed
+            self.assertIn("m1_scarcity_100_pure_runs", res_data)
+            self.assertIn("m2_charging_windows", res_data)
+            
+            hash1 = compute_sha256(temp_results_json)
+            
+            # Delete temp output and Run 2
+            os.remove(temp_results_json)
+            res2 = subprocess.run(cmd1, cwd=BASE_DIR, capture_output=True, text=True)
+            self.assertEqual(res2.returncode, 0, f"Note #004 Synthetic Run 2 failed:\n{res2.stderr}")
+            hash2 = compute_sha256(temp_results_json)
+            
+            self.assertEqual(hash1, hash2, "Note #004 synthetic output is non-deterministic!")
+            print(f"\n[NOTE #004 SYNTHETIC CI GUARD PASSED] Verified byte-identity on synthetic Elexon fixture: {hash1}")
 
 class TestReinforcedDeterminism(unittest.TestCase):
     def test_rename_recreate_byte_identity(self):

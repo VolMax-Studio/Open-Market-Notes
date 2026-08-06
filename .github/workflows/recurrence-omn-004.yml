@@ -49,5 +49,4 @@ jobs:
             notes/004-gb-duration-baseline/results.json
             notes/004-gb-duration-baseline/data_manifest.json
             notes/004-gb-duration-baseline/history/measurement_log.json
-            notes/004-gb-duration-baseline/results/*.png
           delete-branch: true
