@@ -59,7 +59,7 @@
     "evidence_class": "Clean Baseline Measurement",
     "doi": "https://doi.org/10.5281/zenodo.21693262",
     "params_sha256": "6efc418bc25829ad276dada62e2919b918e99438a1a64953326fc2e77a9d16d5",
-    "reproduce_sha256": "08ab4d625739705361a1fb233c364feaeecf921c0f862b04d773d6145b6b846c"
+    "reproduce_sha256": "f3642ff2829e5a3eadf97832aba6042a47176f66d2f85efe30b3a323cbf6b0ae"
   },
   {
     "id": "OMN-005",

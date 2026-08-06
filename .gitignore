@@ -1,6 +1,7 @@
-# Ignore all raw and compiled data files
+# Ignore all raw, baseline, and compiled data files
 **/data/raw_cache/
 **/data/processed/
+**/data/baseline/
 **/data/*.CSV
 **/data/*.csv
 **/data/*.feather

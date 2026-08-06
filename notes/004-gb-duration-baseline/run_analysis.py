@@ -208,11 +208,15 @@ def run_full_analysis(start_date=None, end_date=None, data_dir=None, out_dir=Non
         
     base_dir = os.path.dirname(os.path.abspath(__file__))
     if data_dir is None:
-        baseline_file = os.path.join(base_dir, 'data', 'baseline', 'gb_system_prices_202506_202606.feather')
-        if os.path.exists(baseline_file):
-            feather_file = baseline_file
+        if (start_date, end_date) == ("2025-06-01", "2026-06-30"):
+            baseline_file = os.path.join(base_dir, 'data', 'baseline', 'gb_system_prices_202506_202606.feather')
+            if os.path.exists(baseline_file):
+                feather_file = baseline_file
+            else:
+                feather_file = os.path.join(base_dir, 'data', 'processed', 'gb_system_prices.feather')
         else:
-            feather_file = os.path.join(base_dir, 'data', 'processed', 'gb_system_prices.feather')
+            import sys
+            sys.exit("FATAL ERROR: Non-baseline measurement window requires explicit --data-dir argument")
     else:
         feather_file = os.path.join(data_dir, 'gb_system_prices.feather')
 

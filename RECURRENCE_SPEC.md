@@ -1,7 +1,7 @@
 # VolMax Open Market Notes — Recurrence Specification
-**Version:** v1.0.8  
-**Status:** Ratified Baseline Specification  
-**Date:** 2026-08-01  
+**Version:** v1.0.9  
+**Status:** Draft for Ratification (Pre-Merge)  
+**Date:** 2026-08-06  
 **Repository:** `VolMax-Studio/Open-Market-Notes`  
 
 ---
@@ -19,6 +19,7 @@ The recurrence pipeline ensures that market observation baselines remain dynamic
 
 ## 2. Revision History & Governance Changelog
 
+- **v1.0.9 (2026-08-06):** Draft for Ratification (Pre-Merge). Aligned Mandate 8 specification text to exact rolling window row count threshold calculation ($\ge \text{expected\_days} \times 48$) matching implementation in `recurrence_run.py` (NB114); formalized Mandate 1 source-specific boundary conventions (AEMO 04:05 market trading day vs Elexon Europe/London calendar day vs ENTSO-E CET/CEST calendar day).
 - **v1.0.8 (2026-08-01):** Ratified Baseline Specification. Formally defined dual parameter field semantics (`params_commit_hash` for pre-execution freeze lineage vs `params_sha256` for cryptographic verification of published package `PARAMS.md`) under Mandate 3; distinguished baseline registry initial establishment (2026-07-31) from post-ratification immutability freezing; updated Mandate 3 verification wording.
 - **v1.0.7 (2026-07-30):** Ratified Option 3 alignment of `notes_registry.json` and `results.json` to the canonical 13-month published Zenodo baseline hash (`c192e7ee...`) after restoring complete 13-month telemetry; formalized DOI Revision & `superseded_doi` Erratum Policy in Mandate 5; upgraded Mandate 8 to enforce dual-prefix monthly telemetry completeness (`price_` AND `scada_` files for all 13 months); logged Failure Entries #011, #012, and #013; explicitly supersedes and corrects the erroneous v1.0.6 changelog claim regarding `0ddbc333...` baseline output verification.
 - **v1.0.6 (2026-07-30):** Enforced non-bypassable `reproduce_sha256` check across all notes; established Registry Code Hash Revision Policy for minor maintenance patches ($v1.x.0$); pin-locked dependency versions in `requirements.txt`; enriched synthetic CI fixture with scarcity price spikes; dynamic spec version resolution.
@@ -95,7 +96,7 @@ All recurrent measurement refreshes write to `history/measurement_log.json`. Cor
 ### Mandate 8 — Telemetry Completeness & Boundary Verification
 - **Multi-File Monthly Layouts (e.g. AEMO OMN-001)**: The pipeline MUST verify the presence, structural readability (`pd.read_feather()`), and non-zero row count (`len(df) > 0`) of ALL 13 monthly telemetry files across ALL required dataset types (`price_YYYYMM.feather` AND `scada_YYYYMM.feather`) in the explicitly passed data directory.
 - **Single-File & Consolidated Layouts (e.g. Elexon OMN-004)**: For single-file datasets (`gb_system_prices.feather`), the pipeline MUST verify:
-  1. Total row count meets expected rolling window threshold ($\ge \text{expected\_months} \times 28 \times 48$, e.g., $\ge 17,472$ intervals for a 13-month window).
+  1. Total row count meets exact expected rolling window threshold ($\text{expected\_days} \times 48$, e.g., $18,960$ intervals for 395 baseline days, $19,008$ intervals for 396 rolling window days).
   2. Non-zero monthly row count for EVERY month within the calculated rolling window (`df['startTime'].dt.strftime('%Y%m')`).
   3. Strict timestamp continuity without unexpected temporal gaps ($>35$ min limit).
 - **Abort Policy**: If any telemetry file, month, or structural check fails or returns 0 rows, the workflow MUST terminate immediately (`sys.exit(1)`) prior to PR creation.
