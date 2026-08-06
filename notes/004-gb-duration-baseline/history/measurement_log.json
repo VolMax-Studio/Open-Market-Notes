@@ -1,0 +1,12 @@
+[
+  {
+    "version": "v1.1.0",
+    "measurement_window": "2025-07-01 to 2026-07-31",
+    "results_sha256": "9cd0c9117e580732776db0251f9a0edf68c669591805c1ab7a3fffc602eaded7",
+    "input_manifest_sha256": "6b36222aaa21029fb36ad1e105ac28390f7cd5428446d6ed4d3df5e705db47e4",
+    "params_sha256": "6efc418bc25829ad276dada62e2919b918e99438a1a64953326fc2e77a9d16d5",
+    "reproduce_sha256": "f3642ff2829e5a3eadf97832aba6042a47176f66d2f85efe30b3a323cbf6b0ae",
+    "pipeline_commit_sha": "c92d9ad97d074a8c9d1fa51ac1e798302f4d7f0b",
+    "executed_at": "2026-08-06T20:38:26Z"
+  }
+]

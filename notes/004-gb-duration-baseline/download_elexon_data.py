@@ -110,18 +110,27 @@ def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
     while curr <= end_dt:
         date_str = curr.isoformat()
         url = f"{BASE_URL}/{date_str}"
-        try:
-            resp = requests.get(url, timeout=10)
-            if resp.status_code == 200:
-                data = resp.json()
-                if isinstance(data, list):
-                    records.extend(data)
-                elif isinstance(data, dict) and "data" in data:
-                    records.extend(data["data"])
-            else:
-                print(f"Warning: HTTP {resp.status_code} for {date_str}")
-        except Exception as e:
-            print(f"Error fetching {date_str}: {e}")
+        fetched = False
+        for attempt in range(3):
+            try:
+                resp = requests.get(url, timeout=10)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if isinstance(data, list):
+                        records.extend(data)
+                        fetched = True
+                        break
+                    elif isinstance(data, dict) and "data" in data:
+                        records.extend(data["data"])
+                        fetched = True
+                        break
+                else:
+                    print(f"Warning: HTTP {resp.status_code} for {date_str} (attempt {attempt+1})")
+            except Exception as e:
+                print(f"Error fetching {date_str} (attempt {attempt+1}): {e}")
+            time.sleep(0.5)
+        if not fetched:
+            print(f"FATAL: FAILED to fetch {date_str} after 3 attempts.")
             
         curr += timedelta(days=1)
         day_count += 1
