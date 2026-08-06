@@ -32,7 +32,10 @@ def update_manifest(filepath, file_hash, source_url, acquisition_mode):
     basename = os.path.basename(filepath)
     acquired_at = datetime.now(timezone.utc).isoformat()
     
-    manifest[basename] = {
+    if "recurrent_telemetry" not in manifest or not isinstance(manifest["recurrent_telemetry"], dict):
+        manifest["recurrent_telemetry"] = {}
+
+    manifest["recurrent_telemetry"][basename] = {
         "sha256": file_hash,
         "size_bytes": os.path.getsize(filepath),
         "source_url": source_url,

@@ -7,18 +7,22 @@
         "settlement_run_lifecycle": "Elexon System Prices undergo multi-stage BSC settlement reconciliations (Interim, SF, R1, R2, R3 over ~14 months). Baseline telemetry represents active system prices (priceDerivationCode P/R) at acquisition.",
         "settlement_revision_policy": "Recurrent rolling window refreshes fetch active settlement state from Elexon Insights API. Retrospective revisions during settlement reconciliation runs will update rolling window historical values if re-queried."
     },
-    "gb_system_prices_202506_202606.csv": {
-        "sha256": "3c63f78a910f96d48b9235200b7b29b74d40b220cee84d39eeb556b38734a664",
-        "size_bytes": 3935566,
-        "source_url": "https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{settlementDate} (Open Elexon Insights API)",
-        "acquisition_mode": "live_open_api_query",
-        "acquired_at_utc": "2026-07-19T12:00:00Z"
+    "baseline_telemetry": {
+        "gb_system_prices_202506_202606.csv": {
+            "sha256": "3c63f78a910f96d48b9235200b7b29b74d40b220cee84d39eeb556b38734a664",
+            "size_bytes": 3935566,
+            "source_url": "https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{settlementDate} (Open Elexon Insights API)",
+            "acquisition_mode": "live_open_api_query",
+            "acquired_at_utc": "2026-08-05T17:42:22Z",
+            "acquisition_note": "Re-acquisition of the frozen baseline window. SHA-256 byte-identical to the original 2026-07-19 acquisition, confirming no upstream settlement revision over that interval."
+        },
+        "gb_system_prices_202506_202606.feather": {
+            "sha256": "d7b03f690631169f26084f6ed50334e7965f5af3f76b39b9b11a6686111ae977",
+            "size_bytes": 1613266,
+            "source_url": "Elexon Ingestion Pipeline (Frozen Baseline Telemetry)",
+            "acquisition_mode": "feather_serialization",
+            "acquired_at_utc": "2026-08-05T17:42:22Z"
+        }
     },
-    "gb_system_prices_202506_202606.feather": {
-        "sha256": "d7b03f690631169f26084f6ed50334e7965f5af3f76b39b9b11a6686111ae977",
-        "size_bytes": 1613266,
-        "source_url": "Elexon Ingestion Pipeline (Frozen Baseline Telemetry)",
-        "acquisition_mode": "feather_serialization",
-        "acquired_at_utc": "2026-07-19T12:00:00Z"
-    }
+    "recurrent_telemetry": {}
 }
