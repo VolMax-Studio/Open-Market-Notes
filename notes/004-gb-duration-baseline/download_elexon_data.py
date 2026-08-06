@@ -18,7 +18,7 @@ def compute_sha256(filepath):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
 
-def update_manifest(filepath, file_hash, source_url, acquisition_mode):
+def update_manifest(filepath, file_hash, source_url, acquisition_mode, reset_recurrent=False):
     note_dir = os.path.dirname(os.path.abspath(__file__))
     manifest_path = os.path.join(note_dir, 'data_manifest.json')
     manifest = {}
@@ -32,7 +32,7 @@ def update_manifest(filepath, file_hash, source_url, acquisition_mode):
     basename = os.path.basename(filepath)
     acquired_at = datetime.now(timezone.utc).isoformat()
     
-    if "recurrent_telemetry" not in manifest or not isinstance(manifest["recurrent_telemetry"], dict):
+    if "recurrent_telemetry" not in manifest or not isinstance(manifest["recurrent_telemetry"], dict) or reset_recurrent:
         manifest["recurrent_telemetry"] = {}
 
     manifest["recurrent_telemetry"][basename] = {
@@ -142,7 +142,7 @@ def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
     
     source_url = f"{BASE_URL}/{{settlementDate}} (Open Elexon Insights API)"
     file_hash = compute_sha256(csv_path)
-    update_manifest(csv_path, file_hash, source_url=source_url, acquisition_mode="live_open_api_query")
+    update_manifest(csv_path, file_hash, source_url=source_url, acquisition_mode="live_open_api_query", reset_recurrent=True)
     
     # Run procedural regime analysis
     analyze_regime_classification(df)
