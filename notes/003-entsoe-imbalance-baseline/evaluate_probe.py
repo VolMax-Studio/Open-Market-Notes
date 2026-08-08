@@ -67,7 +67,7 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
         # Load baseline feather to compute uncontaminated Q90 (1 Aug 2025 - 30 Jun 2026)
         base_feather = os.path.join(note_dir, 'data', 'processed', f"imbalance_{zone}.feather")
         if not os.path.exists(base_feather):
-            raise ValueError(f"BASELINE ABORT: Baseline feather file missing for {zone} at {base_feather}")
+            raise ValueError(f"BASELINE ABORT: Baseline feather file missing for {zone} at {base_feather}. Run ingestion script download_entsoe_data.py to populate baseline dataset.")
 
         base_df = pd.read_feather(base_feather)
         time_col = bind_entsoe_timestamp_col(base_df, f"imbalance_{zone}.feather (baseline)")
@@ -197,9 +197,11 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
         "execution_timestamp_utc": pd.Timestamp.now(tz='UTC').isoformat(),
         "provenance": {
             "git_commit": active_commit,
+            "git_commit_note": "Captures git HEAD commit hash at evaluator execution time prior to committing report artifacts.",
             "evaluator_script": "notes/003-entsoe-imbalance-baseline/evaluate_probe.py",
             "evaluator_sha256": compute_sha256(os.path.join(note_dir, 'evaluate_probe.py')),
             "params_hash": "acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58",
+            "data_licensing": "ENTSO-E Transparency Platform data used under Creative Commons Attribution 4.0 International (CC BY 4.0) License.",
             "pre_registered_ratifier": "Ivan Nestorov (2026-08-08)"
         },
         "mandate_8_telemetry_audit": {
