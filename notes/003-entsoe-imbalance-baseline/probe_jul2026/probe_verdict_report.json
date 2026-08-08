@@ -1,8 +1,8 @@
 {
   "probe_name": "OMN-003 July 2026 Recurrence & European Imbalance Scarcity Probe",
-  "execution_timestamp_utc": "2026-08-08T15:58:19.668699+00:00",
+  "execution_timestamp_utc": "2026-08-08T16:00:56.624503+00:00",
   "provenance": {
-    "git_commit": "3c8354b5c6217a10de83bd60177fe396765be270",
+    "git_commit": "c4946e36f33352d792439bdb47d3c09f0bc739f6",
     "git_commit_note": "Captures git HEAD commit hash at evaluator execution time prior to committing report artifacts.",
     "evaluator_script": "notes/003-entsoe-imbalance-baseline/evaluate_probe.py",
     "evaluator_sha256": "136e65bb52312bde9e3645940d59f3ae8b1f734579bcc3557cf6a9cf082b869a",

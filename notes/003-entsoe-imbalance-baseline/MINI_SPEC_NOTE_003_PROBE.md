@@ -9,8 +9,8 @@
 > **Published Baseline Analysis Script (`run_imbalance_analysis.py`) Blob:** `7e6be06d5b7e7a46223c83998eb4ad35cdb4a16be5245932abce3c827aa5b484`  
 > **Remediated Analysis Script (`run_imbalance_analysis.py`) SHA-256:** `2957e2c5905c40228cb74012c791164b0a0b34c6cf22ea578490f1d0b095874e`  
 > **Ingestion Script (`download_entsoe_data.py`) SHA-256:** `265d1e722c1f444e1b4041ea1518dd83fc61db5f29efc6f62ac5ff4fecd3b887` (Calibrated 23:45:00 timestamp alignment for exact 15m MTU boundary)  
-> **Probe Evaluator Script (`evaluate_probe.py`) SHA-256:** `136e65bb52312bde9e3645940d59f3ae8b1f734579bcc3557cf6a9cf082b869a`  
-> **Provenance Manifest (`data_manifest.json`) SHA-256:** `147eef422d0b96d02b3bc5acc630722dbd3a7a8b592ba07c952f147492702346`  
+> **Baseline Provenance Manifest (`data_manifest.json` / `baseline_data_manifest.json`) SHA-256:** `147eef422d0b96d02b3bc5acc630722dbd3a7a8b592ba07c952f147492702346`  
+> **Probe Provenance Manifest (`probe_jul2026/data_manifest.json` / `probe_data_manifest.json`) SHA-256:** `613d2d9b17fe4cbda62bf60db6a0aa78122c97607acba4ed48f88ddfa8af2c0f`  
 > **Published Baseline Results SHA-256 (`notes_registry.json`):** `b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`  
 > **Remediated Gap-Terminated Baseline Results SHA-256 (`notes/003-entsoe-imbalance-baseline/results.json`):** `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c`
 
