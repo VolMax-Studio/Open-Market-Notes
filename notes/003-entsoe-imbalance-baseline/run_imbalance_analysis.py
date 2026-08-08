@@ -1,19 +1,27 @@
 import os
+import sys
 import json
 import glob
 import pandas as pd
 import numpy as np
 
-# Load manifest for verification
-manifest_path = './data/data_manifest.json'
-with open(manifest_path, 'r') as f:
-    manifest = json.load(f)
+# Path resolution for manifest and processed feather files
+data_dir = '.'
+manifest_path = os.path.join(data_dir, 'data_manifest.json')
+if not os.path.exists(manifest_path):
+    manifest_path = os.path.join(data_dir, 'data', 'data_manifest.json')
 
-proc_dir = './data/processed'
+with open(manifest_path, 'r') as f:
+    manifest_data = json.load(f)
+
+proc_dir = os.path.join(data_dir, 'data', 'processed')
+if not os.path.exists(proc_dir):
+    proc_dir = os.path.join(data_dir, 'processed')
+
 proc_files = sorted(glob.glob(os.path.join(proc_dir, "imbalance_*.feather")))
 
 print("=== EXECUTING VOLMAX NOTE #3: ENTSO-E IMBALANCE DURATION BASELINE ANALYSIS ===")
-print(f"Found {len(proc_files)} processed zone datasets.")
+print(f"Found {len(proc_files)} processed zone datasets in {proc_dir}.")
 
 results = {}
 
@@ -23,14 +31,12 @@ for pfile in proc_files:
     
     df = pd.read_feather(pfile)
     
-    # Identify time index
     if 'index' in df.columns:
         df = df.set_index('index')
     elif 'DateTime' in df.columns:
         df = df.set_index('DateTime')
         
     df.index = pd.to_datetime(df.index)
-    # Ensure localized to Brussels time for calendar day grouping
     if df.index.tz is None:
         df.index = df.index.tz_localize('UTC').tz_convert('Europe/Brussels')
     else:
@@ -56,10 +62,6 @@ for pfile in proc_files:
     print(f"\n--------------------------------------------------")
     print(f"ZONE: {zone} | REGIME: {regime} | TOTAL INTERVALS: {len(df)}")
     print(f"--------------------------------------------------")
-    
-    # M1: Scarcity Duration (Shortage - Short column)
-    # Threshold A: >= 100 EUR/MWh
-    # Threshold B: >= 250 EUR/MWh
     
     def compute_m1(price_series, threshold):
         above = (price_series >= threshold).values
@@ -88,16 +90,12 @@ for pfile in proc_files:
             "max_min": int(np.max(events))
         }
 
-
-
     m1_100 = compute_m1(p_short, 100.0)
     m1_250 = compute_m1(p_short, 250.0)
     
     print(f"M1 Scarcity >= €100/MWh: {m1_100['count']} events | Mean: {m1_100['mean_min']}m | P90: {m1_100['p90_min']}m | Max: {m1_100['max_min']}m")
     print(f"M1 Scarcity >= €250/MWh: {m1_250['count']} events | Mean: {m1_250['mean_min']}m | P90: {m1_250['p90_min']}m | Max: {m1_250['max_min']}m")
     
-    # M2: Grid Surplus Absorption (Surplus - Long column)
-    # Group by calendar day in Brussels market time
     df['date'] = df.index.date
     df['is_zero_neg'] = p_long <= 0.0
     df['is_cheap_25'] = p_long <= 25.0
@@ -136,8 +134,8 @@ for pfile in proc_files:
         }
     }
 
-# Write summary JSON
-with open('./data/imbalance_baseline_summary.json', 'w') as f:
+out_summary_path = os.path.join(data_dir, 'results.json')
+with open(out_summary_path, 'w') as f:
     json.dump(results, f, indent=4)
     
-print("\n=== ANALYSIS COMPLETE: Saved imbalance_baseline_summary.json ===")
+print(f"\n=== ANALYSIS COMPLETE: Saved {out_summary_path} ===")
