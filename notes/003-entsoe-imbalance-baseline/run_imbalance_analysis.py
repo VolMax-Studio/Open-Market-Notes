@@ -5,7 +5,7 @@ import glob
 import pandas as pd
 import numpy as np
 
-# Path resolution for manifest and processed feather files
+# Single Source of Truth: Path resolution for data_manifest.json and processed feather files
 data_dir = '.'
 manifest_path = os.path.join(data_dir, 'data_manifest.json')
 if not os.path.exists(manifest_path):
@@ -13,6 +13,9 @@ if not os.path.exists(manifest_path):
 
 with open(manifest_path, 'r') as f:
     manifest_data = json.load(f)
+
+manifest_files_list = manifest_data.get("files", [])
+manifest_files_dict = {item["file_name"]: item for item in manifest_files_list if isinstance(item, dict) and "file_name" in item}
 
 proc_dir = os.path.join(data_dir, 'data', 'processed')
 if not os.path.exists(proc_dir):
@@ -29,6 +32,21 @@ for pfile in proc_files:
     basename = os.path.basename(pfile)
     zone = basename.replace("imbalance_", "").replace(".feather", "")
     
+    # Locate corresponding raw cache manifest entry for zone regime metadata
+    csv_pattern = f"imbalance_{zone}_*.csv"
+    matching_manifest_entries = [v for k, v in manifest_files_dict.items() if k.startswith(f"imbalance_{zone}_")]
+    
+    if matching_manifest_entries:
+        manifest_entry = matching_manifest_entries[0]
+        regime = manifest_entry.get("frozen_regime", "SINGLE_PRICING")
+        m1_col_name = manifest_entry.get("m1_shortage_col", "Short")
+        m2_col_name = manifest_entry.get("m2_surplus_col", "Long")
+    else:
+        print(f"WARNING: No manifest entry found for {zone}. Falling back to default column selection.")
+        regime = "SINGLE_PRICING"
+        m1_col_name = "Short"
+        m2_col_name = "Long"
+        
     df = pd.read_feather(pfile)
     
     if 'index' in df.columns:
@@ -42,29 +60,14 @@ for pfile in proc_files:
     else:
         df.index = df.index.tz_convert('Europe/Brussels')
         
-    cols = [c for c in df.columns if c not in ['index', 'DateTime']]
+    cols = list(df.columns)
     
-    # Regime determination according to frozen rules
-    if len(cols) == 1:
-        regime = "SINGLE_PRICING"
-        p_short = df[cols[0]]
-        p_long = df[cols[0]]
-    else:
-        p_long_temp = df['Long'] if 'Long' in cols else df.iloc[:, 0]
-        p_short_temp = df['Short'] if 'Short' in cols else df.iloc[:, 1]
-        valid_mask = p_long_temp.notna() & p_short_temp.notna()
-        diff = (p_long_temp[valid_mask] - p_short_temp[valid_mask]).abs()
-        if (diff < 1e-4).all():
-            regime = "SINGLE_PRICING"
-            p_short = p_short_temp
-            p_long = p_long_temp
-        else:
-            regime = "DUAL_PRICING"
-            p_short = df['Short']
-            p_long = df['Long']
-            
+    p_short = df[m1_col_name] if m1_col_name in cols else df.iloc[:, 0]
+    p_long = df[m2_col_name] if m2_col_name in cols else df.iloc[:, 0]
+    
     print(f"\n--------------------------------------------------")
-    print(f"ZONE: {zone} | REGIME: {regime} | TOTAL INTERVALS: {len(df)}")
+    print(f"ZONE: {zone} | FROZEN REGIME (MANIFEST): {regime} | TOTAL INTERVALS: {len(df)}")
+    print(f"Columns bound -> Shortage (M1): '{m1_col_name}' | Surplus (M2): '{m2_col_name}'")
     print(f"--------------------------------------------------")
     
     def compute_m1(price_series, threshold):

@@ -1,13 +1,13 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
-> **Version:** 2.0.0-draft (Fully Aligned & Verified Pre-Registration Spec)  
+> **Version:** 2.1.0-draft (Fully Aligned, Manifest-Bound Pre-Registration Spec)  
 > **Status:** Draft Submitted to Human Gate on `feature/omn-003-preregistration-draft` (Pre-Execution Freeze)  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
 > **PARAMS Freeze Commitment (`a2c0b3a`):** `feat(note-003): publish final ENTSO-E baseline note with PARAMS v3.1.0 and reproducible figures`  
 > **PARAMS Cryptographic SHA-256:** `acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58`  
 > **Main Branch HEAD (`6fa1cb7`):** `Merge pull request #51 from VolMax-Studio/recurrent-measurement/omn-004-31221838425`  
 > **Published Baseline Analysis Script (`run_imbalance_analysis.py`) Blob (`6fa1cb7`):** `7e6be06d5b7e7a46223c83998eb4ad35cdb4a16be5245932abce3c827aa5b484`  
-> **Remediated Analysis Script (`run_imbalance_analysis.py`) Draft SHA-256:** `02381f445a1daaf488214eb29076bb58964527c1b7db3f76d7403c2c48388dbf`  
+> **Remediated Analysis Script (`run_imbalance_analysis.py`) Draft SHA-256:** `55c119354b2d39ed3002407d7d32e24813209e6e7a6140ee042f5983fd5ee264`  
 > **Ingestion Script (`download_entsoe_data.py`) Draft SHA-256:** `c6eb203ab3daf4c6f4844aeb4b2c248d2466eaa373bff5afd56bcba80aa7eabe`  
 > **Baseline Results SHA-256 (`notes_registry.json`):** `b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`
 
@@ -29,9 +29,10 @@
     - **4-Hour BESS Window:** Minimum $\ge 4.80\text{ hours}$ per calendar day of surplus pricing. (Note: 85% round-trip efficiency serves as the post-hoc engineering rationale for this daily window and does not alter the frozen 4.8h threshold).
     - **8-Hour BESS Window:** Minimum $\ge 9.50\text{ hours}$ per calendar day of surplus pricing.
 
-### 2. Empirical Verification of Pricing Regime Columns (Blocker 3 Verification)
-- **Dual Pricing Zones (NL, FR):** `Short` (shortage) and `Long` (surplus) columns are distinct (`max_diff` = €4,081.59/MWh in NL; €632.20/MWh in FR). M1 is evaluated strictly on `Short` and M2 strictly on `Long`.
-- **Single Pricing Zones (AT, BE, DK_1, DK_2):** `Short` and `Long` columns are empirically verified to be **100% byte-for-byte identical** (`max_diff = 0.000000`, `all_match (<1e-4) = True`). Evaluating M1 or M2 on either column yields mathematically identical values.
+### 2. Manifest-Bound Pricing Regime Assignment (Single Source of Truth — Blocker 2 & 3 Remediation)
+- **Single Source of Truth:** `run_imbalance_analysis.py` reads `frozen_regime`, `m1_shortage_col`, and `m2_surplus_col` directly from `data_manifest.json`.
+- **Dual Pricing Zones (NL, FR):** `Short` (shortage) and `Long` (surplus) columns are distinct (`max_diff` = €4,081.59/MWh in NL; €632.20/MWh in FR). M1 is evaluated strictly on `Short` and M2 strictly on `Long` as registered in manifest.
+- **Single Pricing Zones (AT, BE, DK_1, DK_2):** `Short` and `Long` columns are empirically verified to be **100% byte-for-byte identical** (`max_diff = 0.000000`, `all_match (<1e-4) = True`). Evaluating M1 or M2 on either column yields mathematically identical values. Manifest binding prevents silent column switching.
 
 ### 3. Temporal Windows & Baseline Isolation
 - **Baseline Window (Zenodo v1.0.0):** 1 June 2025 – 30 June 2026 (13 Calendar Months / 395 Days).
