@@ -1,29 +1,38 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
-> **Version:** 2.3.0-draft (Strict Gap-Terminated & Empirically Audited Spec)  
+> **Version:** 2.4.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
 > **Status:** Draft Submitted to Human Gate on `feature/omn-003-preregistration-draft` (Pre-Execution Freeze)  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
 > **PARAMS Freeze Commitment (`a2c0b3a`):** `feat(note-003): publish final ENTSO-E baseline note with PARAMS v3.1.0 and reproducible figures`  
 > **PARAMS Cryptographic SHA-256:** `acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58`  
 > **Main Branch HEAD (`6fa1cb7`):** `Merge pull request #51 from VolMax-Studio/recurrent-measurement/omn-004-31221838425`  
 > **Published Baseline Analysis Script (`run_imbalance_analysis.py`) Blob (`6fa1cb7`):** `7e6be06d5b7e7a46223c83998eb4ad35cdb4a16be5245932abce3c827aa5b484`  
-> **Remediated Analysis Script (`run_imbalance_analysis.py`) Draft SHA-256:** `d1ea872e0d99e8d687f6c9e4dfe345e3df820218cbda17b5885712f7a0a42a69`  
+> **Remediated Analysis Script (`run_imbalance_analysis.py`) Draft SHA-256:** `72e2be1d47be03b4fbebc07e73c5b4d32656ab0c2cd26f54ad63bdea89bc005b`  
 > **Ingestion Script (`download_entsoe_data.py`) Draft SHA-256:** `c6eb203ab3daf4c6f4844aeb4b2c248d2466eaa373bff5afd56bcba80aa7eabe`  
 > **Provenance Manifest (`data_manifest.json`) SHA-256:** `147eef422d0b96d02b3bc5acc630722dbd3a7a8b592ba07c952f147492702346`  
 > **Published Baseline Results SHA-256 (`notes_registry.json`):** `b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`  
-> **Remediated Strict Gap-Terminated Baseline Results SHA-256:** `f25ca075421eae92ff77eae492ce878facbf3400ce5991c331f3498bb86220d6`
+> **Remediated Gap-Terminated Baseline Results SHA-256:** `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c`
 
 ---
 
 ## Layer 1 / Measured: Baseline & Pre-Registered Metric Alignment
 
-### 1. Pre-Registered Metrics & Strict Timestamp Gap Termination (Blocker 1 Remediation)
+### 1. Parametric Changelog & Continuity Rule Audit (Blocker 1, 3 & 4 Clarification)
+- **Published Zenodo v1.0.0 Baseline (`notes_registry.json`):** Computed via row-adjacency continuity (`b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`).
+- **Remediated Strict Gap-Terminated Baseline (`a10c0aae...`):** Enforces strict timestamp continuity rule (`Δt > 15 min` terminates an active block).
+- **Empirical Audit Findings:**
+  - Across 19,862 baseline scarcity events, 19,855 ($99.965\%$) contained ZERO internal gaps.
+  - Enforcing strict timestamp gap termination splits exactly **7 bridged events** (8 total gap breaches).
+  - **Data Acquisition Artifact Clarification:** 5 of the 7 bridged events occurred on **2026-05-31** at the boundary of monthly CSV chunk stitching, NOT raw TSO grid telemetry gaps.
+  - **Metric Impact:** €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m).
+  - Both `gap_breaches_count` and `bridged_events_count` are recorded explicitly in `results.json` per zone.
+
+### 2. Pre-Registered Metrics & Threshold Definitions
 - **Metric M1: Scarcity Duration & Shortage Pricing**
   - Evaluated on Shortage Column (`Short` for Dual Pricing zones, or Single Imbalance Price column).
   - **Threshold A (Moderate Scarcity):** Imbalance Price $\ge €100.00/\text{MWh}$.
   - **Threshold B (Extreme Scarcity):** Imbalance Price $\ge €250.00/\text{MWh}$.
-  - **Strict Timestamp Continuity Rule (`Δt > 15 min` Termination):** Imbalance scarcity events are contiguous 15-minute settlement intervals where price remains at or above threshold. A timestamp gap $\Delta t > 15\text{ minutes}$ across adjacent rows immediately terminates the active event block and starts a new event if pricing remains elevated.
-  - **Empirical Gap Impact Measurement:** Across 19,862 baseline scarcity events, 19,855 ($99.965\%$) contained ZERO internal gaps. Enforcing strict timestamp gap termination splits exactly 7 bridged events (5 of which occurred on the 2026-05-31 monthly chunk boundary). €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected.
+  - **Strict Timestamp Continuity Rule (`Δt > 15 min` Termination):** Imbalance scarcity events are contiguous 15-minute settlement intervals where price remains at or above threshold. A timestamp gap $\Delta t > 15\text{ minutes}$ across adjacent rows terminates the active event block and starts a new event if pricing remains elevated.
 - **Metric M2: Grid Surplus Absorption & Daily BESS Opportunity Windows**
   - Evaluated on Surplus Column (`Long` for Dual Pricing zones, or Single Imbalance Price column).
   - **Cheap Surplus Threshold:** Imbalance Price $\le €25.00/\text{MWh}$.
@@ -32,35 +41,35 @@
     - **4-Hour BESS Window:** Minimum $\ge 4.80\text{ hours}$ per calendar day of surplus pricing. (Note: 85% round-trip efficiency serves as the post-hoc engineering rationale for this daily window and does not alter the frozen 4.8h threshold).
     - **8-Hour BESS Window:** Minimum $\ge 9.50\text{ hours}$ per calendar day of surplus pricing.
 
-### 2. Manifest-Bound Pricing Regime Assignment (Single Source of Truth — Zero Fallbacks)
+### 3. Manifest-Bound Pricing Regime Assignment (Single Source of Truth — Zero Fallbacks)
 - **Single Source of Truth:** `run_imbalance_analysis.py` reads `frozen_regime`, `m1_shortage_col`, and `m2_surplus_col` directly from `data_manifest.json`.
 - **Parametrized Timeframe Window Tag (Blocker 2 Remediation):** `run_imbalance_analysis.py` accepts `--window-tag` (default `202506_202606`) via `argparse` to match zone manifest entries dynamically per timeframe.
 - **Zero Fallback Abort Policy:** If a zone's manifest entry or column metadata is missing, `run_imbalance_analysis.py` raises an immediate `ValueError` abort. Zero silent defaults are permitted.
 - **Dual Pricing Zones (NL, FR):** `Short` (shortage) and `Long` (surplus) columns are distinct (`max_diff` = €4,081.59/MWh in NL; €632.20/MWh in FR). M1 is evaluated strictly on `Short` and M2 strictly on `Long` as registered in manifest.
 - **Single Pricing Zones (AT, BE, DK_1, DK_2):** `Short` and `Long` columns are empirically verified to be **100% byte-for-byte identical** (`max_diff = 0.000000`, `all_match (<1e-4) = True`). Evaluating M1 or M2 on either column yields mathematically identical values. Manifest binding prevents silent column switching.
 
-### 3. Temporal Windows & Baseline Isolation
+### 4. Temporal Windows & Baseline Isolation
 - **Baseline Window (Zenodo v1.0.0):** 1 June 2025 – 30 June 2026 (13 Calendar Months / 395 Days).
 - **Uncontaminated Baseline Window ($Q_{90}$ Base):** 1 August 2025 – 30 June 2026 (11 Calendar Months / 334 Days).
 - **Probe Window:** 1 July 2026 – 31 July 2026 (31 Days / 2,976 expected 15-min settlement intervals per zone).
 - **Matched Pair Window:** July 2026 vs July 2025 (same zone, same script, same metric).
 
-### 4. Licensing Boundary Guard & Source Platform
+### 5. Licensing Boundary Guard & Source Platform
 - **Permitted Data Source:** ENTSO-E Primary Transparency Platform (REST API DocumentType `A85`, Imbalance Prices).
 - **Forbidden Data Source:** DocumentType `A44` (Day-Ahead Prices) or unverified third-party aggregators.
 - **Provenance Manifest Anchor:** `data_manifest.json` contains verbatim entry: `"acquired_at_utc": "2026-07-19T12:00:00Z"`.
 
-### 5. Code-Enforced Mandate 8 & Data Completeness Guard
+### 6. Code-Enforced Mandate 8 & Data Completeness Guard
 - **Row Floor:** $\lceil 2,976 \times 0.98 \rceil = \mathbf{2,917\text{ intervals}}$ ($98.0\%$ math ceiling for 31 days).  
   *Operational Extension Note:* The $98\%$ telemetry floor is a Note #003 pre-registration extension pending formal ratification in `RECURRENCE_SPEC`.
 - **Timestamp Gap Threshold:** $\le 90\text{ minutes}$.  
   *Post-Hoc Empirical Calibration Note:* Threshold of 90 minutes was calibrated to DK_1/DK_2 historical baseline telemetry gap structure.
 
-### 6. Step 0 Determinism & Output Isolation (Blocker 5 Remediation)
+### 7. Step 0 Determinism & Output Isolation (Blocker 5 Remediation)
 - **Argparse Output Isolation:** `run_imbalance_analysis.py` accepts `--out-dir` parameter (e.g., `--out-dir scratch/step0_probe`) to write `results.json` without modifying the root directory or baseline files.
-- **Baseline Integrity Execution:** Executing `python3 run_imbalance_analysis.py --out-dir scratch/step0_probe` over baseline `.feather` files produced SHA-256 `f25ca075421eae92ff77eae492ce878facbf3400ce5991c331f3498bb86220d6` under strict timestamp gap termination.
+- **Baseline Integrity Execution:** Executing `python3 run_imbalance_analysis.py --out-dir scratch/step0_probe` over baseline `.feather` files produced SHA-256 `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c` under strict timestamp gap termination.
 
-### 7. Verified Target Bidding Zones & Regime Mapping Persistence
+### 8. Verified Target Bidding Zones & Regime Mapping Persistence
 - **NL** Netherlands (`10YNL----------L`) — *Frozen DUAL_PRICING*
 - **BE** Belgium (`10YBE----------X`) — *Frozen SINGLE_PRICING*
 - **FR** France (`10YFR-RTE------C`) — *Frozen DUAL_PRICING*
@@ -69,7 +78,7 @@
 - **AT** Austria (`10YAT-APG------L`) — *Frozen SINGLE_PRICING*  
 *Persistence:* Regime mapping parameters (`frozen_regime`, `m1_shortage_col`, `m2_surplus_col`) are persisted into `data_manifest.json` under each zone's file entry.
 
-### 8. Security & Zero Secret Leakage Pipeline (Mandate 9)
+### 9. Security & Zero Secret Leakage Pipeline (Mandate 9)
 - **Token Source:** Environment variable `ENTSOE_API_KEY`.
 - **Token Rotation Verification:** Active key prefix vs historical compromised prefix (`RESULT: NO MATCH`).
 - **Redaction Order:** `sanitize_token_url()` scrubs `securityToken=[^&]+` parameters on `response.url` and `request.url` *prior* to string formatting.

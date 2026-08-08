@@ -52,9 +52,10 @@ def main():
         basename = os.path.basename(pfile)
         zone = basename.replace("imbalance_", "").replace(".feather", "")
         
+        escaped_tag = re.escape(window_tag)
         matching_entries = [
             v for k, v in manifest_files_dict.items() 
-            if re.search(rf'imbalance_{zone}_{window_tag}\.csv', k)
+            if re.search(rf'imbalance_{zone}_{escaped_tag}\.csv', k)
         ]
         
         if not matching_entries:
@@ -67,7 +68,7 @@ def main():
         m2_col_name = manifest_entry.get("m2_surplus_col")
         
         if not regime or not m1_col_name or not m2_col_name:
-            raise ValueError(f"MANIFEST ABORT: Incomplete regime metadata for zone {zone} u manifest! regime={regime}, m1_col={m1_col_name}, m2_col={m2_col_name}")
+            raise ValueError(f"MANIFEST ABORT: Incomplete regime metadata for zone {zone} in manifest! regime={regime}, m1_col={m1_col_name}, m2_col={m2_col_name}")
             
         df = pd.read_feather(pfile)
         
@@ -101,8 +102,10 @@ def main():
             timestamps = pd.to_datetime(df_sub.index, utc=True)
             above = (price_series >= threshold).values
             events = []
-            bridged_gaps_count = 0
+            gap_breaches_count = 0
+            bridged_events_count = 0
             curr_rows = []
+            curr_had_gap = False
             
             for i, val in enumerate(above):
                 if val:
@@ -111,40 +114,48 @@ def main():
                         curr_ts = timestamps[i]
                         gap_min = (curr_ts - prev_ts).total_seconds() / 60.0
                         if gap_min > 15.0:
-                            bridged_gaps_count += 1
+                            gap_breaches_count += 1
+                            curr_had_gap = True
                             events.append(len(curr_rows) * 15)
                             curr_rows = [i]
                         else:
                             curr_rows.append(i)
                     else:
                         curr_rows.append(i)
+                        curr_had_gap = False
                 else:
                     if curr_rows:
+                        if curr_had_gap:
+                            bridged_events_count += 1
                         events.append(len(curr_rows) * 15)
                         curr_rows = []
+                        curr_had_gap = False
                         
             if curr_rows:
+                if curr_had_gap:
+                    bridged_events_count += 1
                 events.append(len(curr_rows) * 15)
                 
             if not events:
-                return {"count": 0, "mean_min": 0, "median_min": 0, "p90_min": 0, "p95_min": 0, "p99_min": 0, "max_min": 0, "bridged_gaps_terminated": 0}
+                return {"count": 0, "mean_min": 0, "median_min": 0, "p90_min": 0, "p95_min": 0, "p99_min": 0, "max_min": 0, "gap_breaches_count": 0, "bridged_events_count": 0}
                 
             return {
                 "count": len(events),
                 "mean_min": round(float(np.mean(events)), 1),
                 "median_min": round(float(np.median(events)), 1),
-                "p90_min": round(float(np.percentile(events, 90)), 1),
-                "p95_min": round(float(np.percentile(events, 95)), 1),
-                "p99_min": round(float(np.percentile(events, 99)), 1),
+                "p90_min": round(float(np.percentile(events, 90, method='linear')), 1),
+                "p95_min": round(float(np.percentile(events, 95, method='linear')), 1),
+                "p99_min": round(float(np.percentile(events, 99, method='linear')), 1),
                 "max_min": int(np.max(events)),
-                "bridged_gaps_terminated": bridged_gaps_count
+                "gap_breaches_count": gap_breaches_count,
+                "bridged_events_count": bridged_events_count
             }
 
         m1_100 = compute_m1(df, p_short, 100.0)
         m1_250 = compute_m1(df, p_short, 250.0)
         
-        print(f"M1 Scarcity >= €100/MWh (Shortage): {m1_100['count']} events | Mean: {m1_100['mean_min']}m | P90: {m1_100['p90_min']}m | Max: {m1_100['max_min']}m | Gaps Terminated: {m1_100['bridged_gaps_terminated']}")
-        print(f"M1 Scarcity >= €250/MWh (Shortage): {m1_250['count']} events | Mean: {m1_250['mean_min']}m | P90: {m1_250['p90_min']}m | Max: {m1_250['max_min']}m | Gaps Terminated: {m1_250['bridged_gaps_terminated']}")
+        print(f"M1 Scarcity >= €100/MWh (Shortage): {m1_100['count']} events | Mean: {m1_100['mean_min']}m | P90: {m1_100['p90_min']}m | Max: {m1_100['max_min']}m | Gap Breaches: {m1_100['gap_breaches_count']} (Bridged Events: {m1_100['bridged_events_count']})")
+        print(f"M1 Scarcity >= €250/MWh (Shortage): {m1_250['count']} events | Mean: {m1_250['mean_min']}m | P90: {m1_250['p90_min']}m | Max: {m1_250['max_min']}m | Gap Breaches: {m1_250['gap_breaches_count']} (Bridged Events: {m1_250['bridged_events_count']})")
         
         df['date'] = df.index.date
         df['is_zero_neg'] = p_long <= 0.0

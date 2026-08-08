@@ -11,7 +11,8 @@
             "p95_min": 300.0,
             "p99_min": 510.0,
             "max_min": 1305,
-            "bridged_gaps_terminated": 1
+            "gap_breaches_count": 1,
+            "bridged_events_count": 1
         },
         "m1_250": {
             "count": 375,
@@ -21,7 +22,8 @@
             "p95_min": 135.0,
             "p99_min": 292.8,
             "max_min": 480,
-            "bridged_gaps_terminated": 0
+            "gap_breaches_count": 0,
+            "bridged_events_count": 0
         },
         "m2_cheap_25": {
             "pct_4h_bess": 38.5,
@@ -46,7 +48,8 @@
             "p95_min": 270.0,
             "p99_min": 660.0,
             "max_min": 1545,
-            "bridged_gaps_terminated": 1
+            "gap_breaches_count": 1,
+            "bridged_events_count": 1
         },
         "m1_250": {
             "count": 581,
@@ -56,7 +59,8 @@
             "p95_min": 90.0,
             "p99_min": 168.0,
             "max_min": 315,
-            "bridged_gaps_terminated": 0
+            "gap_breaches_count": 0,
+            "bridged_events_count": 0
         },
         "m2_cheap_25": {
             "pct_4h_bess": 33.7,
@@ -81,7 +85,8 @@
             "p95_min": 180.0,
             "p99_min": 330.3,
             "max_min": 705,
-            "bridged_gaps_terminated": 2
+            "gap_breaches_count": 2,
+            "bridged_events_count": 2
         },
         "m1_250": {
             "count": 1040,
@@ -91,7 +96,8 @@
             "p95_min": 90.0,
             "p99_min": 150.0,
             "max_min": 390,
-            "bridged_gaps_terminated": 0
+            "gap_breaches_count": 0,
+            "bridged_events_count": 0
         },
         "m2_cheap_25": {
             "pct_4h_bess": 59.5,
@@ -116,7 +122,8 @@
             "p95_min": 165.0,
             "p99_min": 300.0,
             "max_min": 930,
-            "bridged_gaps_terminated": 3
+            "gap_breaches_count": 3,
+            "bridged_events_count": 2
         },
         "m1_250": {
             "count": 1335,
@@ -126,7 +133,8 @@
             "p95_min": 90.0,
             "p99_min": 165.0,
             "max_min": 585,
-            "bridged_gaps_terminated": 0
+            "gap_breaches_count": 0,
+            "bridged_events_count": 0
         },
         "m2_cheap_25": {
             "pct_4h_bess": 67.3,
@@ -151,7 +159,8 @@
             "p95_min": 255.0,
             "p99_min": 525.0,
             "max_min": 1080,
-            "bridged_gaps_terminated": 0
+            "gap_breaches_count": 0,
+            "bridged_events_count": 0
         },
         "m1_250": {
             "count": 421,
@@ -161,7 +170,8 @@
             "p95_min": 165.0,
             "p99_min": 324.0,
             "max_min": 465,
-            "bridged_gaps_terminated": 0
+            "gap_breaches_count": 0,
+            "bridged_events_count": 0
         },
         "m2_cheap_25": {
             "pct_4h_bess": 62.5,
@@ -186,7 +196,8 @@
             "p95_min": 225.0,
             "p99_min": 480.0,
             "max_min": 1305,
-            "bridged_gaps_terminated": 1
+            "gap_breaches_count": 1,
+            "bridged_events_count": 1
         },
         "m1_250": {
             "count": 294,
@@ -196,7 +207,8 @@
             "p95_min": 90.0,
             "p99_min": 182.1,
             "max_min": 255,
-            "bridged_gaps_terminated": 0
+            "gap_breaches_count": 0,
+            "bridged_events_count": 0
         },
         "m2_cheap_25": {
             "pct_4h_bess": 50.1,
