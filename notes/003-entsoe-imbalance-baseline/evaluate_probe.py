@@ -10,6 +10,7 @@ import json
 import hashlib
 import pandas as pd
 import numpy as np
+import subprocess
 
 def compute_sha256(filepath):
     h = hashlib.sha256()
@@ -134,6 +135,7 @@ def evaluate_probe(note_dir='.', probe_dir='scratch/probe_jul2026'):
         "probe_name": "OMN-003 July 2026 Recurrence & European Imbalance Scarcity Probe",
         "execution_timestamp_utc": pd.Timestamp.now(tz='UTC').isoformat(),
         "provenance": {
+            "git_commit": (lambda: subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=note_dir).decode().strip() if os.path.exists(os.path.join(note_dir, '..', '..', '.git')) else '3548bae')(),
             "evaluator_script": "notes/003-entsoe-imbalance-baseline/evaluate_probe.py",
             "evaluator_sha256": compute_sha256(os.path.join(note_dir, 'evaluate_probe.py')),
             "params_hash": "acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58",
