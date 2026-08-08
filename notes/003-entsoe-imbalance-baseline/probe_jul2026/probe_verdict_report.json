@@ -1,10 +1,10 @@
 {
   "probe_name": "OMN-003 July 2026 Recurrence & European Imbalance Scarcity Probe",
-  "execution_timestamp_utc": "2026-08-08T15:44:31.215430+00:00",
+  "execution_timestamp_utc": "2026-08-08T15:49:24.358700+00:00",
   "provenance": {
-    "git_commit": "f82aa01398bc394570c6407330ea87217dd4d519",
+    "git_commit": "d9429c03a4a7c96e2b3cf0c7aef5f62d710019d2",
     "evaluator_script": "notes/003-entsoe-imbalance-baseline/evaluate_probe.py",
-    "evaluator_sha256": "8f285434a5cd5c120a3cddbacc6f536699da25cbe940f4c9f049d442196ecf3d",
+    "evaluator_sha256": "1e98359e9866e72646062651adda287316eca72390a6100f1c70f011f7ca4c36",
     "params_hash": "acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58",
     "pre_registered_ratifier": "Ivan Nestorov (2026-08-08)"
   },
@@ -18,8 +18,8 @@
       "FR": 2976,
       "NL": 2976
     },
-    "completeness_pct": 100.0,
-    "no_gaps_exceeding_15min": true,
+    "measured_completeness_pct": 100.0,
+    "measured_no_gaps_exceeding_15min": true,
     "mandate_8_status": "PASSED"
   },
   "benchmark_metrics": {
@@ -36,42 +36,54 @@
         "jul_2026_share_q90_pct": 18.35,
         "is_elevated": true,
         "manifest_bound_column": "Short",
-        "probe_intervals": 2976
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true
       },
       "BE": {
         "baseline_q90_eur": 157.92,
         "jul_2026_share_q90_pct": 18.78,
         "is_elevated": true,
         "manifest_bound_column": "Short",
-        "probe_intervals": 2976
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true
       },
       "DK_1": {
         "baseline_q90_eur": 183.18,
         "jul_2026_share_q90_pct": 17.47,
         "is_elevated": true,
         "manifest_bound_column": "Short",
-        "probe_intervals": 2976
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true
       },
       "DK_2": {
         "baseline_q90_eur": 201.54,
         "jul_2026_share_q90_pct": 11.32,
         "is_elevated": false,
         "manifest_bound_column": "Short",
-        "probe_intervals": 2976
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true
       },
       "FR": {
         "baseline_q90_eur": 156.18,
         "jul_2026_share_q90_pct": 31.82,
         "is_elevated": true,
         "manifest_bound_column": "Short",
-        "probe_intervals": 2976
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true
       },
       "NL": {
         "baseline_q90_eur": 153.0,
         "jul_2026_share_q90_pct": 23.29,
         "is_elevated": true,
         "manifest_bound_column": "Short",
-        "probe_intervals": 2976
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true
       }
     }
   },
