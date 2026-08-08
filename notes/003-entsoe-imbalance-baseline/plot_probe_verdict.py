@@ -19,7 +19,7 @@ def generate_probe_figures(report_path='probe_jul2026/probe_verdict_report.json'
 
     os.makedirs(out_dir, exist_ok=True)
 
-    # Extract metrics
+    # Extract metrics dynamically from source report
     gb_metrics = report["benchmark_metrics"]["gb_comparator"]
     eu_metrics = report["benchmark_metrics"]["eu_zones"]
 
@@ -107,8 +107,13 @@ def generate_probe_figures(report_path='probe_jul2026/probe_verdict_report.json'
     fig.patch.set_facecolor('#0f172a')
     ax.set_facecolor('#0f172a')
 
+    gb_jul25 = gb_metrics["jul_2025_share_q90_pct"]
+    gb_jul26 = gb_metrics["jul_2026_share_q90_pct"]
+    gb_q90 = gb_metrics["baseline_q90_gbp"]
+    yoy_factor = gb_jul26 / gb_jul25 if gb_jul25 > 0 else 0.0
+
     gb_periods = ['July 2025', 'July 2026']
-    gb_shares = [gb_metrics["jul_2025_share_q90_pct"], gb_metrics["jul_2026_share_q90_pct"]]
+    gb_shares = [gb_jul25, gb_jul26]
     bar_colors = ['#475569', '#f59e0b']
 
     bars = ax.bar(gb_periods, gb_shares, color=bar_colors, width=0.45, zorder=3)
@@ -118,16 +123,17 @@ def generate_probe_figures(report_path='probe_jul2026/probe_verdict_report.json'
         ax.text(bar.get_x() + bar.get_width()/2.0, height + 0.8, f'{share:.2f}%',
                 ha='center', va='bottom', color='#ffffff', fontsize=13, fontweight='bold')
 
-    # Annotation arrow for 35.6x increase
-    ax.annotate('35.6× Increase', xy=(1, 28.83), xytext=(0.45, 20.0),
+    # Dynamic annotation arrow derived from report source
+    annotation_text = f"{yoy_factor:.1f}× Increase"
+    ax.annotate(annotation_text, xy=(1, gb_jul26), xytext=(0.45, gb_jul26 * 0.7),
                 arrowprops=dict(facecolor='#f43f5e', edgecolor='#f43f5e', shrink=0.08, width=2, headwidth=8),
                 fontsize=12, fontweight='bold', color='#f43f5e', bbox=dict(boxstyle="round,pad=0.4", fc="#1e293b", ec="#f43f5e", lw=1.5))
 
     ax.set_title('Great Britain (GB) July Scarcity Elevation YoY', fontsize=14, fontweight='bold', pad=20, color='#ffffff', loc='left')
-    fig.text(0.125, 0.90, "Share of settlement time above GB Q90 baseline (£131.54/MWh)", fontsize=10, color='#94a3b8', fontstyle='italic')
+    fig.text(0.125, 0.90, f"Share of settlement time above GB Q90 baseline (£{gb_q90:.2f}/MWh)", fontsize=10, color='#94a3b8', fontstyle='italic')
 
     ax.set_ylabel('Time Share Above Q90 (%)', fontsize=11, fontweight='bold', color='#cbd5e1', labelpad=10)
-    ax.set_ylim(0, 35)
+    ax.set_ylim(0, max(gb_shares) * 1.25)
 
     ax.grid(True, axis='y', linestyle=':', color='#334155', alpha=0.7, zorder=0)
     ax.spines['top'].set_visible(False)
