@@ -18,5 +18,15 @@
     "reproduce_sha256": "f3642ff2829e5a3eadf97832aba6042a47176f66d2f85efe30b3a323cbf6b0ae",
     "pipeline_commit_sha": "0aaa20bd6c53b1871b8e5bf15fff014e12237ae5",
     "executed_at": "2026-08-07T21:59:02Z"
+  },
+  {
+    "version": "v1.3.0",
+    "measurement_window": "2025-07-01 to 2026-07-31",
+    "results_sha256": "9cd0c9117e580732776db0251f9a0edf68c669591805c1ab7a3fffc602eaded7",
+    "input_manifest_sha256": "baff7abfbbf6c62753acc0f47d2f3baeb8036857cce2ca4b249228a24698c2c6",
+    "params_sha256": "6efc418bc25829ad276dada62e2919b918e99438a1a64953326fc2e77a9d16d5",
+    "reproduce_sha256": "f3642ff2829e5a3eadf97832aba6042a47176f66d2f85efe30b3a323cbf6b0ae",
+    "pipeline_commit_sha": "1b34203394f40b8db9f9a4a7024973277c8b3b0f",
+    "executed_at": "2026-08-08T13:51:45Z"
   }
 ]
