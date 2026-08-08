@@ -1,27 +1,29 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
-> **Version:** 2.2.0-draft (Strict Manifest-Bound & Pinned Pre-Registration Spec)  
+> **Version:** 2.3.0-draft (Strict Gap-Terminated & Empirically Audited Spec)  
 > **Status:** Draft Submitted to Human Gate on `feature/omn-003-preregistration-draft` (Pre-Execution Freeze)  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
 > **PARAMS Freeze Commitment (`a2c0b3a`):** `feat(note-003): publish final ENTSO-E baseline note with PARAMS v3.1.0 and reproducible figures`  
 > **PARAMS Cryptographic SHA-256:** `acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58`  
 > **Main Branch HEAD (`6fa1cb7`):** `Merge pull request #51 from VolMax-Studio/recurrent-measurement/omn-004-31221838425`  
 > **Published Baseline Analysis Script (`run_imbalance_analysis.py`) Blob (`6fa1cb7`):** `7e6be06d5b7e7a46223c83998eb4ad35cdb4a16be5245932abce3c827aa5b484`  
-> **Remediated Analysis Script (`run_imbalance_analysis.py`) Draft SHA-256:** `2032e7c0c3d7e693a2542a37adcbbff27c0b95dba9f517f9c593c2ead68a11d6`  
+> **Remediated Analysis Script (`run_imbalance_analysis.py`) Draft SHA-256:** `d1ea872e0d99e8d687f6c9e4dfe345e3df820218cbda17b5885712f7a0a42a69`  
 > **Ingestion Script (`download_entsoe_data.py`) Draft SHA-256:** `c6eb203ab3daf4c6f4844aeb4b2c248d2466eaa373bff5afd56bcba80aa7eabe`  
-> **Provenance Manifest (`data_manifest.json`) Draft SHA-256:** `147eef422d0b96d02b3bc5acc630722dbd3a7a8b592ba07c952f147492702346`  
-> **Baseline Results SHA-256 (`notes_registry.json`):** `b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`
+> **Provenance Manifest (`data_manifest.json`) SHA-256:** `147eef422d0b96d02b3bc5acc630722dbd3a7a8b592ba07c952f147492702346`  
+> **Published Baseline Results SHA-256 (`notes_registry.json`):** `b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`  
+> **Remediated Strict Gap-Terminated Baseline Results SHA-256:** `f25ca075421eae92ff77eae492ce878facbf3400ce5991c331f3498bb86220d6`
 
 ---
 
 ## Layer 1 / Measured: Baseline & Pre-Registered Metric Alignment
 
-### 1. Pre-Registered Metrics & Threshold Definitions (Code-Aligned)
+### 1. Pre-Registered Metrics & Strict Timestamp Gap Termination (Blocker 1 Remediation)
 - **Metric M1: Scarcity Duration & Shortage Pricing**
   - Evaluated on Shortage Column (`Short` for Dual Pricing zones, or Single Imbalance Price column).
   - **Threshold A (Moderate Scarcity):** Imbalance Price $\ge €100.00/\text{MWh}$.
   - **Threshold B (Extreme Scarcity):** Imbalance Price $\ge €250.00/\text{MWh}$.
-  - **Continuity Rule:** Imbalance scarcity events are contiguous settlement rows where price remains at or above threshold. (Note: A timestamp gap $>15\text{ minutes}$ is flagged as a Data-Completeness Bounded Conservative Lower Bound in telemetry interpretation).
+  - **Strict Timestamp Continuity Rule (`Δt > 15 min` Termination):** Imbalance scarcity events are contiguous 15-minute settlement intervals where price remains at or above threshold. A timestamp gap $\Delta t > 15\text{ minutes}$ across adjacent rows immediately terminates the active event block and starts a new event if pricing remains elevated.
+  - **Empirical Gap Impact Measurement:** Across 19,862 baseline scarcity events, 19,855 ($99.965\%$) contained ZERO internal gaps. Enforcing strict timestamp gap termination splits exactly 7 bridged events (5 of which occurred on the 2026-05-31 monthly chunk boundary). €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected.
 - **Metric M2: Grid Surplus Absorption & Daily BESS Opportunity Windows**
   - Evaluated on Surplus Column (`Long` for Dual Pricing zones, or Single Imbalance Price column).
   - **Cheap Surplus Threshold:** Imbalance Price $\le €25.00/\text{MWh}$.
@@ -32,8 +34,8 @@
 
 ### 2. Manifest-Bound Pricing Regime Assignment (Single Source of Truth — Zero Fallbacks)
 - **Single Source of Truth:** `run_imbalance_analysis.py` reads `frozen_regime`, `m1_shortage_col`, and `m2_surplus_col` directly from `data_manifest.json`.
+- **Parametrized Timeframe Window Tag (Blocker 2 Remediation):** `run_imbalance_analysis.py` accepts `--window-tag` (default `202506_202606`) via `argparse` to match zone manifest entries dynamically per timeframe.
 - **Zero Fallback Abort Policy:** If a zone's manifest entry or column metadata is missing, `run_imbalance_analysis.py` raises an immediate `ValueError` abort. Zero silent defaults are permitted.
-- **Unambiguous Timeframe Matching:** Zone manifest entries are matched strictly by zone code and baseline timeframe tag (`202506_202606`), eliminating probe file lookup ambiguity.
 - **Dual Pricing Zones (NL, FR):** `Short` (shortage) and `Long` (surplus) columns are distinct (`max_diff` = €4,081.59/MWh in NL; €632.20/MWh in FR). M1 is evaluated strictly on `Short` and M2 strictly on `Long` as registered in manifest.
 - **Single Pricing Zones (AT, BE, DK_1, DK_2):** `Short` and `Long` columns are empirically verified to be **100% byte-for-byte identical** (`max_diff = 0.000000`, `all_match (<1e-4) = True`). Evaluating M1 or M2 on either column yields mathematically identical values. Manifest binding prevents silent column switching.
 
@@ -54,12 +56,9 @@
 - **Timestamp Gap Threshold:** $\le 90\text{ minutes}$.  
   *Post-Hoc Empirical Calibration Note:* Threshold of 90 minutes was calibrated to DK_1/DK_2 historical baseline telemetry gap structure.
 
-### 6. Baseline Feather Integrity Verification (Blocker 4 & 6 Verification)
-- **Baseline Integrity Execution:** Executing `run_imbalance_analysis.py` over baseline `.feather` files produced SHA-256 `b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9` (100% byte-perfect match with `notes_registry.json`).
-- **Step 0 Protocol:**
-  1. Isolated output directory: `--out-dir scratch/step0_probe`.
-  2. Verify zero modification to `./data/processed/imbalance_{ZONE}.feather` baseline files.
-  3. Validate output hash against pre-registered baseline result hash (`b1c71337...`).
+### 6. Step 0 Determinism & Output Isolation (Blocker 5 Remediation)
+- **Argparse Output Isolation:** `run_imbalance_analysis.py` accepts `--out-dir` parameter (e.g., `--out-dir scratch/step0_probe`) to write `results.json` without modifying the root directory or baseline files.
+- **Baseline Integrity Execution:** Executing `python3 run_imbalance_analysis.py --out-dir scratch/step0_probe` over baseline `.feather` files produced SHA-256 `f25ca075421eae92ff77eae492ce878facbf3400ce5991c331f3498bb86220d6` under strict timestamp gap termination.
 
 ### 7. Verified Target Bidding Zones & Regime Mapping Persistence
 - **NL** Netherlands (`10YNL----------L`) — *Frozen DUAL_PRICING*

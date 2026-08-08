@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 import glob
 import re
@@ -10,9 +9,16 @@ import numpy as np
 def main():
     parser = argparse.ArgumentParser(description="ENTSO-E Baseline & Recurrence Analysis Script")
     parser.add_argument('--data-dir', type=str, default='.', help='Input data and manifest directory')
+    parser.add_argument('--out-dir', type=str, default=None, help='Output directory for results.json summary')
+    parser.add_argument('--window-tag', type=str, default='202506_202606', help='Timeframe tag for matching manifest entries')
     args = parser.parse_args()
 
     data_dir = args.data_dir
+    out_dir = args.out_dir or data_dir
+    window_tag = args.window_tag
+
+    os.makedirs(out_dir, exist_ok=True)
+
     manifest_path = os.path.join(data_dir, 'data_manifest.json')
     if not os.path.exists(manifest_path):
         manifest_path = os.path.join(data_dir, 'data', 'data_manifest.json')
@@ -46,24 +52,15 @@ def main():
         basename = os.path.basename(pfile)
         zone = basename.replace("imbalance_", "").replace(".feather", "")
         
-        # Exact zone manifest lookup with zero ambiguity and zero silent fallbacks
         matching_entries = [
             v for k, v in manifest_files_dict.items() 
-            if re.search(rf'imbalance_{zone}_\d{{6}}_\d{{6}}\.csv', k)
+            if re.search(rf'imbalance_{zone}_{window_tag}\.csv', k)
         ]
         
         if not matching_entries:
-            raise ValueError(f"MANIFEST ABORT: No registered provenance entry found in manifest for zone {zone}!")
+            raise ValueError(f"MANIFEST ABORT: No registered provenance entry found in manifest for zone {zone} with window tag '{window_tag}'!")
             
-        if len(matching_entries) > 1:
-            # Baseline timeframe filtering (202506_202606) to prevent multi-file collision in probe runs
-            baseline_entries = [e for e in matching_entries if '202506_202606' in e.get("file_name", "")]
-            if len(baseline_entries) == 1:
-                manifest_entry = baseline_entries[0]
-            else:
-                raise ValueError(f"MANIFEST ABORT: Ambiguous multiple manifest entries found for zone {zone}: {[e['file_name'] for e in matching_entries]}")
-        else:
-            manifest_entry = matching_entries[0]
+        manifest_entry = matching_entries[0]
             
         regime = manifest_entry.get("frozen_regime")
         m1_col_name = manifest_entry.get("m1_shortage_col")
@@ -100,22 +97,37 @@ def main():
         print(f"Columns bound -> Shortage (M1): '{m1_col_name}' | Surplus (M2): '{m2_col_name}'")
         print(f"--------------------------------------------------")
         
-        def compute_m1(price_series, threshold):
+        def compute_m1(df_sub, price_series, threshold):
+            timestamps = pd.to_datetime(df_sub.index, utc=True)
             above = (price_series >= threshold).values
             events = []
-            curr = 0
-            for val in above:
+            bridged_gaps_count = 0
+            curr_rows = []
+            
+            for i, val in enumerate(above):
                 if val:
-                    curr += 1
+                    if curr_rows:
+                        prev_ts = timestamps[curr_rows[-1]]
+                        curr_ts = timestamps[i]
+                        gap_min = (curr_ts - prev_ts).total_seconds() / 60.0
+                        if gap_min > 15.0:
+                            bridged_gaps_count += 1
+                            events.append(len(curr_rows) * 15)
+                            curr_rows = [i]
+                        else:
+                            curr_rows.append(i)
+                    else:
+                        curr_rows.append(i)
                 else:
-                    if curr > 0:
-                        events.append(curr * 15)  # duration in minutes
-                        curr = 0
-            if curr > 0:
-                events.append(curr * 15)
+                    if curr_rows:
+                        events.append(len(curr_rows) * 15)
+                        curr_rows = []
+                        
+            if curr_rows:
+                events.append(len(curr_rows) * 15)
                 
             if not events:
-                return {"count": 0, "mean_min": 0, "median_min": 0, "p90_min": 0, "p95_min": 0, "p99_min": 0, "max_min": 0}
+                return {"count": 0, "mean_min": 0, "median_min": 0, "p90_min": 0, "p95_min": 0, "p99_min": 0, "max_min": 0, "bridged_gaps_terminated": 0}
                 
             return {
                 "count": len(events),
@@ -124,14 +136,15 @@ def main():
                 "p90_min": round(float(np.percentile(events, 90)), 1),
                 "p95_min": round(float(np.percentile(events, 95)), 1),
                 "p99_min": round(float(np.percentile(events, 99)), 1),
-                "max_min": int(np.max(events))
+                "max_min": int(np.max(events)),
+                "bridged_gaps_terminated": bridged_gaps_count
             }
 
-        m1_100 = compute_m1(p_short, 100.0)
-        m1_250 = compute_m1(p_short, 250.0)
+        m1_100 = compute_m1(df, p_short, 100.0)
+        m1_250 = compute_m1(df, p_short, 250.0)
         
-        print(f"M1 Scarcity >= €100/MWh (Shortage): {m1_100['count']} events | Mean: {m1_100['mean_min']}m | P90: {m1_100['p90_min']}m | Max: {m1_100['max_min']}m")
-        print(f"M1 Scarcity >= €250/MWh (Shortage): {m1_250['count']} events | Mean: {m1_250['mean_min']}m | P90: {m1_250['p90_min']}m | Max: {m1_250['max_min']}m")
+        print(f"M1 Scarcity >= €100/MWh (Shortage): {m1_100['count']} events | Mean: {m1_100['mean_min']}m | P90: {m1_100['p90_min']}m | Max: {m1_100['max_min']}m | Gaps Terminated: {m1_100['bridged_gaps_terminated']}")
+        print(f"M1 Scarcity >= €250/MWh (Shortage): {m1_250['count']} events | Mean: {m1_250['mean_min']}m | P90: {m1_250['p90_min']}m | Max: {m1_250['max_min']}m | Gaps Terminated: {m1_250['bridged_gaps_terminated']}")
         
         df['date'] = df.index.date
         df['is_zero_neg'] = p_long <= 0.0
@@ -171,7 +184,7 @@ def main():
             }
         }
 
-    out_summary_path = os.path.join(data_dir, 'results.json')
+    out_summary_path = os.path.join(out_dir, 'results.json')
     with open(out_summary_path, 'w') as f:
         json.dump(results, f, indent=4)
         
