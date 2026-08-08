@@ -111,9 +111,10 @@ def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
         date_str = curr.isoformat()
         url = f"{BASE_URL}/{date_str}"
         fetched = False
-        for attempt in range(3):
+        max_attempts = 5
+        for attempt in range(1, max_attempts + 1):
             try:
-                resp = requests.get(url, timeout=10)
+                resp = requests.get(url, timeout=15)
                 if resp.status_code == 200:
                     data = resp.json()
                     if isinstance(data, list):
@@ -124,13 +125,23 @@ def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
                         records.extend(data["data"])
                         fetched = True
                         break
+                    else:
+                        print(f"Warning: Unexpected JSON structure for {date_str} (attempt {attempt}/{max_attempts})")
+                elif resp.status_code in (429, 500, 502, 503, 504):
+                    retry_after = resp.headers.get("Retry-After")
+                    sleep_sec = float(retry_after) if retry_after and retry_after.isdigit() else (2 ** (attempt - 1))
+                    print(f"Warning: HTTP {resp.status_code} for {date_str} (attempt {attempt}/{max_attempts}). Retrying in {sleep_sec:.1f}s...")
+                    time.sleep(sleep_sec)
+                    continue
                 else:
-                    print(f"Warning: HTTP {resp.status_code} for {date_str} (attempt {attempt+1})")
+                    print(f"Warning: HTTP {resp.status_code} for {date_str} (attempt {attempt}/{max_attempts})")
             except Exception as e:
-                print(f"Error fetching {date_str} (attempt {attempt+1}): {e}")
-            time.sleep(0.5)
+                print(f"Error fetching {date_str} (attempt {attempt}/{max_attempts}): {e}")
+            sleep_sec = 2 ** (attempt - 1)
+            time.sleep(sleep_sec)
         if not fetched:
-            print(f"FATAL: FAILED to fetch {date_str} after 3 attempts.")
+            print(f"FATAL: FAILED to fetch telemetry for {date_str} after {max_attempts} attempts. Aborting per Mandate 8.")
+            sys.exit(1)
             
         curr += timedelta(days=1)
         day_count += 1

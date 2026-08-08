@@ -1,7 +1,7 @@
 # VolMax Open Market Notes — Recurrence Specification
-**Version:** v1.0.9  
-**Status:** Draft for Ratification (Pre-Merge)  
-**Date:** 2026-08-06  
+**Version:** v1.1.0  
+**Status:** Ratified Baseline Specification  
+**Date:** 2026-08-08  
 **Repository:** `VolMax-Studio/Open-Market-Notes`  
 
 ---
@@ -19,6 +19,7 @@ The recurrence pipeline ensures that market observation baselines remain dynamic
 
 ## 2. Revision History & Governance Changelog
 
+- **v1.1.0 (2026-08-08):** Ratified ENTSO-E Consolidated Zone Layout clause under Mandate 8, establishing the 98.0% telemetry floor ($\ge \lceil \text{expected\_intervals} \times 0.98 \rceil$) and 90-minute maximum timestamp gap threshold for ENTSO-E 15-minute imbalance datasets (OMN-003, OMN-005).
 - **v1.0.9 (2026-08-06):** Draft for Ratification (Pre-Merge). Aligned Mandate 8 specification text to exact rolling window row count threshold calculation ($\ge \text{expected\_days} \times 48$) matching implementation in `recurrence_run.py` (NB114); formalized Mandate 1 source-specific boundary conventions (AEMO 04:05 market trading day vs Elexon Europe/London calendar day vs ENTSO-E CET/CEST calendar day).
 - **v1.0.8 (2026-08-01):** Ratified Baseline Specification. Formally defined dual parameter field semantics (`params_commit_hash` for pre-execution freeze lineage vs `params_sha256` for cryptographic verification of published package `PARAMS.md`) under Mandate 3; distinguished baseline registry initial establishment (2026-07-31) from post-ratification immutability freezing; updated Mandate 3 verification wording.
 - **v1.0.7 (2026-07-30):** Ratified Option 3 alignment of `notes_registry.json` and `results.json` to the canonical 13-month published Zenodo baseline hash (`c192e7ee...`) after restoring complete 13-month telemetry; formalized DOI Revision & `superseded_doi` Erratum Policy in Mandate 5; upgraded Mandate 8 to enforce dual-prefix monthly telemetry completeness (`price_` AND `scada_` files for all 13 months); logged Failure Entries #011, #012, and #013; explicitly supersedes and corrects the erroneous v1.0.6 changelog claim regarding `0ddbc333...` baseline output verification.
@@ -99,6 +100,10 @@ All recurrent measurement refreshes write to `history/measurement_log.json`. Cor
   1. Total row count is at least the exact expected count ($\ge \text{expected\_days} \times 48$, e.g., $18,960$ intervals for 395 baseline days, $19,008$ intervals for 396 rolling window days).
   2. Non-zero monthly row count for EVERY month within the calculated rolling window (`df['startTime'].dt.strftime('%Y%m')`).
   3. Strict timestamp continuity without unexpected temporal gaps ($>35$ min limit).
+- **ENTSO-E Consolidated Zone Layouts (e.g. ENTSO-E OMN-003, OMN-005)**: For ENTSO-E 15-minute imbalance pricing datasets (`imbalance_<zone>.feather` per bidding zone: AT, BE, DK_1, DK_2, FR, NL), the pipeline MUST verify:
+  1. Telemetry completeness floor: total row count per zone MUST meet or exceed the $98.0\%$ math ceiling floor ($\ge \lceil \text{expected\_intervals} \times 0.98 \rceil$, e.g., $\ge \lceil 37,920 \times 0.98 \rceil = \mathbf{37,162\text{ intervals}}$ for 13 baseline months; or $\ge \mathbf{2,917\text{ intervals}}$ for a 31-day probe window).
+  2. Maximum timestamp gap threshold: no single un-terminated timestamp gap between adjacent records shall exceed $\le 90\text{ minutes}$. Any gap $\Delta t > 15\text{ minutes}$ is strictly evaluated and terminates event continuity block state transitions.
+  3. Non-zero monthly interval count for EVERY month within the calculated window.
 - **Abort Policy**: If any telemetry file, month, or structural check fails or returns 0 rows, the workflow MUST terminate immediately (`sys.exit(1)`) prior to PR creation.
 
 ### Mandate 9 — Zero Secret Leakage Control
