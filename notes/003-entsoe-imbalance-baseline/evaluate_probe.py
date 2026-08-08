@@ -54,11 +54,12 @@ def evaluate_probe(note_dir='.', probe_dir='scratch/probe_jul2026'):
             raise ValueError(f"MANIFEST ABORT: Missing baseline manifest entry for {manifest_csv_key}")
 
         regime_info = manifest_dict[manifest_csv_key]
-        shortage_col = regime_info.get("m1_shortage_col", "Short")
+        if "m1_shortage_col" not in regime_info:
+            raise ValueError(f"MANIFEST ABORT: 'm1_shortage_col' missing in manifest entry for {manifest_csv_key}")
 
+        shortage_col = regime_info["m1_shortage_col"]
         if shortage_col not in base_df.columns:
-            # Fallback if single column dataframe
-            shortage_col = base_df.columns[0]
+            raise ValueError(f"MANIFEST ABORT: Shortage column '{shortage_col}' bound in manifest for {zone} missing in baseline columns: {list(base_df.columns)}")
 
         # Uncontaminated baseline window
         uncontam_df = base_df['2025-08-01':'2026-06-30']
@@ -75,7 +76,10 @@ def evaluate_probe(note_dir='.', probe_dir='scratch/probe_jul2026'):
         probe_df = probe_df.set_index(p_time_col)
 
         # Enforce manifest-bound shortage column on probe dataset
-        p_shortage_col = shortage_col if shortage_col in probe_df.columns else probe_df.columns[0]
+        if shortage_col not in probe_df.columns:
+            raise ValueError(f"MANIFEST ABORT: Shortage column '{shortage_col}' bound in manifest for {zone} missing in probe columns: {list(probe_df.columns)}")
+
+        p_shortage_col = shortage_col
         actual_intervals = len(probe_df)
         actual_intervals_dict[zone] = actual_intervals
 
