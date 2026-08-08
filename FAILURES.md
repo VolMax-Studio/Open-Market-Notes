@@ -175,4 +175,15 @@ This document records procedural failures, governance violations, anti-patterns,
 - **Remediation & Mechanical Verification:** No code defect. The Mandate 8 row-count guard performed exactly as specified on its first production encounter, successfully preventing the creation of a corrupted or incomplete Pull Request. Lower bound on AEMO monthly archive latency confirmed at >5 days post month-end. Entry #014 remediation formally verified in production.  
 - **Status:** Logged — Remediation Verified (2026-08-05) — Pending Ratification.
 
+---
+
+### Failure Entry #018 — Unverified Value Population in Registry Metadata
+- **Date:** 2026-08-08  
+- **Target File:** `notes_registry.json`  
+- **Violation:** Agent populated `results_sha256` for `OMN-003-PROBE` in `notes_registry.json` using the remediated baseline hash (`a10c0aae...`) instead of computing the SHA-256 hash of the actual probe report (`probe_verdict_report.json`), and set `params_commit_hash` to the post-execution PR merge commit (`c4946e3`) rather than the pre-registration freeze commit (`70b79d0`).  
+- **Root Cause:** Value population shortcut anti-pattern. Registry metadata fields were populated to complete schema validation using nearby existing strings instead of computing exact artifact hashes and verifying freeze commits against git history.  
+- **Remediation:** Computed exact SHA-256 of `probe_verdict_report.json` (`8e66c1c00267218615abe1d7ed4a14e63e7fb5d118fca84074acc4a0942ac671`), restored pre-registration freeze commit (`70b79d0`), and updated `notes_registry.json`. Formally established policy: *Registry and metadata files must pass strict adversarial gate review identical to core execution code.*  
+- **Status:** Logged — Remediation Pending Gate Ratification (2026-08-08).
+
+
 
