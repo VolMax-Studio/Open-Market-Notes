@@ -11,8 +11,6 @@ import matplotlib.ticker as ticker
 import numpy as np
 
 def generate_probe_figures(report_path='probe_jul2026/probe_verdict_report.json', out_dir='probe_jul2026'):
-    if not os.path.exists(report_path) and os.path.exists('scratch/probe_jul2026/probe_verdict_report.json'):
-        report_path = 'scratch/probe_jul2026/probe_verdict_report.json'
     if not os.path.exists(report_path):
         raise FileNotFoundError(f"Report not found at {report_path}")
 

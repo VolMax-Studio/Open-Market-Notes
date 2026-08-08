@@ -8,9 +8,9 @@ import os
 import sys
 import json
 import hashlib
+import subprocess
 import pandas as pd
 import numpy as np
-import subprocess
 
 def compute_sha256(filepath):
     h = hashlib.sha256()
@@ -19,9 +19,28 @@ def compute_sha256(filepath):
             h.update(chunk)
     return h.hexdigest()
 
+def get_active_git_commit(note_dir='.'):
+    try:
+        commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=note_dir, stderr=subprocess.DEVNULL).decode().strip()
+        if commit and len(commit) >= 7:
+            return commit
+    except Exception as e:
+        raise ValueError(f"GIT PROVENANCE ABORT: Unable to resolve active git commit HEAD: {e}")
+    raise ValueError("GIT PROVENANCE ABORT: Resolved empty git commit HEAD.")
+
+def resolve_datetime_col(df, filename):
+    if 'index' in df.columns:
+        return 'index'
+    for col in df.columns:
+        if 'time' in col.lower() or 'date' in col.lower() or pd.api.types.is_datetime64_any_dtype(df[col]):
+            return col
+    raise ValueError(f"DATAFRAME ABORT: Unable to resolve datetime column for {filename}. Available columns: {list(df.columns)}")
+
 def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
-    if not os.path.exists(os.path.join(note_dir, probe_dir)) and os.path.exists(os.path.join(note_dir, 'scratch/probe_jul2026')):
-        probe_dir = 'scratch/probe_jul2026'
+    target_probe_path = os.path.join(note_dir, probe_dir)
+    if not os.path.exists(target_probe_path):
+        raise ValueError(f"PROBE ABORT: Target probe directory missing at {target_probe_path}")
+
     manifest_path = os.path.join(note_dir, 'data_manifest.json')
     if not os.path.exists(manifest_path):
         raise ValueError(f"MANIFEST ABORT: data_manifest.json missing at {manifest_path}")
@@ -36,6 +55,11 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
     eu_results = {}
     elevated_count = 0
     actual_intervals_dict = {}
+    zone_no_gaps_dict = {}
+    zone_completeness_dict = {}
+
+    # Target July 2026 window: 31 days * 96 15-min MTUs = 2,976 expected MTU intervals
+    expected_intervals_per_zone = 31 * 96
 
     print("=== EXECUTING VOLMAX NOTE #3 PROBE EVALUATOR (STRICT MANIFEST BINDING) ===")
 
@@ -46,7 +70,7 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
             raise ValueError(f"BASELINE ABORT: Baseline feather file missing for {zone} at {base_feather}")
 
         base_df = pd.read_feather(base_feather)
-        time_col = 'index' if 'index' in base_df.columns else base_df.columns[0]
+        time_col = resolve_datetime_col(base_df, f"imbalance_{zone}.feather (baseline)")
         base_df[time_col] = pd.to_datetime(base_df[time_col])
         base_df = base_df.set_index(time_col)
 
@@ -63,21 +87,17 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
         if shortage_col not in base_df.columns:
             raise ValueError(f"MANIFEST ABORT: Shortage column '{shortage_col}' bound in manifest for {zone} missing in baseline columns: {list(base_df.columns)}")
 
-        # Uncontaminated baseline window
+        # Uncontaminated baseline window (11 calendar months)
         uncontam_df = base_df['2025-08-01':'2026-06-30']
         q90 = float(uncontam_df[shortage_col].quantile(0.90))
 
         # Load Probe July 2026 feather
-        probe_feather = os.path.join(probe_dir, 'processed', f"imbalance_{zone}.feather")
+        probe_feather = os.path.join(target_probe_path, 'processed', f"imbalance_{zone}.feather")
         if not os.path.exists(probe_feather):
-            scratch_feather = os.path.join(note_dir, 'scratch/probe_jul2026', 'processed', f"imbalance_{zone}.feather")
-            if os.path.exists(scratch_feather):
-                probe_feather = scratch_feather
-            else:
-                raise ValueError(f"PROBE ABORT: Probe feather file missing for {zone} at {probe_feather}")
+            raise ValueError(f"PROBE ABORT: Probe feather file missing for {zone} at {probe_feather}")
 
         probe_df = pd.read_feather(probe_feather)
-        p_time_col = 'index' if 'index' in probe_df.columns else probe_df.columns[0]
+        p_time_col = resolve_datetime_col(probe_df, f"imbalance_{zone}.feather (probe)")
         probe_df[p_time_col] = pd.to_datetime(probe_df[p_time_col])
         probe_df = probe_df.set_index(p_time_col)
 
@@ -88,10 +108,21 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
         p_shortage_col = shortage_col
         actual_intervals = len(probe_df)
         actual_intervals_dict[zone] = actual_intervals
+        zone_completeness = round((actual_intervals / expected_intervals_per_zone) * 100.0, 4)
+        zone_completeness_dict[zone] = zone_completeness
 
-        # Mandate 8 Completeness Check (>= 2917 intervals for 31 days)
-        if actual_intervals < 2917:
-            raise ValueError(f"MANDATE 8 ABORT: {zone} probe telemetry incomplete: {actual_intervals}/2976 intervals.")
+        # Measured telemetry gap audit
+        time_diffs = pd.Series(probe_df.index).diff()
+        max_gap_seconds = float(time_diffs.max().total_seconds()) if len(time_diffs) > 1 else 900.0
+        no_gaps_gt_15m = bool(max_gap_seconds <= 900.0)
+        zone_no_gaps_dict[zone] = no_gaps_gt_15m
+
+        # Mandate 8 Completeness Check (>= 98.0% threshold)
+        if zone_completeness < 98.0:
+            raise ValueError(f"MANDATE 8 ABORT: {zone} probe telemetry incomplete: {actual_intervals}/{expected_intervals_per_zone} ({zone_completeness:.2f}%).")
+
+        if not no_gaps_gt_15m:
+            raise ValueError(f"MANDATE 8 ABORT: {zone} probe telemetry contains gap exceeding 15 minutes (Max gap = {max_gap_seconds/60.0:.1f} min).")
 
         # Compute S(z) share >= Q90
         share_q90 = float((probe_df[p_shortage_col] >= q90).mean() * 100.0)
@@ -105,7 +136,9 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
             "jul_2026_share_q90_pct": round(share_q90, 2),
             "is_elevated": is_elevated,
             "manifest_bound_column": p_shortage_col,
-            "probe_intervals": actual_intervals
+            "probe_intervals": actual_intervals,
+            "completeness_pct": zone_completeness,
+            "no_gaps_exceeding_15min": no_gaps_gt_15m
         }
 
         print(f"Zone {zone:4s}: Q90 = €{q90:6.2f}/MWh | S(z) = {share_q90:5.2f}% | Elevated: {is_elevated}")
@@ -116,8 +149,9 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
         raise ValueError(f"GB COMPARATOR ABORT: GB dataset missing at {gb_feather}")
 
     gb_df = pd.read_feather(gb_feather)
-    gb_df['startTime'] = pd.to_datetime(gb_df['startTime'])
-    gb_df = gb_df.set_index('startTime').tz_convert('Europe/London')
+    gb_time_col = resolve_datetime_col(gb_df, "gb_system_prices.feather")
+    gb_df[gb_time_col] = pd.to_datetime(gb_df[gb_time_col])
+    gb_df = gb_df.set_index(gb_time_col).tz_convert('Europe/London')
 
     gb_base = gb_df['2025-08-01':'2026-06-30']
     gb_q90 = float(gb_base['systemSellPrice'].quantile(0.90))
@@ -141,22 +175,29 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
 
     print(f"\n=== PRE-REGISTERED VERDICT: {verdict} (N_elevated = {elevated_count} of 6 EU zones) ===")
 
+    total_actual_intervals = sum(actual_intervals_dict.values())
+    total_expected_intervals = len(zones) * expected_intervals_per_zone
+    overall_completeness_pct = round((total_actual_intervals / total_expected_intervals) * 100.0, 4)
+    overall_no_gaps = all(zone_no_gaps_dict.values())
+
+    active_commit = get_active_git_commit(note_dir)
+
     report = {
         "probe_name": "OMN-003 July 2026 Recurrence & European Imbalance Scarcity Probe",
         "execution_timestamp_utc": pd.Timestamp.now(tz='UTC').isoformat(),
         "provenance": {
-            "git_commit": (lambda: subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=note_dir).decode().strip() if os.path.exists(os.path.join(note_dir, '..', '..', '.git')) else '3548bae')(),
+            "git_commit": active_commit,
             "evaluator_script": "notes/003-entsoe-imbalance-baseline/evaluate_probe.py",
             "evaluator_sha256": compute_sha256(os.path.join(note_dir, 'evaluate_probe.py')),
             "params_hash": "acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58",
             "pre_registered_ratifier": "Ivan Nestorov (2026-08-08)"
         },
         "mandate_8_telemetry_audit": {
-            "expected_intervals_per_zone": 2976,
+            "expected_intervals_per_zone": expected_intervals_per_zone,
             "actual_intervals_per_zone": actual_intervals_dict,
-            "completeness_pct": 100.0,
-            "no_gaps_exceeding_15min": True,
-            "mandate_8_status": "PASSED"
+            "measured_completeness_pct": overall_completeness_pct,
+            "measured_no_gaps_exceeding_15min": overall_no_gaps,
+            "mandate_8_status": "PASSED" if (overall_completeness_pct >= 98.0 and overall_no_gaps) else "FAILED"
         },
         "benchmark_metrics": {
             "gb_comparator": {
@@ -179,15 +220,9 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
         }
     }
 
-    out_report_path = os.path.join(note_dir, 'probe_jul2026', 'probe_verdict_report.json')
-    os.makedirs(os.path.dirname(out_report_path), exist_ok=True)
+    out_report_path = os.path.join(target_probe_path, 'probe_verdict_report.json')
     with open(out_report_path, 'w') as f:
         json.dump(report, f, indent=2)
-
-    scratch_report_path = os.path.join(note_dir, 'scratch/probe_jul2026', 'probe_verdict_report.json')
-    if os.path.exists(os.path.dirname(scratch_report_path)):
-        with open(scratch_report_path, 'w') as f:
-            json.dump(report, f, indent=2)
 
     print(f"Saved reproducible probe verdict report to {out_report_path}")
     return report
