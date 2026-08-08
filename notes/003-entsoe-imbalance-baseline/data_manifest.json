@@ -64,6 +64,72 @@
       "frozen_regime": "DUAL_PRICING",
       "m1_shortage_col": "Short",
       "m2_surplus_col": "Long"
+    },
+    {
+      "file_name": "imbalance_NL_202607_202607.csv",
+      "sha256": "4fe0623b00bcd987e5281ff930cc37f1c6faab029664b8ac67e656ce5d8ea8ea",
+      "size_bytes": 113394,
+      "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: 10YNL----------L, Zone: NL)",
+      "acquisition_mode": "live_api_query",
+      "acquired_at_utc": "2026-08-08T15:02:13.097106+00:00",
+      "frozen_regime": "DUAL_PRICING",
+      "m1_shortage_col": "Short",
+      "m2_surplus_col": "Long"
+    },
+    {
+      "file_name": "imbalance_BE_202607_202607.csv",
+      "sha256": "ba109b1d4d9be08237dcd9f58deedaa789a01f601d4c2af116263759b35445e6",
+      "size_bytes": 115832,
+      "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: 10YBE----------X, Zone: BE)",
+      "acquisition_mode": "live_api_query",
+      "acquired_at_utc": "2026-08-08T15:02:19.439601+00:00",
+      "frozen_regime": "SINGLE_PRICING",
+      "m1_shortage_col": "Short",
+      "m2_surplus_col": "Short"
+    },
+    {
+      "file_name": "imbalance_FR_202607_202607.csv",
+      "sha256": "378bcc712ddf0b09f718c8374e1f6dbf88cdaa65961ca2f528616b1fffabb304",
+      "size_bytes": 116515,
+      "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: 10YFR-RTE------C, Zone: FR)",
+      "acquisition_mode": "live_api_query",
+      "acquired_at_utc": "2026-08-08T15:02:25.622653+00:00",
+      "frozen_regime": "DUAL_PRICING",
+      "m1_shortage_col": "Short",
+      "m2_surplus_col": "Long"
+    },
+    {
+      "file_name": "imbalance_DK_1_202607_202607.csv",
+      "sha256": "b12c8730dbe9ef6acae07773c57f1e7e70897aaa21dea328e422276fe92c6a7c",
+      "size_bytes": 114518,
+      "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: 10YDK-1--------W, Zone: DK_1)",
+      "acquisition_mode": "live_api_query",
+      "acquired_at_utc": "2026-08-08T15:02:35.684898+00:00",
+      "frozen_regime": "SINGLE_PRICING",
+      "m1_shortage_col": "Short",
+      "m2_surplus_col": "Short"
+    },
+    {
+      "file_name": "imbalance_DK_2_202607_202607.csv",
+      "sha256": "e7c91750a9070e40d826f4bbd8e7dcaed6f495eccce0d85edb02bd8973ae18ec",
+      "size_bytes": 114644,
+      "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: 10YDK-2--------T, Zone: DK_2)",
+      "acquisition_mode": "live_api_query",
+      "acquired_at_utc": "2026-08-08T15:02:44.340243+00:00",
+      "frozen_regime": "SINGLE_PRICING",
+      "m1_shortage_col": "Short",
+      "m2_surplus_col": "Short"
+    },
+    {
+      "file_name": "imbalance_AT_202607_202607.csv",
+      "sha256": "0c254e8377ef17f58304511185e71bc7e725a309d8d54d06918ddfc039e7bb80",
+      "size_bytes": 129488,
+      "source_url": "ENTSO-E REST API DocumentType A85 (Area EIC: 10YAT-APG------L, Zone: AT)",
+      "acquisition_mode": "live_api_query",
+      "acquired_at_utc": "2026-08-08T15:02:59.012024+00:00",
+      "frozen_regime": "SINGLE_PRICING",
+      "m1_shortage_col": "Short",
+      "m2_surplus_col": "Short"
     }
   ]
 }

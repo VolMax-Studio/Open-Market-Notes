@@ -200,7 +200,7 @@ def download_entsoe_imbalance(start_date='2025-06-01', end_date='2026-06-30', da
     api_key = api_key or os.environ.get('ENTSOE_API_KEY')
     
     start_stamp = f"{start_date} 00:00:00"
-    end_stamp = f"{end_date} 23:59:59"
+    end_stamp = f"{end_date} 23:45:00"
     
     s_tag = start_date.replace('-', '')[:6]
     e_tag = end_date.replace('-', '')[:6]
