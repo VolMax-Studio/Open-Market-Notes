@@ -1,6 +1,6 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
-> **Version:** 2.4.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
+> **Version:** 2.5.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
 > **Status:** Draft Submitted to Human Gate on `feature/omn-003-preregistration-draft` (Pre-Execution Freeze)  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
 > **PARAMS Freeze Commitment (`a2c0b3a`):** `feat(note-003): publish final ENTSO-E baseline note with PARAMS v3.1.0 and reproducible figures`  
@@ -19,12 +19,12 @@
 
 ### 1. Parametric Changelog & Continuity Rule Audit (Blocker 1, 3 & 4 Clarification)
 - **Published Zenodo v1.0.0 Baseline (`notes_registry.json`):** Computed via row-adjacency continuity (`b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`).
-- **Remediated Strict Gap-Terminated Baseline (`a10c0aae...`):** Enforces strict timestamp continuity rule (`Δt > 15 min` terminates an active block).
+- **Remediated Strict Gap-Terminated Baseline (`a10c0aae...`):** Enforces strict timestamp continuity rule ($\Delta t > 15\text{ min}$ terminates an active block). Documented in `PARAMETRIC_CHANGELOG.md` Entry #002.
 - **Empirical Audit Findings:**
   - Across 19,862 baseline scarcity events, 19,855 ($99.965\%$) contained ZERO internal gaps.
   - Enforcing strict timestamp gap termination splits exactly **7 bridged events** (8 total gap breaches).
   - **Data Acquisition Artifact Clarification:** 5 of the 7 bridged events occurred on **2026-05-31** at the boundary of monthly CSV chunk stitching, NOT raw TSO grid telemetry gaps.
-  - **Metric Impact:** €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m).
+  - **Metric Impact:** €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m). Maximum event duration in BE remained exactly 1,545 minutes ($25.75\text{ hours}$).
   - Both `gap_breaches_count` and `bridged_events_count` are recorded explicitly in `results.json` per zone.
 
 ### 2. Pre-Registered Metrics & Threshold Definitions
