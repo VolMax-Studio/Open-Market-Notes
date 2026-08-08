@@ -1,7 +1,7 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
-> **Version:** 3.6.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
-> **Status:** Draft Submitted to Human Gate on `feature/omn-003-preregistration-draft` (Pre-Execution Freeze)  
+> **Version:** 4.0.0-frozen (Strict Gap-Terminated & Pre-Registered Decision Spec)  
+> **Status:** Ratified Pre-Registration Frozen Spec on `feature/omn-003-preregistration-draft`  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
 > **PARAMS Freeze Commitment (`a2c0b3a`):** `feat(note-003): publish final ENTSO-E baseline note with PARAMS v3.1.0 and reproducible figures`  
 > **PARAMS Cryptographic SHA-256:** `acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58`  
@@ -11,7 +11,7 @@
 > **Ingestion Script (`download_entsoe_data.py`) Draft SHA-256:** `c6eb203ab3daf4c6f4844aeb4b2c248d2466eaa373bff5afd56bcba80aa7eabe`  
 > **Provenance Manifest (`data_manifest.json`) SHA-256:** `147eef422d0b96d02b3bc5acc630722dbd3a7a8b592ba07c952f147492702346`  
 > **Published Baseline Results SHA-256 (`notes_registry.json`):** `b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`  
-> **Remediated Gap-Terminated Baseline Results SHA-256:** `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c`
+> **Remediated Gap-Terminated Baseline Results SHA-256 (`notes/003-entsoe-imbalance-baseline/results.json`):** `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c`
 
 ---
 
@@ -73,7 +73,7 @@
 
 ### 7. Step 0 Determinism & Output Isolation Protocol
 - **Argparse Output Isolation:** Executing `python3 run_imbalance_analysis.py --out-dir scratch/step0_probe` writes `results.json` to an isolated directory without modifying baseline files or root directory.
-- **Baseline Integrity Execution:** Executing `python3 run_imbalance_analysis.py --out-dir scratch/step0_probe` over baseline `.feather` files produced SHA-256 `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c` under strict timestamp gap termination.
+- **Baseline Integrity Execution:** Executing `python3 run_imbalance_analysis.py --out-dir scratch/step0_probe` over baseline `.feather` files produced SHA-256 `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c` under strict timestamp gap termination, matching tracked `notes/003-entsoe-imbalance-baseline/results.json`.
 
 ### 8. Verified Target Bidding Zones & Regime Mapping Persistence
 - **NL** Netherlands (`10YNL----------L`) — *Frozen DUAL_PRICING*
@@ -102,21 +102,24 @@ Expressed as share of time (not raw interval counts). No FX conversion is perfor
 July 2026 vs July 2025, same zone, same metric, both computed by the same script. GB is recomputed on the matched July/July pair after Elexon HTTP retry logic is landed.  
 *Vintage Bias:* July 2025 data was acquired in July 2026 (recorded at `"acquired_at_utc": "2026-07-19T12:00:00Z"` in manifest); July 2026 data will be acquired in August 2026. Potential TSO price revisions between acquisition dates are declared as a known data-vintage bias.
 
-### C3. Elevation Threshold (Frozen Before Data)
-Zone $z$ is "elevated" iff $S(z) \ge S_{\text{thresh}}$ (options: $15.0\%$, $12.5\%$, or $20.0\%$).
+### C3. Elevation Threshold (Pre-Registered & Frozen Before Data)
+Zone $z$ is "elevated" iff $S(z) \ge \mathbf{15.0\%}$ (1.5x baseline decile).  
+*Ratification Record:* Ratified by **Ivan Nestorov** on **2026-08-08** prior to probe data acquisition.
 
-### C4. Decision Rule — Three Outcomes
-- **`REGIONAL`**: GB elevated AND $\ge N_{\text{high}}$ of 6 EU zones elevated.
-- **`GB-SPECIFIC`**: GB elevated AND $\le N_{\text{low}}$ of 6 EU zones elevated.
-- **`INCONCLUSIVE`**: Every other configuration, including GB not elevated. *INCONCLUSIVE is a first-class outcome and is reported as the finding when it occurs.*
+### C4. Decision Rule — Three Outcomes (Pre-Registered & Frozen Before Data)
+- **`REGIONAL`**: GB elevated AND $\ge \mathbf{4\text{ of }6}$ EU zones elevated ($N_{\text{high}} = 4$).
+- **`GB-SPECIFIC`**: GB elevated AND $\le \mathbf{1\text{ of }6}$ EU zones elevated ($N_{\text{low}} = 1$).
+- **`INCONCLUSIVE`**: Every other configuration, including GB not elevated ($N = 2$ or $N = 3$). *INCONCLUSIVE is a first-class outcome and is reported as the finding when it occurs.*  
+*Ratification Record:* Ratified by **Ivan Nestorov** on **2026-08-08** prior to probe data acquisition.
 
 ### C5. Independence Caveat (Load-Bearing)
 The 6 EU zones are NOT independent samples (DK_1/DK_2 share a national system, NL/BE/FR are interconnector-coupled). The count in C4 is a descriptive tally, not a statistical test ($n = 1$ time window).
 
 ---
 
-## Layer 3 / Decision (Human-Owned): Gate Status & Open Threshold Choices
+## Layer 3 / Decision (Human-Owned): Gate Status & Frozen Decision Parameters
 
-- **Current Status:** `DRAFT SUBMITTED FOR RATIFICATION` on `feature/omn-003-preregistration-draft`.
-- **Human Choice 1 (Elevation Threshold $S_{\text{thresh}}$ in C3):** [15.0% | 12.5% | 20.0%]
-- **Human Choice 2 (INCONCLUSIVE Band Limits $N_{\text{high}} / N_{\text{low}}$ in C4):** [4-of-6 / 1-of-6 | 5-of-6 / 2-of-6]
+- **Pre-Registration Decision Ratification:** Ratified by **Ivan Nestorov** on **2026-08-08** (Prior to July 2026 Probe Data Acquisition).
+- **Elevation Threshold $S_{\text{thresh}}$ (C3):** `15.0%`
+- **INCONCLUSIVE Band Limits ($N_{\text{high}} / N_{\text{low}}$) (C4):** `4 of 6 / 1 of 6`
+- **Repository Commit Status:** `FROZEN PRE-REGISTRATION SPEC` on `feature/omn-003-preregistration-draft`.
