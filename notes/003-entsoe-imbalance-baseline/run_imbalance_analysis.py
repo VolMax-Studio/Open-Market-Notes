@@ -127,11 +127,15 @@ def main():
                         curr_in_bridged_event = False
                 else:
                     if curr_rows:
+                        if curr_in_bridged_event:
+                            bridged_events_count += 1
                         events.append(len(curr_rows) * 15)
                         curr_rows = []
                         curr_in_bridged_event = False
                         
             if curr_rows:
+                if curr_in_bridged_event:
+                    bridged_events_count += 1
                 events.append(len(curr_rows) * 15)
                 
             if not events:

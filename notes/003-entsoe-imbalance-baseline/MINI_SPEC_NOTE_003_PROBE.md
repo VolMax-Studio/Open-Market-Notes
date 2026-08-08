@@ -1,6 +1,6 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
-> **Version:** 2.6.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
+> **Version:** 2.7.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
 > **Status:** Draft Submitted to Human Gate on `feature/omn-003-preregistration-draft` (Pre-Execution Freeze)  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
 > **PARAMS Freeze Commitment (`a2c0b3a`):** `feat(note-003): publish final ENTSO-E baseline note with PARAMS v3.1.0 and reproducible figures`  
@@ -19,13 +19,15 @@
 
 ### 1. Parametric Changelog & Continuity Rule Audit (Blocker 1, 3 & 4 Clarification)
 - **Published Zenodo v1.0.0 Baseline (`notes_registry.json`):** Computed via row-adjacency continuity (`b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`).
-- **Remediated Strict Gap-Terminated Baseline (`a10c0aae...`):** Enforces strict timestamp continuity rule ($\Delta t > 15\text{ min}$ terminates an active block). Documented u `PARAMETRIC_CHANGELOG.md` Entry #002.
-- **Dual Cause Audit Findings:**
-  1. **Rule Refinement:** Enforcing strict timestamp gap termination across row boundaries.
-  2. **Data Acquisition Artifact:** 5 of the 8 total gap breaches occurred on **2026-05-31** at the boundary of monthly ENTSO-E CSV chunk stitching in `download_entsoe_data.py`, while 3 breaches represent actual TSO telemetry gaps.
-  3. **Empirical Impact:** Across 19,862 total baseline scarcity events (13 calendar months, 6 zones), 19,855 events ($99.965\%$) contained ZERO internal timestamp gaps. Enforcing strict timestamp gap termination split exactly **7 bridged events** (8 total gap breaches).
-  4. €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m). Maximum event duration in BE remained exactly 1,545 minutes ($25.75\text{ hours}$).
-  5. Both `gap_breaches_count` and `bridged_events_count` are recorded explicitly in `results.json` per zone.
+- **Remediated Strict Gap-Terminated Baseline (`a10c0aae...`):** Enforces strict timestamp continuity rule ($\Delta t > 15\text{ min}$ terminates an active block). Documented in `PARAMETRIC_CHANGELOG.md` Entry #002.
+- **Dual Cause & Empirical Audit Findings:**
+  - Across 19,219 total M1 moderate scarcity events ($\ge €100/\text{MWh}$ across 13 calendar months, 6 zones), 19,212 events ($99.964\%$) contained ZERO internal timestamp gaps.
+  - Enforcing strict timestamp gap termination splits exactly **7 bridged events** (8 total gap breaches).
+  - **Dual Cause Breakdown:**
+    - **Data Acquisition Artifact (5 breaches):** 5 of 8 breaches occurred simultaneously across AT, BE, DK_1, DK_2, and NL at `2026-05-31 21:45 UTC` $\rightarrow$ `2026-05-31 22:15 UTC` at the boundary of monthly ENTSO-E CSV chunk stitching in `download_entsoe_data.py`.
+    - **Raw TSO Telemetry Gaps (3 breaches):** 3 breaches occurred in Denmark (1 breach in DK_1, 2 breaches in DK_2) at `2025-08-10 18:45 UTC` $\rightarrow$ `2025-08-10 20:15 UTC` representing actual Energinet TSO telemetry gaps.
+  - **Metric Impact:** €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m). Maximum event duration in BE remained exactly 1,545 minutes ($25.75\text{ hours}$).
+  - Both `gap_breaches_count` and `bridged_events_count` are recorded explicitly in `results.json` per zone.
 
 ### 2. Pre-Registered Metrics & Threshold Definitions
 - **Metric M1: Scarcity Duration & Shortage Pricing**
@@ -65,7 +67,7 @@
 - **Timestamp Gap Threshold:** $\le 90\text{ minutes}$.  
   *Post-Hoc Empirical Calibration Note:* Threshold of 90 minutes was calibrated to DK_1/DK_2 historical baseline telemetry gap structure.
 
-### 7. Step 0 Determinism & Output Isolation (Blocker 5 Remediation)
+### 7. Step 0 Determinism & Output Isolation Protocol
 - **Argparse Output Isolation:** Executing `python3 run_imbalance_analysis.py --out-dir scratch/step0_probe` writes `results.json` to an isolated directory without modifying baseline files or root directory.
 - **Baseline Integrity Execution:** Executing `python3 run_imbalance_analysis.py --out-dir scratch/step0_probe` over baseline `.feather` files produced SHA-256 `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c` under strict timestamp gap termination.
 
