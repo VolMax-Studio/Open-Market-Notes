@@ -19,7 +19,9 @@ def compute_sha256(filepath):
             h.update(chunk)
     return h.hexdigest()
 
-def evaluate_probe(note_dir='.', probe_dir='scratch/probe_jul2026'):
+def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
+    if not os.path.exists(os.path.join(note_dir, probe_dir)) and os.path.exists(os.path.join(note_dir, 'scratch/probe_jul2026')):
+        probe_dir = 'scratch/probe_jul2026'
     manifest_path = os.path.join(note_dir, 'data_manifest.json')
     if not os.path.exists(manifest_path):
         raise ValueError(f"MANIFEST ABORT: data_manifest.json missing at {manifest_path}")
@@ -68,7 +70,11 @@ def evaluate_probe(note_dir='.', probe_dir='scratch/probe_jul2026'):
         # Load Probe July 2026 feather
         probe_feather = os.path.join(probe_dir, 'processed', f"imbalance_{zone}.feather")
         if not os.path.exists(probe_feather):
-            raise ValueError(f"PROBE ABORT: Probe feather file missing for {zone} at {probe_feather}")
+            scratch_feather = os.path.join(note_dir, 'scratch/probe_jul2026', 'processed', f"imbalance_{zone}.feather")
+            if os.path.exists(scratch_feather):
+                probe_feather = scratch_feather
+            else:
+                raise ValueError(f"PROBE ABORT: Probe feather file missing for {zone} at {probe_feather}")
 
         probe_df = pd.read_feather(probe_feather)
         p_time_col = 'index' if 'index' in probe_df.columns else probe_df.columns[0]
@@ -173,9 +179,15 @@ def evaluate_probe(note_dir='.', probe_dir='scratch/probe_jul2026'):
         }
     }
 
-    out_report_path = os.path.join(probe_dir, 'probe_verdict_report.json')
+    out_report_path = os.path.join(note_dir, 'probe_jul2026', 'probe_verdict_report.json')
+    os.makedirs(os.path.dirname(out_report_path), exist_ok=True)
     with open(out_report_path, 'w') as f:
         json.dump(report, f, indent=2)
+
+    scratch_report_path = os.path.join(note_dir, 'scratch/probe_jul2026', 'probe_verdict_report.json')
+    if os.path.exists(os.path.dirname(scratch_report_path)):
+        with open(scratch_report_path, 'w') as f:
+            json.dump(report, f, indent=2)
 
     print(f"Saved reproducible probe verdict report to {out_report_path}")
     return report
