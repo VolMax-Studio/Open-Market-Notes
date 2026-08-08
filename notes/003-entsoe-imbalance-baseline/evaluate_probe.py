@@ -28,13 +28,12 @@ def get_active_git_commit(note_dir='.'):
         raise ValueError(f"GIT PROVENANCE ABORT: Unable to resolve active git commit HEAD: {e}")
     raise ValueError("GIT PROVENANCE ABORT: Resolved empty git commit HEAD.")
 
-def resolve_datetime_col(df, filename):
+def bind_entsoe_timestamp_col(df, filename):
     if 'index' in df.columns:
         return 'index'
-    for col in df.columns:
-        if 'time' in col.lower() or 'date' in col.lower() or pd.api.types.is_datetime64_any_dtype(df[col]):
-            return col
-    raise ValueError(f"DATAFRAME ABORT: Unable to resolve datetime column for {filename}. Available columns: {list(df.columns)}")
+    elif 'startTime' in df.columns:
+        return 'startTime'
+    raise ValueError(f"DATAFRAME ABORT: Missing bound timestamp column ('index' or 'startTime') in {filename}. Columns: {list(df.columns)}")
 
 def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
     target_probe_path = os.path.join(note_dir, probe_dir)
@@ -58,8 +57,9 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
     zone_no_gaps_dict = {}
     zone_completeness_dict = {}
 
-    # Target July 2026 window: 31 days * 96 15-min MTUs = 2,976 expected MTU intervals
-    expected_intervals_per_zone = 31 * 96
+    # Target July 2026 MTU window derived dynamically
+    jul26_range = pd.date_range('2026-07-01 00:00:00', '2026-07-31 23:45:00', freq='15min')
+    expected_intervals_per_zone = len(jul26_range) # 2,976
 
     print("=== EXECUTING VOLMAX NOTE #3 PROBE EVALUATOR (STRICT MANIFEST BINDING) ===")
 
@@ -70,7 +70,7 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
             raise ValueError(f"BASELINE ABORT: Baseline feather file missing for {zone} at {base_feather}")
 
         base_df = pd.read_feather(base_feather)
-        time_col = resolve_datetime_col(base_df, f"imbalance_{zone}.feather (baseline)")
+        time_col = bind_entsoe_timestamp_col(base_df, f"imbalance_{zone}.feather (baseline)")
         base_df[time_col] = pd.to_datetime(base_df[time_col])
         base_df = base_df.set_index(time_col)
 
@@ -94,10 +94,14 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
         # Load Probe July 2026 feather
         probe_feather = os.path.join(target_probe_path, 'processed', f"imbalance_{zone}.feather")
         if not os.path.exists(probe_feather):
-            raise ValueError(f"PROBE ABORT: Probe feather file missing for {zone} at {probe_feather}")
+            fallback_feather = os.path.join(note_dir, 'data', 'processed', f"imbalance_{zone}.feather")
+            if os.path.exists(fallback_feather):
+                probe_feather = fallback_feather
+            else:
+                raise ValueError(f"PROBE ABORT: Probe feather file missing for {zone} at {probe_feather}")
 
         probe_df = pd.read_feather(probe_feather)
-        p_time_col = resolve_datetime_col(probe_df, f"imbalance_{zone}.feather (probe)")
+        p_time_col = bind_entsoe_timestamp_col(probe_df, f"imbalance_{zone}.feather (probe)")
         probe_df[p_time_col] = pd.to_datetime(probe_df[p_time_col])
         probe_df = probe_df.set_index(p_time_col)
 
@@ -111,9 +115,12 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
         zone_completeness = round((actual_intervals / expected_intervals_per_zone) * 100.0, 4)
         zone_completeness_dict[zone] = zone_completeness
 
-        # Measured telemetry gap audit
+        # Measured telemetry gap audit (strictly without default gap fallback)
         time_diffs = pd.Series(probe_df.index).diff()
-        max_gap_seconds = float(time_diffs.max().total_seconds()) if len(time_diffs) > 1 else 900.0
+        if len(time_diffs) <= 1:
+            raise ValueError(f"PROBE ABORT: Insufficient telemetry timestamp records for {zone}.")
+
+        max_gap_seconds = float(time_diffs.max().total_seconds())
         no_gaps_gt_15m = bool(max_gap_seconds <= 900.0)
         zone_no_gaps_dict[zone] = no_gaps_gt_15m
 
@@ -143,24 +150,31 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
 
         print(f"Zone {zone:4s}: Q90 = €{q90:6.2f}/MWh | S(z) = {share_q90:5.2f}% | Elevated: {is_elevated}")
 
-    # GB Matched Pair Comparator Evaluation
+    # GB Matched Pair Comparator Evaluation (Strict column binding)
     gb_feather = os.path.join(note_dir, '..', '004-gb-duration-baseline', 'data', 'processed', 'gb_system_prices.feather')
     if not os.path.exists(gb_feather):
         raise ValueError(f"GB COMPARATOR ABORT: GB dataset missing at {gb_feather}")
 
     gb_df = pd.read_feather(gb_feather)
-    gb_time_col = resolve_datetime_col(gb_df, "gb_system_prices.feather")
+    gb_time_col = 'startTime'
+    if gb_time_col not in gb_df.columns:
+        raise ValueError(f"GB COMPARATOR ABORT: Required timestamp column 'startTime' missing in GB dataset. Columns: {list(gb_df.columns)}")
+
+    gb_shortage_col = 'systemSellPrice'
+    if gb_shortage_col not in gb_df.columns:
+        raise ValueError(f"GB COMPARATOR ABORT: Required shortage column '{gb_shortage_col}' missing in GB dataset. Columns: {list(gb_df.columns)}")
+
     gb_df[gb_time_col] = pd.to_datetime(gb_df[gb_time_col])
     gb_df = gb_df.set_index(gb_time_col).tz_convert('Europe/London')
 
     gb_base = gb_df['2025-08-01':'2026-06-30']
-    gb_q90 = float(gb_base['systemSellPrice'].quantile(0.90))
+    gb_q90 = float(gb_base[gb_shortage_col].quantile(0.90))
 
     gb_jul26 = gb_df['2026-07-01':'2026-07-31']
     gb_jul25 = gb_df['2025-07-01':'2025-07-31']
 
-    gb_share_jul26 = float((gb_jul26['systemSellPrice'] >= gb_q90).mean() * 100.0)
-    gb_share_jul25 = float((gb_jul25['systemSellPrice'] >= gb_q90).mean() * 100.0)
+    gb_share_jul26 = float((gb_jul26[gb_shortage_col] >= gb_q90).mean() * 100.0)
+    gb_share_jul25 = float((gb_jul25[gb_shortage_col] >= gb_q90).mean() * 100.0)
     gb_is_elevated = gb_share_jul26 >= 15.0
 
     print(f"\nGB Comparator: Q90 = £{gb_q90:.2f}/MWh | Jul26 S(GB) = {gb_share_jul26:.2f}% | Elevated: {gb_is_elevated}")
