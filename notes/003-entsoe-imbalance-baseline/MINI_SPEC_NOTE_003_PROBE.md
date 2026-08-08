@@ -1,13 +1,13 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
-> **Version:** 2.5.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
+> **Version:** 2.6.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
 > **Status:** Draft Submitted to Human Gate on `feature/omn-003-preregistration-draft` (Pre-Execution Freeze)  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
 > **PARAMS Freeze Commitment (`a2c0b3a`):** `feat(note-003): publish final ENTSO-E baseline note with PARAMS v3.1.0 and reproducible figures`  
 > **PARAMS Cryptographic SHA-256:** `acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58`  
 > **Main Branch HEAD (`6fa1cb7`):** `Merge pull request #51 from VolMax-Studio/recurrent-measurement/omn-004-31221838425`  
 > **Published Baseline Analysis Script (`run_imbalance_analysis.py`) Blob (`6fa1cb7`):** `7e6be06d5b7e7a46223c83998eb4ad35cdb4a16be5245932abce3c827aa5b484`  
-> **Remediated Analysis Script (`run_imbalance_analysis.py`) Draft SHA-256:** `72e2be1d47be03b4fbebc07e73c5b4d32656ab0c2cd26f54ad63bdea89bc005b`  
+> **Remediated Analysis Script (`run_imbalance_analysis.py`) Draft SHA-256:** `2957e2c5905c40228cb74012c791164b0a0b34c6cf22ea578490f1d0b095874e`  
 > **Ingestion Script (`download_entsoe_data.py`) Draft SHA-256:** `c6eb203ab3daf4c6f4844aeb4b2c248d2466eaa373bff5afd56bcba80aa7eabe`  
 > **Provenance Manifest (`data_manifest.json`) SHA-256:** `147eef422d0b96d02b3bc5acc630722dbd3a7a8b592ba07c952f147492702346`  
 > **Published Baseline Results SHA-256 (`notes_registry.json`):** `b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`  
@@ -19,13 +19,13 @@
 
 ### 1. Parametric Changelog & Continuity Rule Audit (Blocker 1, 3 & 4 Clarification)
 - **Published Zenodo v1.0.0 Baseline (`notes_registry.json`):** Computed via row-adjacency continuity (`b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`).
-- **Remediated Strict Gap-Terminated Baseline (`a10c0aae...`):** Enforces strict timestamp continuity rule ($\Delta t > 15\text{ min}$ terminates an active block). Documented in `PARAMETRIC_CHANGELOG.md` Entry #002.
-- **Empirical Audit Findings:**
-  - Across 19,862 baseline scarcity events, 19,855 ($99.965\%$) contained ZERO internal gaps.
-  - Enforcing strict timestamp gap termination splits exactly **7 bridged events** (8 total gap breaches).
-  - **Data Acquisition Artifact Clarification:** 5 of the 7 bridged events occurred on **2026-05-31** at the boundary of monthly CSV chunk stitching, NOT raw TSO grid telemetry gaps.
-  - **Metric Impact:** €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m). Maximum event duration in BE remained exactly 1,545 minutes ($25.75\text{ hours}$).
-  - Both `gap_breaches_count` and `bridged_events_count` are recorded explicitly in `results.json` per zone.
+- **Remediated Strict Gap-Terminated Baseline (`a10c0aae...`):** Enforces strict timestamp continuity rule ($\Delta t > 15\text{ min}$ terminates an active block). Documented u `PARAMETRIC_CHANGELOG.md` Entry #002.
+- **Dual Cause Audit Findings:**
+  1. **Rule Refinement:** Enforcing strict timestamp gap termination across row boundaries.
+  2. **Data Acquisition Artifact:** 5 of the 8 total gap breaches occurred on **2026-05-31** at the boundary of monthly ENTSO-E CSV chunk stitching in `download_entsoe_data.py`, while 3 breaches represent actual TSO telemetry gaps.
+  3. **Empirical Impact:** Across 19,862 total baseline scarcity events (13 calendar months, 6 zones), 19,855 events ($99.965\%$) contained ZERO internal timestamp gaps. Enforcing strict timestamp gap termination split exactly **7 bridged events** (8 total gap breaches).
+  4. €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m). Maximum event duration in BE remained exactly 1,545 minutes ($25.75\text{ hours}$).
+  5. Both `gap_breaches_count` and `bridged_events_count` are recorded explicitly in `results.json` per zone.
 
 ### 2. Pre-Registered Metrics & Threshold Definitions
 - **Metric M1: Scarcity Duration & Shortage Pricing**
@@ -66,7 +66,7 @@
   *Post-Hoc Empirical Calibration Note:* Threshold of 90 minutes was calibrated to DK_1/DK_2 historical baseline telemetry gap structure.
 
 ### 7. Step 0 Determinism & Output Isolation (Blocker 5 Remediation)
-- **Argparse Output Isolation:** `run_imbalance_analysis.py` accepts `--out-dir` parameter (e.g., `--out-dir scratch/step0_probe`) to write `results.json` without modifying the root directory or baseline files.
+- **Argparse Output Isolation:** Executing `python3 run_imbalance_analysis.py --out-dir scratch/step0_probe` writes `results.json` to an isolated directory without modifying baseline files or root directory.
 - **Baseline Integrity Execution:** Executing `python3 run_imbalance_analysis.py --out-dir scratch/step0_probe` over baseline `.feather` files produced SHA-256 `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c` under strict timestamp gap termination.
 
 ### 8. Verified Target Bidding Zones & Regime Mapping Persistence

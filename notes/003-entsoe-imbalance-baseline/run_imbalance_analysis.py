@@ -105,7 +105,7 @@ def main():
             gap_breaches_count = 0
             bridged_events_count = 0
             curr_rows = []
-            curr_had_gap = False
+            curr_in_bridged_event = False
             
             for i, val in enumerate(above):
                 if val:
@@ -115,25 +115,23 @@ def main():
                         gap_min = (curr_ts - prev_ts).total_seconds() / 60.0
                         if gap_min > 15.0:
                             gap_breaches_count += 1
-                            curr_had_gap = True
+                            if not curr_in_bridged_event:
+                                bridged_events_count += 1
+                                curr_in_bridged_event = True
                             events.append(len(curr_rows) * 15)
                             curr_rows = [i]
                         else:
                             curr_rows.append(i)
                     else:
                         curr_rows.append(i)
-                        curr_had_gap = False
+                        curr_in_bridged_event = False
                 else:
                     if curr_rows:
-                        if curr_had_gap:
-                            bridged_events_count += 1
                         events.append(len(curr_rows) * 15)
                         curr_rows = []
-                        curr_had_gap = False
+                        curr_in_bridged_event = False
                         
             if curr_rows:
-                if curr_had_gap:
-                    bridged_events_count += 1
                 events.append(len(curr_rows) * 15)
                 
             if not events:

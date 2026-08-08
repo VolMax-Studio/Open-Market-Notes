@@ -22,10 +22,10 @@
 - **Scope:** Note #003 ENTSO-E Imbalance Baseline (`run_imbalance_analysis.py`)
 - **Motivation:** In published Zenodo v1.0.0 (`results_sha256: b1c713379887...`), event continuity was computed via row-adjacency (`compute_m1`). While row-adjacency evaluates strictly contiguous rows, missing telemetry timestamp intervals across row boundaries could silently bridge events separated by missing clock time.
 - **Remediated Rule:** Enforce strict timestamp gap termination ($\Delta t > 15\text{ min}$ terminates an active block and starts a new event).
-- **Empirical Audit Findings:**
-  1. Across 19,862 total baseline scarcity events (13 calendar months, 6 zones), 19,855 events ($99.965\%$) contained ZERO internal timestamp gaps.
-  2. Enforcing strict timestamp gap termination split exactly **7 bridged events** (8 total gap breaches).
-  3. **Data Acquisition Artifact:** 5 of the 7 bridged events occurred on **2026-05-31** at the boundary of monthly ENTSO-E CSV chunk stitching, NOT raw TSO grid telemetry gaps.
+- **Dual Cause Audit Findings:**
+  1. **Rule Refinement:** Enforcing strict timestamp gap termination across row boundaries.
+  2. **Data Acquisition Artifact:** 5 of the 8 total gap breaches occurred on **2026-05-31** at the boundary of monthly ENTSO-E CSV chunk stitching u `download_entsoe_data.py`, while 3 breaches represent actual TSO telemetry gaps.
+  3. **Empirical Impact:** Across 19,862 total baseline scarcity events (13 calendar months, 6 zones), 19,855 events ($99.965\%$) contained ZERO internal timestamp gaps. Enforcing strict timestamp gap termination split exactly **7 bridged events** (8 total gap breaches).
   4. €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m). Maximum event duration in BE remained exactly 1,545 minutes ($25.75\text{ hours}$).
   5. Remediated baseline result hash under strict timestamp gap termination: `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c`.
 - **Status:** Pending Ratification (Pre-Merge on `feature/omn-003-preregistration-draft`)
