@@ -50,14 +50,18 @@ for pfile in proc_files:
         p_short = df[cols[0]]
         p_long = df[cols[0]]
     else:
-        p_long = df['Long'] if 'Long' in cols else df.iloc[:, 0]
-        p_short = df['Short'] if 'Short' in cols else df.iloc[:, 1]
-        valid_mask = p_long.notna() & p_short.notna()
-        diff = (p_long[valid_mask] - p_short[valid_mask]).abs()
+        p_long_temp = df['Long'] if 'Long' in cols else df.iloc[:, 0]
+        p_short_temp = df['Short'] if 'Short' in cols else df.iloc[:, 1]
+        valid_mask = p_long_temp.notna() & p_short_temp.notna()
+        diff = (p_long_temp[valid_mask] - p_short_temp[valid_mask]).abs()
         if (diff < 1e-4).all():
             regime = "SINGLE_PRICING"
+            p_short = p_short_temp
+            p_long = p_long_temp
         else:
             regime = "DUAL_PRICING"
+            p_short = df['Short']
+            p_long = df['Long']
             
     print(f"\n--------------------------------------------------")
     print(f"ZONE: {zone} | REGIME: {regime} | TOTAL INTERVALS: {len(df)}")
@@ -93,8 +97,8 @@ for pfile in proc_files:
     m1_100 = compute_m1(p_short, 100.0)
     m1_250 = compute_m1(p_short, 250.0)
     
-    print(f"M1 Scarcity >= €100/MWh: {m1_100['count']} events | Mean: {m1_100['mean_min']}m | P90: {m1_100['p90_min']}m | Max: {m1_100['max_min']}m")
-    print(f"M1 Scarcity >= €250/MWh: {m1_250['count']} events | Mean: {m1_250['mean_min']}m | P90: {m1_250['p90_min']}m | Max: {m1_250['max_min']}m")
+    print(f"M1 Scarcity >= €100/MWh (Shortage): {m1_100['count']} events | Mean: {m1_100['mean_min']}m | P90: {m1_100['p90_min']}m | Max: {m1_100['max_min']}m")
+    print(f"M1 Scarcity >= €250/MWh (Shortage): {m1_250['count']} events | Mean: {m1_250['mean_min']}m | P90: {m1_250['p90_min']}m | Max: {m1_250['max_min']}m")
     
     df['date'] = df.index.date
     df['is_zero_neg'] = p_long <= 0.0
