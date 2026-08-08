@@ -1,14 +1,14 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
 > **Version:** 4.0.0-frozen (Strict Gap-Terminated & Pre-Registered Decision Spec)  
-> **Status:** Ratified Pre-Registration Frozen Spec on `feature/omn-003-preregistration-draft`  
+> **Status:** Ratified Pre-Registration Frozen Spec  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
 > **PARAMS Freeze Commitment (`a2c0b3a`):** `feat(note-003): publish final ENTSO-E baseline note with PARAMS v3.1.0 and reproducible figures`  
 > **PARAMS Cryptographic SHA-256:** `acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58`  
-> **Main Branch HEAD (`6fa1cb7`):** `Merge pull request #51 from VolMax-Studio/recurrent-measurement/omn-004-31221838425`  
-> **Published Baseline Analysis Script (`run_imbalance_analysis.py`) Blob (`6fa1cb7`):** `7e6be06d5b7e7a46223c83998eb4ad35cdb4a16be5245932abce3c827aa5b484`  
-> **Remediated Analysis Script (`run_imbalance_analysis.py`) Draft SHA-256:** `2957e2c5905c40228cb74012c791164b0a0b34c6cf22ea578490f1d0b095874e`  
-> **Ingestion Script (`download_entsoe_data.py`) Draft SHA-256:** `c6eb203ab3daf4c6f4844aeb4b2c248d2466eaa373bff5afd56bcba80aa7eabe`  
+> **Main Branch HEAD (`70b79d0`):** `Merge pull request #54 from VolMax-Studio/docs/recurrence-spec-v1-1-0`  
+> **Published Baseline Analysis Script (`run_imbalance_analysis.py`) Blob:** `7e6be06d5b7e7a46223c83998eb4ad35cdb4a16be5245932abce3c827aa5b484`  
+> **Remediated Analysis Script (`run_imbalance_analysis.py`) SHA-256:** `2957e2c5905c40228cb74012c791164b0a0b34c6cf22ea578490f1d0b095874e`  
+> **Ingestion Script (`download_entsoe_data.py`) SHA-256:** `c6eb203ab3daf4c6f4844aeb4b2c248d2466eaa373bff5afd56bcba80aa7eabe`  
 > **Provenance Manifest (`data_manifest.json`) SHA-256:** `147eef422d0b96d02b3bc5acc630722dbd3a7a8b592ba07c952f147492702346`  
 > **Published Baseline Results SHA-256 (`notes_registry.json`):** `b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`  
 > **Remediated Gap-Terminated Baseline Results SHA-256 (`notes/003-entsoe-imbalance-baseline/results.json`):** `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c`
@@ -98,9 +98,15 @@ For each market $m$ and zone $z$, let $Q_{90}(z)$ be the 90th percentile of imba
 $$S(z) = \text{share of settlement TIME in probe month with price} \ge Q_{90}(z)$$
 Expressed as share of time (not raw interval counts). No FX conversion is performed anywhere. Absolute EUR thresholds (M1/M2) remain descriptive within EU zones only and carry NO cross-market weight.
 
-### C2. Matched Comparator Pair & Vintage Bias Declaration
-July 2026 vs July 2025, same zone, same metric, both computed by the same script. GB is recomputed on the matched July/July pair after Elexon HTTP retry logic is landed.  
-*Vintage Bias:* July 2025 data was acquired in July 2026 (recorded at `"acquired_at_utc": "2026-07-19T12:00:00Z"` in manifest); July 2026 data will be acquired in August 2026. Potential TSO price revisions between acquisition dates are declared as a known data-vintage bias.
+### C2. Matched Comparator Pair, Vintage Bias Declaration & GB Sequential Benchmark Audit
+July 2026 vs July 2025, same zone, same metric, both computed by the same script.
+- **Vintage Bias:** July 2025 data was acquired in July 2026 (recorded at `"acquired_at_utc": "2026-07-19T12:00:00Z"` in manifest); July 2026 data was acquired in August 2026. Potential TSO price revisions between acquisition dates are declared as a known data-vintage bias.
+- **Sequential GB Benchmark Audit Record (Measured 2026-08-08 prior to EU probe acquisition):**
+  - **GB Uncontaminated Baseline $Q_{90}$ (1 Aug 2025 – 30 Jun 2026):** £131.54 / MWh.
+  - **GB Column Verification:** Column `systemSellPrice` is empirically verified to match `systemBuyPrice` (Single Pricing regime P305, `all_match = True`, `max_diff = 0.0000 GBP/MWh`). Evaluated on `systemSellPrice`.
+  - **July 2026 GB Scarcity Metric ($S(\text{GB})_{\text{Jul26}}$):** 454.0 hours $\ge £100/\text{MWh}$; share $\ge Q_{90}$ = **28.83%** (429 of 1,488 30-min settlement periods). Since $28.83\% \ge 15.0\%$ ($S_{\text{thresh}}$), GB is empirically **ELEVATED** (Condition 1 of C4 satisfied).
+  - **July 2025 GB Comparator Metric ($S(\text{GB})_{\text{Jul25}}$):** 220.0 hours $\ge £100/\text{MWh}$; share $\ge Q_{90}$ = **0.81%** (12 of 1,488 30-min settlement periods).
+  - **Audit Lineage Declaration:** GB $S(z)$ metrics were measured and logged on 2026-08-08 prior to ENTSO-E EU probe data acquisition.
 
 ### C3. Elevation Threshold (Pre-Registered & Frozen Before Data)
 Zone $z$ is "elevated" iff $S(z) \ge \mathbf{15.0\%}$ (1.5x baseline decile).  
@@ -122,4 +128,4 @@ The 6 EU zones are NOT independent samples (DK_1/DK_2 share a national system, N
 - **Pre-Registration Decision Ratification:** Ratified by **Ivan Nestorov** on **2026-08-08** (Prior to July 2026 Probe Data Acquisition).
 - **Elevation Threshold $S_{\text{thresh}}$ (C3):** `15.0%`
 - **INCONCLUSIVE Band Limits ($N_{\text{high}} / N_{\text{low}}$) (C4):** `4 of 6 / 1 of 6`
-- **Repository Commit Status:** `FROZEN PRE-REGISTRATION SPEC` on `feature/omn-003-preregistration-draft`.
+- **Repository Commit Status:** `FROZEN PRE-REGISTRATION SPEC` on `main`.
