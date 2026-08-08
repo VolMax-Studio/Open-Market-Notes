@@ -1,6 +1,6 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
-> **Version:** 2.8.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
+> **Version:** 2.9.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
 > **Status:** Draft Submitted to Human Gate on `feature/omn-003-preregistration-draft` (Pre-Execution Freeze)  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
 > **PARAMS Freeze Commitment (`a2c0b3a`):** `feat(note-003): publish final ENTSO-E baseline note with PARAMS v3.1.0 and reproducible figures`  
@@ -20,12 +20,12 @@
 ### 1. Parametric Changelog & Continuity Rule Audit
 - **Published Zenodo v1.0.0 Baseline (`notes_registry.json`):** Computed via row-adjacency continuity (`b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`).
 - **Remediated Strict Gap-Terminated Baseline (`a10c0aae...`):** Enforces strict timestamp continuity rule ($\Delta t > 15\text{ min}$ terminates an active block). Documented in `PARAMETRIC_CHANGELOG.md` Entry #002.
-- **Dual Cause & Empirical Audit Findings:**
+- **Dual Cause & Verbatim Empirical Audit Findings:**
   - Across 19,219 total M1 moderate scarcity events ($\ge €100/\text{MWh}$ across 13 calendar months, 6 zones), 19,212 events ($99.964\%$) contained ZERO internal timestamp gaps.
   - Enforcing strict timestamp gap termination splits exactly **7 bridged events** (8 total gap breaches).
   - **Dual Cause Breakdown:**
-    - **Data Acquisition Artifact (5 breaches):** 5 of 8 breaches occurred simultaneously across AT, BE, DK_1, DK_2, and NL at `2026-05-31 21:45 UTC` $\rightarrow$ `2026-05-31 22:15 UTC` at the boundary of monthly ENTSO-E CSV chunk stitching in `download_entsoe_data.py`. This chunk boundary is the only month-end boundary in the 13-month dataset where an active scarcity event ($\ge €100/\text{MWh}$) was ongoing across the boundary.
-    - **Raw TSO Telemetry Gaps (3 breaches):** 3 breaches occurred in Denmark: 1 breach in DK_1 (`2025-08-10 18:45 UTC` $\rightarrow$ `19:15 UTC`) and 2 separate breaches in DK_2 (`2025-08-10 18:45 UTC` $\rightarrow$ `19:15 UTC` and `19:45 UTC` $\rightarrow$ `20:15 UTC`) representing actual Energinet TSO telemetry gaps. In DK_2, both 30-minute gaps occurred within a single ongoing extended scarcity event, producing 3 gap breaches across 2 bridged events.
+    - **Data Acquisition Artifact (5 breaches across 5 zones):** All 6 zones (AT, BE, DK_1, DK_2, FR, NL) possess an identical 30-minute timestamp gap at `2026-05-31 21:45 UTC` $\rightarrow$ `22:15 UTC` at the boundary of monthly ENTSO-E CSV package stitching in `download_entsoe_data.py`. In FR, price drops to €96.3/MWh after the gap, so no breach occurs; in AT, BE, DK_1, DK_2, and NL, prices remain $\ge €100/\text{MWh}$ across the gap, generating 5 gap breaches across 5 zones.
+    - **Raw TSO Telemetry Gaps (3 breaches across 2 zones):** 3 gap breaches occurred in Denmark: 1 breach in DK_1 (`2025-08-10 18:45 UTC` $\rightarrow$ `19:15 UTC`) and 2 separate breaches in DK_2 (`2025-08-10 18:45 UTC` $\rightarrow$ `19:15 UTC` and `19:45 UTC` $\rightarrow$ `20:15 UTC`) representing actual Energinet TSO telemetry gaps. In DK_2, both 10 August 2025 gaps occurred within a single ongoing extended scarcity event (Bridged Event #1), while the 31 May 2026 gap occurred in a separate event 10 months later (Bridged Event #2), totaling 3 gap breaches across 2 bridged events in DK_2.
   - **Metric Impact:** €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m). Maximum event duration in BE remained exactly 1,545 minutes ($25.75\text{ hours}$).
   - Both `gap_breaches_count` and `bridged_events_count` are recorded explicitly in `results.json` per zone.
 
