@@ -1,23 +1,56 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
-> **Version:** 1.7.0-draft (Remediated Pre-Registration Draft)  
+> **Version:** 1.8.0-draft (Fully Reconstructed Pre-Registration Spec)  
 > **Status:** Draft Submitted to Human Gate on `feature/omn-003-preregistration-draft` (Pre-Execution Freeze)  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
-> **PARAMS Freeze Commitment:** `a2c0b3a` (*Baseline cryptographically fixed, committed alongside reproducible figures*)  
+> **PARAMS Freeze Commitment (`6fa1cb7`):** `a2c0b3a` (*Merge pull request #51 from VolMax-Studio/recurrent-measurement/omn-004-31221838425*)  
 > **PARAMS Cryptographic SHA-256:** `acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58`  
 > **Pipeline Analysis Script (`run_imbalance_analysis.py`) Blob SHA-256 (`6fa1cb7`):** `7e6be06d5b7e7a46223c83998eb4ad35cdb4a16be5245932abce3c827aa5b484`  
-> **Ingestion Script (`download_entsoe_data.py`) Draft SHA-256:** `7b78d1f10a27e480f3e5013a10442df4cdf5b131462b21d0fccce6b61607d64b`  
+> **Ingestion Script (`download_entsoe_data.py`) Draft SHA-256:** `c6eb203ab3daf4c6f4844aeb4b2c248d2466eaa373bff5afd56bcba80aa7eabe`  
 > **Baseline Results SHA-256 (`notes_registry.json`):** `b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`
 
 ---
 
-## Layer 1 / Measured: Verified Code-Enforced Protocol & Baseline Measurements
+## Layer 1 / Measured: Reconstructed Baseline & Pre-Registered Protocol
 
-### 1. Ingestion Safety & Baseline Overwrite Protection (Remediated — B2, B3, B7)
-- **Feather Contract & Overwrite Guard:** Telemetry files in `proc_dir` maintain standard naming `imbalance_{ZONE}.feather`. To prevent accidental overwriting of published baseline files, `download_entsoe_data.py` raises `ValueError` if `imbalance_{ZONE}.feather` already exists, unless `--allow-overwrite` is explicitly passed or an isolated `--out-dir` is specified.
-- **Manifest Provenance Integrity:** `update_manifest()` validates and updates provenance entries within the `"files"` JSON array structure in `data_manifest.json`.
+### 1. Pre-Registered Metrics & Threshold Definitions (Restored from v1.3.0)
+- **Metric M1: Scarcity Duration & Shortage Pricing**
+  - Evaluated on Shortage Column (`Short` for Dual Pricing zones, or Single Imbalance Price column).
+  - **Threshold A (Moderate Scarcity):** Imbalance Price $\ge €100.00/\text{MWh}$.
+  - **Threshold B (Extreme Scarcity):** Imbalance Price $\ge €250.00/\text{MWh}$.
+  - **Continuity Rule:** Imbalance scarcity events are contiguous 15-minute settlement intervals where price remains at or above threshold. A timestamp gap $>15\text{ minutes}$ terminates an ongoing event block.
+- **Metric M2: Grid Surplus Absorption & BESS Charging Windows**
+  - Evaluated on Surplus Column (`Long` for Dual Pricing zones, or Single Imbalance Price column).
+  - **Cheap Surplus Threshold:** Imbalance Price $\le €25.00/\text{MWh}$.
+  - **Zero/Negative Surplus Threshold:** Imbalance Price $\le €0.00/\text{MWh}$.
+  - **BESS Opportunity Windows:**
+    - **4-Hour BESS Window:** Minimum $4.8\text{ hours}$ per calendar day ($\ge 19$ settlement intervals at $85\%$ round-trip efficiency).
+    - **8-Hour BESS Window:** Minimum $9.5\text{ hours}$ per calendar day ($\ge 38$ settlement intervals at $85\%$ round-trip efficiency).
 
-### 2. Measured Target Bidding Zones & Regime Mapping Persistence (Remediated — B4, B7, B8)
+### 2. Temporal Windows & Baseline Isolation (Restored from v1.3.0)
+- **Baseline Window (Zenodo v1.0.0):** 1 June 2025 – 30 June 2026 (13 Calendar Months / 395 Days).
+- **Uncontaminated Baseline Window ($Q_{90}$ Base):** 1 August 2025 – 30 June 2026 (11 Calendar Months / 334 Days).
+- **Probe Window:** 1 July 2026 – 31 July 2026 (31 Days / 2,976 expected 15-min settlement intervals per zone).
+- **Matched Pair Window:** July 2026 vs July 2025 (same zone, same script, same metric).
+
+### 3. Licensing Boundary Guard & Source Platform (Restored from v1.3.0)
+- **Permitted Data Source:** ENTSO-E Primary Transparency Platform (REST API DocumentType `A85`, Imbalance Prices).
+- **Forbidden Data Source:** DocumentType `A44` (Day-Ahead Prices) or unverified third-party aggregators.
+- **Provenance Manifest Anchor:** `data_manifest.json` contains verified entry hashes recorded at `acquired_at_utc: "2026-07-19T12:00:00Z"`.
+
+### 4. Code-Enforced Mandate 8 & Data Completeness Guard
+- **Row Floor:** $\lceil 2,976 \times 0.98 \rceil = \mathbf{2,917\text{ intervals}}$ ($98.0\%$ math ceiling for 31 days).  
+  *Operational Extension Note:* The $98\%$ telemetry floor is a Note #003 pre-registration extension pending formal ratification u RECURRENCE_SPEC v1.1.0.
+- **Timestamp Gap Threshold:** $\le 90\text{ minutes}$.  
+  *Post-Hoc Empirical Calibration Note:* Threshold of 90 minutes was calibrated to DK_1/DK_2 historical baseline telemetry gap structure.
+
+### 5. Step 0 Determinism Verification (Restored from v1.3.0)
+Execution of isolated determinism verification (Handover Requirement b):
+1. Delete target output directory (`rm -rf scratch/step0_probe`).
+2. Run ingestion script from committed blob with isolated `--out-dir scratch/step0_probe`.
+3. Verify zero modification to `./data/processed/imbalance_{ZONE}.feather` baseline files.
+
+### 6. Verified Target Bidding Zones & Regime Mapping Persistence
 - **NL** Netherlands (`10YNL----------L`) — *Frozen DUAL_PRICING*
 - **BE** Belgium (`10YBE----------X`) — *Frozen SINGLE_PRICING*
 - **FR** France (`10YFR-RTE------C`) — *Frozen DUAL_PRICING*
@@ -26,17 +59,10 @@
 - **AT** Austria (`10YAT-APG------L`) — *Frozen SINGLE_PRICING*  
 *Persistence:* Regime mapping parameters (`frozen_regime`, `m1_shortage_col`, `m2_surplus_col`) are persisted into `data_manifest.json` under each zone's file entry.
 
-### 3. Security & Zero Secret Leakage Pipeline (Remediated — B1, B5)
-- **Token Source:** Passed strictly via environment variable `ENTSOE_API_KEY`.
-- **Token Rotation Verification:** Active key prefix checked against historical compromised key prefix (`RESULT: NO MATCH` verified).
-- **Redaction Order:** `sanitize_token_url()` scrubs `securityToken=[^&]+` parameters on `response.url` and `request.url` *prior* to string concatenation.
-
-### 4. Verified Mandate 8 Telemetry Completeness & Timestamp Gap Measurements (Remediated — B2, B3, B6)
-- **Timestamp Parsing:** Timestamps are parsed using `pd.to_datetime(df.index, utc=True)` to prevent object index misinterpretation.
-- **Measured Gap Calibration:** Measured timestamp gaps across baseline cache:
-  - `BE`, `NL`, `AT`, `FR`: Maximum gap = `00:30:00` (30 minutes).
-  - `DK_1`, `DK_2`: Maximum gap = `01:30:00` (90 minutes / 1.5 hours).
-- **Code Enforcement:** `check_mandate8_completeness()` enforces a row count floor of $\lceil 2,976 \times 0.98 \rceil = \mathbf{2,917\text{ intervals}}$ ($98.0\%$ ceiling for 31 days) and a maximum timestamp gap threshold of $\le 90\text{ minutes}$.
+### 7. Security & Zero Secret Leakage Pipeline (Mandate 9)
+- **Token Source:** Environment variable `ENTSOE_API_KEY`.
+- **Token Rotation Verification:** Active key prefix vs historical compromised prefix (`RESULT: NO MATCH`).
+- **Redaction Order:** `sanitize_token_url()` scrubs `securityToken=[^&]+` parameters on `response.url` and `request.url` *prior* to string formatting.
 
 ---
 
@@ -49,7 +75,7 @@ Expressed as share of time (not raw interval counts). No FX conversion is perfor
 
 ### C2. Matched Comparator Pair & Vintage Bias Declaration
 July 2026 vs July 2025, same zone, same metric, both computed by the same script. GB is recomputed on the matched July/July pair after Elexon HTTP retry logic is landed.  
-*Vintage Bias:* July 2025 data was acquired in July 2026 (recorded at `acquired_at_utc: 2026-07-19T12:00:00Z` in manifest); July 2026 data will be acquired in August 2026. Potential TSO price revisions between acquisition dates are declared as a known data-vintage bias.
+*Vintage Bias:* July 2025 data was acquired in July 2026 (recorded at `acquired_at_utc: "2026-07-19T12:00:00Z"` in manifest); July 2026 data will be acquired in August 2026. Potential TSO price revisions between acquisition dates are declared as a known data-vintage bias.
 
 ### C3. Elevation Threshold (Frozen Before Data)
 Zone $z$ is "elevated" iff $S(z) \ge S_{\text{thresh}}$ (e.g., $15.0\%$, 1.5x baseline decile).

@@ -77,17 +77,21 @@ def update_manifest(filepath, file_hash, source_url, acquisition_mode, manifest_
     files_list = manifest_data.get("files", [])
     files_dict = {item["file_name"]: item for item in files_list if isinstance(item, dict) and "file_name" in item}
     
+    dirty = False
     if basename in files_dict:
         expected_hash = files_dict[basename]["sha256"]
         if file_hash != expected_hash:
             raise ValueError(f"Integrity check failed: Hash mismatch for {basename}! Expected {expected_hash}, got {file_hash}")
         else:
             print(f"Integrity check passed: SHA-256 matches for {basename}.")
-            # Update regime info even on existing entries
+            # Update regime info if missing or modified
             if regime_info:
-                files_dict[basename]["frozen_regime"] = regime_info["regime"]
-                files_dict[basename]["m1_shortage_col"] = regime_info["M1_shortage_col"]
-                files_dict[basename]["m2_surplus_col"] = regime_info["M2_surplus_col"]
+                entry = files_dict[basename]
+                if entry.get("frozen_regime") != regime_info["regime"]:
+                    entry["frozen_regime"] = regime_info["regime"]
+                    entry["m1_shortage_col"] = regime_info["M1_shortage_col"]
+                    entry["m2_surplus_col"] = regime_info["M2_surplus_col"]
+                    dirty = True
     else:
         print(f"Registering new entry with provenance metadata in manifest: {basename}")
         entry = {
@@ -105,10 +109,12 @@ def update_manifest(filepath, file_hash, source_url, acquisition_mode, manifest_
             
         files_list.append(entry)
         files_dict[basename] = entry
+        dirty = True
 
-    manifest_data["files"] = list(files_dict.values())
-    with open(manifest_path, 'w') as f:
-        json.dump(manifest_data, f, indent=2)
+    if dirty:
+        manifest_data["files"] = list(files_dict.values())
+        with open(manifest_path, 'w') as f:
+            json.dump(manifest_data, f, indent=2)
 
 def check_mandate8_completeness(df, zone_code, start_stamp, end_stamp):
     """
@@ -131,12 +137,11 @@ def check_mandate8_completeness(df, zone_code, start_stamp, end_stamp):
             f"intervals ({pct:.2f}%). Minimum floor: {min_required_intervals}."
         )
     
-    # Parse timestamps accurately regardless of object index or mixed tz offsets
     dt_series = pd.to_datetime(df.index, utc=True)
     gaps = dt_series.to_series().diff()
     max_gap = gaps.max()
     
-    # Calibrated to 90 min max gap limit based on DK_1/DK_2 historical baseline telemetry structure
+    # [POST-HOC EMPIRICAL CALIBRATION] Threshold of 90 minutes calibrated to DK_1/DK_2 historical baseline gaps
     if max_gap > pd.Timedelta(minutes=90):
         raise ValueError(
             f"[MANDATE 8 ABORT] {zone_code} timestamp continuity breach: Maximum gap {max_gap} exceeds 90-minute threshold limit."
@@ -218,7 +223,7 @@ def download_entsoe_imbalance(start_date='2025-06-01', end_date='2026-06-30', da
             try:
                 proc_path = os.path.join(proc_dir, f"imbalance_{zone_code}.feather")
                 if os.path.exists(proc_path) and not allow_overwrite:
-                    raise ValueError(f"Refusing to overwrite existing feather cache at {proc_path}. Pass --allow-overwrite or use --out-dir for probe runs.")
+                    raise ValueError(f"Overwrite Guard: Refusing to overwrite existing feather cache at {proc_path}. Pass --allow-overwrite or use a separate --out-dir.")
                     
                 df = client.query_imbalance_prices(country_code=zone_code, start=start, end=end)
                 
@@ -236,7 +241,7 @@ def download_entsoe_imbalance(start_date='2025-06-01', end_date='2026-06-30', da
                 print(f"Saved processed imbalance prices ({mapping['regime']}) to {proc_path}")
             except Exception as e:
                 sanitized_err = sanitize_token_url(e)
-                raise ValueError(f"ENTSO-E API Query Failed for {zone_code}: {sanitized_err}") from None
+                raise ValueError(f"ENTSO-E Execution Failed for {zone_code}: {sanitized_err}") from None
     else:
         print("ENTSOE_API_KEY environment variable not set.")
         print("Checking data_manifest.json for registered raw cache files with proven provenance...")
@@ -279,9 +284,14 @@ def download_entsoe_imbalance(start_date='2025-06-01', end_date='2026-06-30', da
             update_manifest(csv_file, file_hash, source_url=entry.get("source_url", ""), acquisition_mode="manifest_verified_cache", manifest_dir=data_dir, regime_info=mapping)
             
             proc_path = os.path.join(proc_dir, f"imbalance_{zone_code}.feather")
-            if not os.path.exists(proc_path) or allow_overwrite:
+            if not os.path.exists(proc_path):
                 df.reset_index().to_feather(proc_path)
                 print(f"Generated missing processed feather cache ({mapping['regime']}): {proc_path}")
+            elif allow_overwrite:
+                df.reset_index().to_feather(proc_path)
+                print(f"Replaced existing processed feather cache ({mapping['regime']}) per --allow-overwrite: {proc_path}")
+            else:
+                print(f"Preserved existing verified feather cache ({mapping['regime']}): {proc_path}")
 
 def main():
     parser = argparse.ArgumentParser(description="ENTSO-E Imbalance Telemetry Downloader & Provenance Manager")
@@ -289,7 +299,7 @@ def main():
     parser.add_argument('--end-date', type=str, default='2026-06-30', help='End date (YYYY-MM-DD)')
     parser.add_argument('--data-dir', type=str, default='.', help='Input data and manifest directory')
     parser.add_argument('--out-dir', type=str, default='.', help='Output cache directory')
-    parser.add_argument('--allow-overwrite', action='store_true', help='Allow overwriting existing feather files u output directory')
+    parser.add_argument('--allow-overwrite', action='store_true', help='Allow overwriting existing feather files in output directory')
     args = parser.parse_args()
     
     try:
