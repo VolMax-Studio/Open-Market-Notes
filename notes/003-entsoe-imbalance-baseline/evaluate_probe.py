@@ -94,11 +94,7 @@ def evaluate_probe(note_dir='.', probe_dir='probe_jul2026'):
         # Load Probe July 2026 feather
         probe_feather = os.path.join(target_probe_path, 'processed', f"imbalance_{zone}.feather")
         if not os.path.exists(probe_feather):
-            fallback_feather = os.path.join(note_dir, 'data', 'processed', f"imbalance_{zone}.feather")
-            if os.path.exists(fallback_feather):
-                probe_feather = fallback_feather
-            else:
-                raise ValueError(f"PROBE ABORT: Probe feather file missing for {zone} at {probe_feather}")
+            raise ValueError(f"PROBE ABORT: Probe feather file missing for {zone} at {probe_feather}. Run ingestion script download_entsoe_data.py to populate probe dataset.")
 
         probe_df = pd.read_feather(probe_feather)
         p_time_col = bind_entsoe_timestamp_col(probe_df, f"imbalance_{zone}.feather (probe)")

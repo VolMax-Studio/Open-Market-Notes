@@ -1,10 +1,10 @@
 {
   "probe_name": "OMN-003 July 2026 Recurrence & European Imbalance Scarcity Probe",
-  "execution_timestamp_utc": "2026-08-08T15:52:58.431807+00:00",
+  "execution_timestamp_utc": "2026-08-08T15:55:57.680042+00:00",
   "provenance": {
-    "git_commit": "87578b852837cdd743991bd6054cde6da091fcc4",
+    "git_commit": "5105609b8e3aa6a9537e987e4458553981b440b0",
     "evaluator_script": "notes/003-entsoe-imbalance-baseline/evaluate_probe.py",
-    "evaluator_sha256": "9174c6c3dbe3cdff1bd85a2122b017ab7a2648ef7f54bfad5827f71442e77df1",
+    "evaluator_sha256": "20081488df6fe358312cb7ef47a6378394322429f4eb5bee939c416d5889ade0",
     "params_hash": "acc7111a0119f835540689fcffbe7f3333cef9d2b580bc81e8174c2add2c9e58",
     "pre_registered_ratifier": "Ivan Nestorov (2026-08-08)"
   },
