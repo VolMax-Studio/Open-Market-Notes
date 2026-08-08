@@ -1,6 +1,6 @@
 # VolMax Open Market Note #003 Probe: Pre-Registration Mini-Spec
 > **Scope:** July 2026 Recurrence & European Imbalance Scarcity Probe  
-> **Version:** 2.7.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
+> **Version:** 2.8.0-draft (Strict Gap-Terminated & Parametrically Audited Spec)  
 > **Status:** Draft Submitted to Human Gate on `feature/omn-003-preregistration-draft` (Pre-Execution Freeze)  
 > **Repository:** `VolMax-Studio/Open-Market-Notes`  
 > **PARAMS Freeze Commitment (`a2c0b3a`):** `feat(note-003): publish final ENTSO-E baseline note with PARAMS v3.1.0 and reproducible figures`  
@@ -17,15 +17,15 @@
 
 ## Layer 1 / Measured: Baseline & Pre-Registered Metric Alignment
 
-### 1. Parametric Changelog & Continuity Rule Audit (Blocker 1, 3 & 4 Clarification)
+### 1. Parametric Changelog & Continuity Rule Audit
 - **Published Zenodo v1.0.0 Baseline (`notes_registry.json`):** Computed via row-adjacency continuity (`b1c713379887043cc429a43d12722939ec70c4ff93f351512970a302478131f9`).
 - **Remediated Strict Gap-Terminated Baseline (`a10c0aae...`):** Enforces strict timestamp continuity rule ($\Delta t > 15\text{ min}$ terminates an active block). Documented in `PARAMETRIC_CHANGELOG.md` Entry #002.
 - **Dual Cause & Empirical Audit Findings:**
   - Across 19,219 total M1 moderate scarcity events ($\ge €100/\text{MWh}$ across 13 calendar months, 6 zones), 19,212 events ($99.964\%$) contained ZERO internal timestamp gaps.
   - Enforcing strict timestamp gap termination splits exactly **7 bridged events** (8 total gap breaches).
   - **Dual Cause Breakdown:**
-    - **Data Acquisition Artifact (5 breaches):** 5 of 8 breaches occurred simultaneously across AT, BE, DK_1, DK_2, and NL at `2026-05-31 21:45 UTC` $\rightarrow$ `2026-05-31 22:15 UTC` at the boundary of monthly ENTSO-E CSV chunk stitching in `download_entsoe_data.py`.
-    - **Raw TSO Telemetry Gaps (3 breaches):** 3 breaches occurred in Denmark (1 breach in DK_1, 2 breaches in DK_2) at `2025-08-10 18:45 UTC` $\rightarrow$ `2025-08-10 20:15 UTC` representing actual Energinet TSO telemetry gaps.
+    - **Data Acquisition Artifact (5 breaches):** 5 of 8 breaches occurred simultaneously across AT, BE, DK_1, DK_2, and NL at `2026-05-31 21:45 UTC` $\rightarrow$ `2026-05-31 22:15 UTC` at the boundary of monthly ENTSO-E CSV chunk stitching in `download_entsoe_data.py`. This chunk boundary is the only month-end boundary in the 13-month dataset where an active scarcity event ($\ge €100/\text{MWh}$) was ongoing across the boundary.
+    - **Raw TSO Telemetry Gaps (3 breaches):** 3 breaches occurred in Denmark: 1 breach in DK_1 (`2025-08-10 18:45 UTC` $\rightarrow$ `19:15 UTC`) and 2 separate breaches in DK_2 (`2025-08-10 18:45 UTC` $\rightarrow$ `19:15 UTC` and `19:45 UTC` $\rightarrow$ `20:15 UTC`) representing actual Energinet TSO telemetry gaps. In DK_2, both 30-minute gaps occurred within a single ongoing extended scarcity event, producing 3 gap breaches across 2 bridged events.
   - **Metric Impact:** €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m). Maximum event duration in BE remained exactly 1,545 minutes ($25.75\text{ hours}$).
   - Both `gap_breaches_count` and `bridged_events_count` are recorded explicitly in `results.json` per zone.
 
@@ -45,7 +45,7 @@
 
 ### 3. Manifest-Bound Pricing Regime Assignment (Single Source of Truth — Zero Fallbacks)
 - **Single Source of Truth:** `run_imbalance_analysis.py` reads `frozen_regime`, `m1_shortage_col`, and `m2_surplus_col` directly from `data_manifest.json`.
-- **Parametrized Timeframe Window Tag (Blocker 2 Remediation):** `run_imbalance_analysis.py` accepts `--window-tag` (default `202506_202606`) via `argparse` to match zone manifest entries dynamically per timeframe.
+- **Parametrized Timeframe Window Tag:** `run_imbalance_analysis.py` accepts `--window-tag` (default `202506_202606`) via `argparse` to match zone manifest entries dynamically per timeframe.
 - **Zero Fallback Abort Policy:** If a zone's manifest entry or column metadata is missing, `run_imbalance_analysis.py` raises an immediate `ValueError` abort. Zero silent defaults are permitted.
 - **Dual Pricing Zones (NL, FR):** `Short` (shortage) and `Long` (surplus) columns are distinct (`max_diff` = €4,081.59/MWh in NL; €632.20/MWh in FR). M1 is evaluated strictly on `Short` and M2 strictly on `Long` as registered in manifest.
 - **Single Pricing Zones (AT, BE, DK_1, DK_2):** `Short` and `Long` columns are empirically verified to be **100% byte-for-byte identical** (`max_diff = 0.000000`, `all_match (<1e-4) = True`). Evaluating M1 or M2 on either column yields mathematically identical values. Manifest binding prevents silent column switching.
