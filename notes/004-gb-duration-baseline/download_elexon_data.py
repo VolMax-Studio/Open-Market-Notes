@@ -140,8 +140,7 @@ def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
             sleep_sec = 2 ** (attempt - 1)
             time.sleep(sleep_sec)
         if not fetched:
-            print(f"FATAL: FAILED to fetch telemetry for {date_str} after {max_attempts} attempts. Aborting per Mandate 8.")
-            sys.exit(1)
+            raise RuntimeError(f"FATAL: FAILED to fetch telemetry for {date_str} after {max_attempts} attempts. Aborting per Mandate 8.")
             
         curr += timedelta(days=1)
         day_count += 1
