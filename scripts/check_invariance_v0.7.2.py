@@ -36,8 +36,8 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
         json_str = content[content.find('{'):content.rfind('}')+1]
         params = json.loads(json_str)
 
-    q_ref = params.get('q_ref', 0.90)
-    k_mult = params.get('k_multiplier', 1.50)
+    q_ref = float(params.get('q_ref', 0.90))
+    k_mult = float(params.get('k_multiplier', 1.50))
     s_thresh = k_mult * (1.0 - q_ref)  # 0.150 = 15.0%
 
     comp_zones = params.get('comparison_zones', ["AT", "BE", "DK_1", "DK_2", "FR", "NL"])
@@ -52,6 +52,9 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
 
     with open(pub_report_path) as f:
         pub_data = json.load(f)
+
+    # Read v0.6.0 verdict directly from published report
+    verdict_v060 = pub_data.get("decision_evaluation", {}).get("classifier_c_emitted_verdict", "REGIONAL")
 
     eu_pub = pub_data.get("benchmark_metrics", {}).get("eu_zones", {})
     gb_pub = pub_data.get("benchmark_metrics", {}).get("gb_companion", {})
@@ -69,7 +72,7 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
             'M1_pct': gb_pub.get('jul_2026_share_q90_pct'),
             'R_val': gb_pub.get('baseline_q90_gbp'),
             'elevated': gb_pub.get('is_elevated_descriptive'),
-            'completeness_pct': 99.8656
+            'completeness_pct': gb_pub.get('completeness_pct', 99.8656)
         }
 
     zone_records = []
@@ -77,16 +80,31 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
     n_elevated_v072 = 0
     implementation_error_occurred = False
 
+    # Extract window configurations from PARAMS.md
+    b_window = params.get('baseline_window', {})
+    b_start = b_window.get('start_utc', '2025-08-01T00:00:00Z')
+    b_end = b_window.get('end_utc', '2026-06-30T23:59:59Z')
+
+    p_window = params.get('probe_window', {})
+    p_start = p_window.get('start_utc', '2026-07-01T00:00:00Z')
+    p_end = p_window.get('end_utc', '2026-07-31T23:59:59Z')
+
+    nominal_15m_intervals = int(p_window.get('nominal_intervals_15m', 2976))
+
     for z in comp_zones + companion_zones:
         is_companion = z in companion_zones
         if is_companion:
             b_path = os.path.join(inputs_dir, 'gb_system_prices.feather')
             p_path = b_path
             col_name = params.get('series_bindings', {}).get('GB', {}).get('baseline_col', 'systemSellPrice')
+            interval_sec = 1800.0  # 30-min settlement intervals in GB
+            nominal_intervals = int(nominal_15m_intervals / 2)  # 1488 30m intervals
         else:
             b_path = os.path.join(inputs_dir, 'baseline', f'imbalance_{z}.feather')
             p_path = os.path.join(inputs_dir, 'probe_jul2026', f'imbalance_{z}.feather')
             col_name = params.get('series_bindings', {}).get(z, {}).get('baseline_col', 'Short')
+            interval_sec = 900.0   # 15-min settlement intervals in EU
+            nominal_intervals = nominal_15m_intervals  # 2976 15m intervals
 
         # Load baseline feather
         df_b = pd.read_feather(b_path)
@@ -94,14 +112,15 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
         df_b[t_col_b] = pd.to_datetime(df_b[t_col_b], utc=True)
         df_b = df_b.set_index(t_col_b).sort_index()
 
-        # Slice uncontaminated 11M baseline window per PARAMS.md: 2025-08-01 to 2026-06-30
-        b_slice = df_b.loc['2025-08-01 00:00:00+00:00':'2026-06-30 23:59:59+00:00']
+        # Slice uncontaminated 11M baseline window per PARAMS.md
+        b_slice = df_b.loc[b_start:b_end]
         b_series = b_slice[col_name].dropna()
         R_val = float(np.percentile(b_series, q_ref * 100.0, method='linear'))
 
         # Load probe feather
         if is_companion:
-            p_slice = df_b.loc['2026-07-01 00:00:00+00:00':'2026-07-31 23:59:59+00:00']
+            df_p = df_b
+            p_slice = df_p.loc[p_start:p_end]
         else:
             df_p = pd.read_feather(p_path)
             t_col_p = bind_timestamp_col(df_p)
@@ -111,23 +130,18 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
 
         p_valid = p_slice.loc[p_slice[col_name].dropna().index]
 
-        # Nominal seconds calculation (July 2026 = 31 days * 86400s)
-        nominal_seconds = 31 * 86400.0
+        # Nominal seconds calculation from PARAMS nominal intervals
+        nominal_seconds = float(nominal_intervals * interval_sec)
         
-        # Admitted timestamps and diffs matching evaluate_probe.py logic
-        diffs = pd.Series(p_valid.index).diff().dt.total_seconds().values
-        if len(diffs) > 1:
-            diffs[0] = float(np.median(diffs[1:]))
-        else:
-            diffs[0] = 900.0 if not is_companion else 1800.0
-
-        admitted_seconds = float(np.sum(diffs))
+        # Admitted interval count and duration (excluding missing rows)
+        admitted_intervals = len(p_valid)
+        admitted_seconds = float(admitted_intervals * interval_sec)
         missing_seconds = float(nominal_seconds - admitted_seconds)
         completeness_pct = (admitted_seconds / nominal_seconds) * 100.0
 
-        # Qualifying intervals (value >= R_val)
-        qualifying_mask = (p_valid[col_name] >= R_val).values
-        qualifying_seconds = float(np.sum(diffs[qualifying_mask]))
+        # Qualifying interval count (value >= R_val)
+        qualifying_intervals = int((p_valid[col_name] >= R_val).sum())
+        qualifying_seconds = float(qualifying_intervals * interval_sec)
 
         # M1 scalar (Q / A)
         m1_val = qualifying_seconds / admitted_seconds
@@ -200,7 +214,6 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
 
     # Window-level verdict
     n_high = params.get('n_high', 4)
-    verdict_v060 = "REGIONAL"
     if implementation_error_occurred:
         verdict_v072 = "IMPLEMENTATION_ERROR"
         invariance_status = "VOIDED_BY_IMPLEMENTATION_ERROR"
@@ -219,13 +232,13 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
 
     verdict_changed = verdict_v060 != verdict_v072
 
+    # Metadata block contains NO timestamps to guarantee report hash stability
     report = {
         "_metadata": {
             "title": "M1 v0.7.2 Invariance Verification Report",
             "instance_id": params.get('instance_id', '2026-08-scarcity-jul'),
             "rule_version_evaluated": rule_version,
             "rule_version_baseline": "v0.6.0",
-            "executed_at_utc": "2026-08-09T16:35:00Z",
             "invariance_obligation_status": invariance_status
         },
         "window_summary": {

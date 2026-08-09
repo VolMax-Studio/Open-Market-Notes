@@ -4,7 +4,6 @@
     "instance_id": "2026-08-scarcity-jul",
     "rule_version_evaluated": "v0.7.2",
     "rule_version_baseline": "v0.6.0",
-    "executed_at_utc": "2026-08-09T16:35:00Z",
     "invariance_obligation_status": "DISCHARGED"
   },
   "window_summary": {
