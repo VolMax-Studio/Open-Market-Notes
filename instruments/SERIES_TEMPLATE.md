@@ -1,6 +1,6 @@
 # SERIES TEMPLATE — Scheduled Series Specification Template
 
-> **Document Status:** Draft — SPREMNO ZA GEJT (not frozen, not ratified)
+> **Document Status:** RATIFIED — FROZEN for Series Operation
 > **Version:** v0.2.0 · supersedes v0.1.0 (defects resolved — see §8)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Selection mode:** S₁ (Scheduled) — `S1_SCHEDULED_SELECTION.md`
