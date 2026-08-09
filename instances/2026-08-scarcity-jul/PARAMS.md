@@ -23,7 +23,6 @@
   "max_allowed_gap_seconds": 900.0,
   "quantile_method": "linear",
   "timestamp_tz": "UTC",
-  "window_timezone": "UTC",
   "baseline_window": {
     "start_utc": "2025-08-01T00:00:00Z",
     "end_utc": "2026-06-30T23:59:59Z",
