@@ -85,6 +85,7 @@
     "market": "ENTSO-E Imbalance (NL, BE, FR, DK1, DK2, AT, GB Comparator)",
     "signal": "Pre-Registered July 2026 Elevation Probe & Regional Verdict",
     "measurement_period": "2026-07-01 to 2026-07-31",
+    "selection_mode": "legacy_triggered_human",
     "params_commit_hash": "70b79d0",
     "code_url": "https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/003-entsoe-imbalance-baseline/probe_jul2026",
     "results_sha256": "8e66c1c00267218615abe1d7ed4a14e63e7fb5d118fca84074acc4a0942ac671",
@@ -99,8 +100,9 @@
     "note_number": "2026-08-scarcity-jul",
     "title": "Isolated Instance 2026-08-scarcity-jul — July 2026 European Imbalance Scarcity Evaluation",
     "market": "ENTSO-E Imbalance (NL, BE, FR, DK1, DK2, AT, GB Comparator)",
-    "signal": "Strict Time-Weighted Scarcity Persistence (M1 v0.6.0, C v1.2.0)",
+    "signal": "Strict Time-Weighted Scarcity Persistence (M1 v0.6.0, C v1.3.0)",
     "measurement_period": "2026-07-01 to 2026-07-31",
+    "selection_mode": "legacy_triggered_human",
     "inherits": [
       "notes/003-entsoe-imbalance-baseline/data/processed/*",
       "notes/003-entsoe-imbalance-baseline/probe_jul2026/processed/*",
