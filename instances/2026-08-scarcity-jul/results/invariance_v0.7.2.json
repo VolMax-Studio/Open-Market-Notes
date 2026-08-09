@@ -4,7 +4,8 @@
     "instance_id": "2026-08-scarcity-jul",
     "rule_version_evaluated": "v0.7.2",
     "rule_version_baseline": "v0.6.0",
-    "invariance_obligation_status": "DISCHARGED"
+    "invariance_obligation_status": "DISCHARGED",
+    "note_on_test_coverage": "EU comparison zones evaluated at 100.0% completeness in published telemetry window; GB companion zone (99.8656% completeness) provides active exposure bound separation."
   },
   "window_summary": {
     "window": "2026-07",

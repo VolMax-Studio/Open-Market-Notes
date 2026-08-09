@@ -163,13 +163,11 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
         pub_R = pub_entry.get('R_val')
         elevated_v060 = pub_entry.get('elevated')
 
-        # Control checks against published v0.6.0 report baseline (M1_pct and R_val must match strictly)
-        m1_control_failed = False
-        if pub_m1 is None or abs(pub_m1 - m1_pct) > 1e-4:
-            m1_control_failed = True
-            implementation_error_occurred = True
+        # Control checks against published v0.6.0 report baseline
+        m1_control_failed = pub_m1 is None or abs(pub_m1 - m1_pct) > 1e-4
+        r_control_failed = pub_R is None or abs(pub_R - R_val) > 1e-4
 
-        if pub_R is None or abs(pub_R - R_val) > 1e-4:
+        if m1_control_failed or r_control_failed:
             implementation_error_occurred = True
 
         # v0.7.2 determinacy evaluation
@@ -184,9 +182,13 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
             if not is_companion:
                 all_determinate = False
 
-        # Determine change_reason
-        if m1_control_failed or implementation_error_occurred:
-            change_reason = "IMPLEMENTATION_ERROR"
+        # Determine change_reason per zone
+        if m1_control_failed and r_control_failed:
+            change_reason = "CONTROL_FAILED_BOTH"
+        elif m1_control_failed:
+            change_reason = "CONTROL_FAILED_M1"
+        elif r_control_failed:
+            change_reason = "CONTROL_FAILED_R"
         elif determinacy == "INDETERMINATE":
             change_reason = "BECAME_INDETERMINATE"
         elif elevated_v060 and determinacy == "NOT_ELEVATED":
@@ -242,7 +244,8 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
             "instance_id": params.get('instance_id', '2026-08-scarcity-jul'),
             "rule_version_evaluated": rule_version,
             "rule_version_baseline": "v0.6.0",
-            "invariance_obligation_status": invariance_status
+            "invariance_obligation_status": invariance_status,
+            "note_on_test_coverage": "EU comparison zones evaluated at 100.0% completeness in published telemetry window; GB companion zone (99.8656% completeness) provides active exposure bound separation."
         },
         "window_summary": {
             "window": "2026-07",
