@@ -1,0 +1,74 @@
+[
+  {
+    "window": "2025-12",
+    "evaluation_status": "EVALUATED",
+    "label": "NULL",
+    "result_json_sha256": "f0406d48c49ed62f0cf8bb9ece79e6c543d77fa023883edcebd829e569669638",
+    "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+    "N_elevated": 1,
+    "evaluated_at_utc": "2026-08-09T18:52:32Z"
+  },
+  {
+    "window": "2026-01",
+    "evaluation_status": "EVALUATED",
+    "label": "REGIONAL",
+    "result_json_sha256": "32057ea505e725a847bcf2ef1243b002397c323f0a182c1211993eaf4544b832",
+    "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+    "N_elevated": 4,
+    "evaluated_at_utc": "2026-08-09T18:52:33Z"
+  },
+  {
+    "window": "2026-02",
+    "evaluation_status": "EVALUATED",
+    "label": "NULL",
+    "result_json_sha256": "a29a524de6eef7bdc9dc6e4ea9389e3e034be71fddaab1121bafbe024745d6f7",
+    "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+    "N_elevated": 0,
+    "evaluated_at_utc": "2026-08-09T18:52:33Z"
+  },
+  {
+    "window": "2026-03",
+    "evaluation_status": "EVALUATED",
+    "label": "ISOLATED",
+    "result_json_sha256": "b3696b1732f9411f5c51edef678923c9123a05fc09fa4fba74192cd5d5e00e21",
+    "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+    "N_elevated": 3,
+    "evaluated_at_utc": "2026-08-09T18:52:34Z"
+  },
+  {
+    "window": "2026-04",
+    "evaluation_status": "EVALUATED",
+    "label": "NULL",
+    "result_json_sha256": "90a22b13af43896bcb47fe3d34ca397a2497bf504e32a8312f0f1d6d29d56094",
+    "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+    "N_elevated": 0,
+    "evaluated_at_utc": "2026-08-09T18:52:34Z"
+  },
+  {
+    "window": "2026-05",
+    "evaluation_status": "EVALUATED",
+    "label": "ISOLATED",
+    "result_json_sha256": "13d58155a5b2129b87b1608fa2f923becaae58d859158012a506d5bf356a433f",
+    "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+    "N_elevated": 2,
+    "evaluated_at_utc": "2026-08-09T18:52:35Z"
+  },
+  {
+    "window": "2026-06",
+    "evaluation_status": "EVALUATED",
+    "label": "REGIONAL",
+    "result_json_sha256": "a123ce91421b1ed92bba48b0b272401f9e90c07c1225b7e3850178038a4a44e6",
+    "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+    "N_elevated": 4,
+    "evaluated_at_utc": "2026-08-09T18:52:35Z"
+  },
+  {
+    "window": "2026-07",
+    "evaluation_status": "EVALUATED",
+    "label": "ISOLATED",
+    "result_json_sha256": "4068697e704898cd969f33f455413604ab274bedadfe45ef48cefc034ebc5c81",
+    "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+    "N_elevated": 3,
+    "evaluated_at_utc": "2026-08-09T18:52:36Z"
+  }
+]

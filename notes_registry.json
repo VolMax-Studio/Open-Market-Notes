@@ -126,10 +126,26 @@
     "instance_dir": "instances/entsoe-scarcity-s1",
     "operating_start": "2026-06",
     "status": "Draft — SPREMNO ZA GEJT",
-    "spec_commit": "f28e0a84b3795c5130a4eee23857f9d00c3e1c3e",
+    "spec_commit": "82b1daa7d594265fe468730dd7ef7d1080fe874a",
     "series_log_path": "instances/entsoe-scarcity-s1/runs/SERIES_LOG.json",
     "runs_completed": 2,
     "runs_unevaluated": 0,
     "params_sha256": "665e97cebc69de499f009378881b856e30a416bc7c29ab0cbea674789308c3e5"
+  },
+  {
+    "id": "entsoe-scarcity-exp-b6",
+    "series_id": "entsoe-scarcity-exp-b6",
+    "title": "Exploratory Instance entsoe-scarcity-exp-b6 — 8-Month Rolling 6M Baseline Scarcity Persistence",
+    "market": "ENTSO-E Imbalance (NL, BE, FR, DK1, DK2, AT, GB Comparator)",
+    "signal": "Strict Time-Weighted Scarcity Persistence (M1 v0.7.3, C v1.4.0, S1 v0.3.1 §3.4)",
+    "selection_mode": "exploratory",
+    "instance_dir": "instances/entsoe-scarcity-exp-b6",
+    "operating_start": "2025-12",
+    "status": "Draft — SPREMNO ZA GEJT",
+    "spec_commit": "82b1daa7d594265fe468730dd7ef7d1080fe874a",
+    "series_log_path": "instances/entsoe-scarcity-exp-b6/runs/SERIES_LOG.json",
+    "runs_completed": 8,
+    "runs_unevaluated": 0,
+    "params_sha256": "5c5a343ed6fc8ab6ac3ee4bc521faca90954dbc6e745749a46c2d52ecabd6efa"
   }
 ]
