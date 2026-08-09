@@ -1,7 +1,7 @@
 # SERIES TEMPLATE — Scheduled Series Specification Template
 
 > **Document Status:** Draft — SPREMNO ZA GEJT (not frozen, not ratified)
-> **Version:** v0.1.0
+> **Version:** v0.2.0 · supersedes v0.1.0 (defects resolved — see §8)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Selection mode:** S₁ (Scheduled) — `S1_SCHEDULED_SELECTION.md`
 > **Measurement:** M₁ — `M1_SCARCITY_PERSISTENCE.md`
@@ -139,6 +139,16 @@ Fields specific to a scheduled series: `selection_mode: "S1_scheduled"`, `series
 `instance_dir`, `spec_commit` (the commit pinning M/C/S and PARAMS together),
 `series_log_path`, `operating_start`, `runs_completed`, `runs_unevaluated`.
 
-*Amendments require a version bump with stated rationale.*
+---
+
+## 8. Amendment Record
+
+**v0.1.0 → v0.2.0.**
+1. Formalized template designation scope in header and §2 layout (`instruments/SERIES_TEMPLATE.md`).
+2. Co-located `INSTANCE_ISOLATION_PROTOCOL.md` in §2 instruments layout.
+3. Codified normative deterministic Upstream Data Revision Rule in §3 under Isolation Protocol §6.
+
+*Amendments require a version bump with stated rationale. Definitions are never edited
+silently.*
 
 *VolMax Studio Lab · P10 Verification Protocol*

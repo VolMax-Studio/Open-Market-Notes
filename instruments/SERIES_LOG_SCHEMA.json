@@ -8,10 +8,10 @@
       "A window that produced no label appears with evaluation_status NOT_EVALUATED and label null. It is never absent.",
       "N_calendar_total = count of all records. N_classified_total = count of records with evaluation_status EVALUATED. Label frequencies are computed over N_classified_total only.",
       "Values are copied from the referenced result.json, never recomputed. If a value here disagrees with the file it references, the file is authoritative and this log is regenerated.",
-      "Records are append-only. An existing record is rewritten only when its underlying result.json is regenerated, and that regeneration is itself a change requiring a changelog entry."
+      "Records are append-only. An unclassified record (NOT_EVALUATED — INCOMPLETE_SET) may be updated exactly once under the S1 §2.5 single retry rule upon generation of its initial result.json during cycle W+1. Otherwise, an existing record is rewritten only when its underlying result.json is regenerated."
     ],
     "evaluation_status_enum": ["EVALUATED", "NOT_EVALUATED"],
-    "not_evaluated_reason_enum": ["INCOMPLETE_SET", "PENDING_PUBLICATION_LAG"],
+    "not_evaluated_reason_enum": ["INCOMPLETE_SET", "PENDING_PUBLICATION_LAG", "EXHAUSTED_RETRY_INCOMPLETE_SET"],
     "label_enum": ["NULL", "ISOLATED", "REGIONAL", null]
   },
 
