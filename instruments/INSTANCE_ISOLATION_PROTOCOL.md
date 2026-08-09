@@ -1,6 +1,6 @@
 # Instance Isolation Protocol
 
-> **Document Status:** Draft — SPREMNO ZA GEJT (not ratified)
+> **Document Status:** RATIFIED — FROZEN for Series Operation
 > **Version:** v0.1.0
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Scope:** How a new unit of work is started, what it may read, what it may never write.

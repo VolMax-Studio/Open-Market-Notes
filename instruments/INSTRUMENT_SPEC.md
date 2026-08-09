@@ -1,6 +1,6 @@
 # Instrument Specification — Measurement Domain and Visibility Boundaries
 
-> **Document Status:** Draft — SPREMNO ZA GEJT (not ratified)
+> **Document Status:** RATIFIED — FROZEN for Series Operation
 > **Version:** v0.3.0 · supersedes v0.2.0, v0.1.0 (none ratified — see §8)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Contains no:** thresholds, percentiles, market names, operator names, dates, or
