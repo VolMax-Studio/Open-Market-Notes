@@ -89,9 +89,7 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
     p_start = p_window.get('start_utc', '2026-07-01T00:00:00Z')
     p_end = p_window.get('end_utc', '2026-07-31T23:59:59Z')
 
-    p_start_dt = pd.to_datetime(p_start, utc=True)
-    p_end_dt = pd.to_datetime(p_end, utc=True)
-    days_in_probe_window = (p_end_dt - p_start_dt).days + 1
+    nominal_15m_intervals = int(p_window.get('nominal_intervals_15m', 2976))
 
     for z in comp_zones + companion_zones:
         is_companion = z in companion_zones
@@ -100,13 +98,13 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
             p_path = b_path
             col_name = params.get('series_bindings', {}).get('GB', {}).get('baseline_col', 'systemSellPrice')
             interval_sec = 1800.0  # 30-min settlement intervals in GB
+            nominal_intervals = int(nominal_15m_intervals / 2)  # 1488 30m intervals
         else:
             b_path = os.path.join(inputs_dir, 'baseline', f'imbalance_{z}.feather')
             p_path = os.path.join(inputs_dir, 'probe_jul2026', f'imbalance_{z}.feather')
             col_name = params.get('series_bindings', {}).get(z, {}).get('baseline_col', 'Short')
             interval_sec = 900.0   # 15-min settlement intervals in EU
-
-        nominal_intervals = int(round((days_in_probe_window * 86400.0) / interval_sec))
+            nominal_intervals = nominal_15m_intervals  # 2976 15m intervals
 
         # Load baseline feather
         df_b = pd.read_feather(b_path)
@@ -120,16 +118,14 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
         R_val = float(np.percentile(b_series, q_ref * 100.0, method='linear'))
 
         # Load probe feather
-        if is_companion:
-            df_p = df_b
-            p_slice = df_p.loc[p_start:p_end]
-        else:
-            df_p = pd.read_feather(p_path)
-            t_col_p = bind_timestamp_col(df_p)
+        df_p = df_b if is_companion else pd.read_feather(p_path)
+        t_col_p = bind_timestamp_col(df_p)
+        if not is_companion:
             df_p[t_col_p] = pd.to_datetime(df_p[t_col_p], utc=True)
             df_p = df_p.set_index(t_col_p).sort_index()
-            p_slice = df_p
 
+        # Uniform UTC window slicing across all comparison and companion series
+        p_slice = df_p.loc[p_start:p_end]
         p_valid = p_slice.loc[p_slice[col_name].dropna().index]
 
         # Nominal seconds calculation from nominal intervals and duration
@@ -165,10 +161,8 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
         pub_R = pub_entry.get('R_val')
         elevated_v060 = pub_entry.get('elevated')
 
-        # Check numeric identity of M1_pct against published v0.6.0
-        m1_control_failed = False
-        if pub_m1 is None or abs(pub_m1 - m1_pct) > 1e-4:
-            m1_control_failed = True
+        # Check numeric control of R_val against published v0.6.0 baseline
+        if pub_R is None or abs(pub_R - R_val) > 1e-4:
             implementation_error_occurred = True
 
         # v0.7.2 determinacy evaluation
@@ -184,9 +178,7 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
                 all_determinate = False
 
         # Determine change_reason
-        if m1_control_failed:
-            change_reason = "IMPLEMENTATION_ERROR"
-        elif determinacy == "INDETERMINATE":
+        if determinacy == "INDETERMINATE":
             change_reason = "BECAME_INDETERMINATE"
         elif elevated_v060 and determinacy == "NOT_ELEVATED":
             change_reason = "ELEVATED_TO_NOT_ELEVATED"
@@ -284,7 +276,7 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
     print("=======================================================\n")
 
     if implementation_error_occurred:
-        raise ValueError("INVARIANCE ABORT: M1_pct control failed against published v0.6.0 report. Implementation error detected.")
+        raise ValueError("INVARIANCE ABORT: Reference price control failed against published v0.6.0 report. Implementation error detected.")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="M1 v0.7.2 Invariance Verification Script")

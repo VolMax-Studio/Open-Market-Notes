@@ -1,7 +1,7 @@
 # M₁ — Scarcity Persistence Scalar
 
 > **Document Status:** Draft — SPREMNO ZA GEJT (not frozen, not ratified)
-> **Version:** v0.7.2 · supersedes v0.6.0, v0.5.0, v0.4.0, v0.3.0, v0.2.0 (complete history preserved — see §9)
+> **Version:** v0.7.3 · supersedes v0.7.2, v0.6.0, v0.5.0, v0.4.0, v0.3.0, v0.2.0 (complete history preserved — see §9)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Role:** Measurement Domain Specification **M₁** for event class *scarcity persistence*, under
 > `INSTRUMENT_SPEC — Measurement Domain and Visibility Boundaries` (v0.3.0).
@@ -181,6 +181,8 @@ The definition of $M_1$ is parameter-free. All specific numeric parameters and s
 ---
 
 ## 9. Amendment Record
+
+**v0.7.3.** Added fixed-resolution parameter equivalence clause to §3 clarifying that on fixed-resolution markets where interval duration $\Delta t$ is a parameter frozen in `PARAMS.md`, time-weighted duration ratios simplify to $(K \cdot \Delta t) / (N \cdot \Delta t) = K / N$.
 
 **v0.7.2.** Replaced §4 in full with Exposure Bounds ($\text{Exposure}_{\text{lower}}$, $\text{Exposure}_{\text{upper}}$) and the Determinacy Elevation Test (§4.4). Removed maximum gap rule $\Delta t_{\text{max}}$ for observation window $W$, replacing geometric gap rejection with uncertainty bounding over nominal window $N$. Added theorem proof for $M_1$ containment, §4.6 baseline uncertainty acceptance clause, and Parametric Changelog entry.
 
