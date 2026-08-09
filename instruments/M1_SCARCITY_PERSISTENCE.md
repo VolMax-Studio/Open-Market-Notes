@@ -1,6 +1,6 @@
 # M₁ — Scarcity Persistence Scalar
 
-> **Document Status:** Draft — SPREMNO ZA GEJT (not frozen, not ratified)
+> **Document Status:** RATIFIED — FROZEN for Series Operation
 > **Version:** v0.7.3 · supersedes v0.7.2, v0.6.0, v0.5.0, v0.4.0, v0.3.0, v0.2.0 (complete history preserved — see §9)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Role:** Measurement Domain Specification **M₁** for event class *scarcity persistence*, under
