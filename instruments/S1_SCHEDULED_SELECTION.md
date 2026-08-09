@@ -89,10 +89,10 @@ S₁ is parameter-free as a definition. Values live in `PARAMS.md`:
 
 | Parameter | Meaning | Status / Constraint |
 |---|---|---|
-| `L` | Publication lag in days before a run may execute | TO BE MEASURED, then frozen |
+| `L` | Publication lag in days before a run may execute | PROVISIONAL — unmeasured estimate (Option B); requires prospective monitoring |
 | `N` | Rolling baseline length in calendar months | TO BE FROZEN (Constraint: $N \ge 12$) |
-| `run_day` | Day of month on which the scheduled run executes | TO BE FROZEN |
-| `operating_start` | First window in the scheduled series | TO BE FROZEN |
+| `run_day` | Day of month on which the scheduled run executes | TO BE FROZEN (Constraint: $\text{run\_day} > L$) |
+| `operating_start` | First window in the scheduled series | TO BE FROZEN (Constraint: $\ge 12$ months post archive start) |
 
 An implementation that supplies a default for any of these is non-conforming.
 
