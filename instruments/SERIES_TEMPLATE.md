@@ -1,4 +1,4 @@
-# SERIES — Scheduled Series Specification
+# SERIES TEMPLATE — Scheduled Series Specification Template
 
 > **Document Status:** Draft — SPREMNO ZA GEJT (not frozen, not ratified)
 > **Version:** v0.1.0
@@ -7,6 +7,7 @@
 > **Measurement:** M₁ — `M1_SCARCITY_PERSISTENCE.md`
 > **Classifier:** C — `C_CLASSIFIER_SCARCITY_PERSISTENCE.md`
 > **Isolation:** `INSTANCE_ISOLATION_PROTOCOL.md`
+> **Scope:** This document is the canonical specification template (`SERIES_TEMPLATE.md`). When a new scheduled series instance is created under `instances/<series-id>/`, this template is instantiated into `instances/<series-id>/SERIES.md`.
 
 ---
 
@@ -36,7 +37,7 @@ chart or one frequency without stating that they are two.
 instances/<series-id>/
 ├── PARAMS.md            frozen once for the whole series
 ├── PROVENANCE.md        inherited inputs, per Isolation Protocol §4
-├── SERIES.md            this file
+├── SERIES.md            instantiated from SERIES_TEMPLATE.md
 ├── src/
 │   └── run_window.py    single entry point, --window YYYY-MM
 ├── inputs/

@@ -11,14 +11,14 @@
       "Records are append-only. An existing record is rewritten only when its underlying result.json is regenerated, and that regeneration is itself a change requiring a changelog entry."
     ],
     "evaluation_status_enum": ["EVALUATED", "NOT_EVALUATED"],
-    "not_evaluated_reason_enum": ["INCOMPLETE_SET", "PENDING_PUBLICATION_LAG", "NOT_YET_DUE"],
+    "not_evaluated_reason_enum": ["INCOMPLETE_SET", "PENDING_PUBLICATION_LAG"],
     "label_enum": ["NULL", "ISOLATED", "REGIONAL", null]
   },
 
   "series_id": "<series-id>",
   "instance_dir": "instances/<series-id>",
   "selection_mode": "S1_scheduled",
-  "spec_commit": "<commit SHA pinning M, C, S and PARAMS together>",
+  "spec_commit": "<commit SHA pinning M, C, S, INSTANCE_ISOLATION, PARAMS and code together>",
   "params_sha256": "<sha256 of PARAMS.md>",
   "operating_start": "<YYYY-MM>",
 
@@ -78,7 +78,7 @@
         "result_sha256": "<sha256 of result.json>",
         "completeness_path": "runs/YYYY-MM/completeness.json",
         "inputs_manifest_sha256": "<sha256 of inputs/MANIFEST.json as read by this run>",
-        "run_commit": "<commit SHA at which this run was committed>"
+        "run_commit": "<commit SHA at which this run execution was committed; equals spec_commit after repo consolidation>"
       }
     },
 
