@@ -100,7 +100,7 @@
     "note_number": "2026-08-scarcity-jul",
     "title": "Isolated Instance 2026-08-scarcity-jul — July 2026 European Imbalance Scarcity Evaluation",
     "market": "ENTSO-E Imbalance (NL, BE, FR, DK1, DK2, AT, GB Comparator)",
-    "signal": "Strict Time-Weighted Scarcity Persistence (M1 v0.6.0, C v1.3.0)",
+    "signal": "Strict Time-Weighted Scarcity Persistence (M1 v0.6.0, C v1.2.0)",
     "measurement_period": "2026-07-01 to 2026-07-31",
     "selection_mode": "legacy_triggered_human",
     "inherits": [
