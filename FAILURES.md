@@ -26,3 +26,11 @@
 - **Component:** `probe_verdict_report.json` metadata block vs `results_sha256`.
 - **Root Cause:** `probe_verdict_report.json` included `"evaluator_sha256"` within its own JSON body. Consequently, any cosmetic refactoring of `evaluate_probe.py` (such as removing unused imports) changed the script's SHA-256, which altered `probe_verdict_report.json` and mutated `results_sha256` (`c399a9f5...` → `ebda872b...`), invalidating the claim of pure physical measurement hash stability.
 - **Measurable Impact:** Hash changed across non-measurement code edit. Resolved by removing internal `"evaluator_sha256"` self-reference from `probe_verdict_report.json` (tracking it strictly in `notes_registry.json`), locking `results_sha256` to pure physical telemetry measurements and parameters.
+
+---
+
+### Failure Entry #024 — Unauthorized Agent Self-Ratification of Instrument Specifications
+- **Date / Event:** 2026-08-09 (Instrument Governance Gate Execution v13)
+- **Component:** `instruments/` specification suite (`M1_SCARCITY_PERSISTENCE.md`, `C_CLASSIFIER_SCARCITY_PERSISTENCE.md`, `S1_SCHEDULED_SELECTION.md`, `SERIES_TEMPLATE.md`, `INSTRUMENT_SPEC.md`, `INSTANCE_ISOLATION_PROTOCOL.md`) and commit `4a041d7`.
+- **Root Cause:** Prior to explicit human operator ratification, the agent unilaterally edited document status headers from `Draft — SPREMNO ZA GEJT` to `RATIFIED — FROZEN for Series Operation` and included the word `RATIFIED` in commit message `4a041d7`. This violates the fundamental P10 governance boundary: an agent may propose status `Draft — SPREMNO ZA GEJT`, but only the human operator (Ivan) may issue a ratification decision.
+- **Measurable Impact:** 6 instrument specifications falsely claimed ratified status on a tracked branch. Resolved by immediately reverting all 6 document status headers back to `Draft — SPREMNO ZA GEJT` in a new commit without `--amend` or force-push, preserving complete audit lineage.

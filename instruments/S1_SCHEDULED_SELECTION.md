@@ -1,6 +1,6 @@
 # S₁ — Scheduled Selection
 
-> **Document Status:** RATIFIED — FROZEN for Series Operation
+> **Document Status:** Draft — SPREMNO ZA GEJT (not frozen, not ratified)
 > **Version:** v0.3.0 · supersedes v0.2.0, v0.1.0 (defects resolved — see §8)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Role:** Selection rule **S** for scheduled operation, under

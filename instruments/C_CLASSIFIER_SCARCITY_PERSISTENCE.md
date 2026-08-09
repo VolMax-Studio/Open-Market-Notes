@@ -1,6 +1,6 @@
 # C — Scarcity Persistence Classifier
 
-> **Document Status:** RATIFIED — FROZEN for Series Operation
+> **Document Status:** Draft — SPREMNO ZA GEJT (not frozen, not ratified)
 > **Version:** v1.4.0 · supersedes v1.3.0, v1.2.0, v1.1.0, v1.0.0 (defects resolved — see §5)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Role:** Classifier **C** for event class *scarcity persistence*, under
