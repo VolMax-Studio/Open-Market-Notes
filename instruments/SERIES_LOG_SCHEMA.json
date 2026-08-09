@@ -1,0 +1,131 @@
+{
+  "_schema": {
+    "name": "SERIES_LOG",
+    "version": "0.3.0",
+    "purpose": "Index of every calendar window in a scheduled series. Regenerated from the per-run result.json files; references their hashes and never restates their numbers as an independent computation. This file is an index, not a measurement — its own hash is not registered and carries no claim.",
+    "invariants": [
+      "One record per calendar window in the operating period, with no gaps and no omissions.",
+      "A window that produced no label appears with evaluation_status NOT_EVALUATED and label null. It is never absent.",
+      "N_calendar_total = count of all records. N_classified_total = count of records with evaluation_status EVALUATED. Label frequencies are computed over N_classified_total only.",
+      "Values are copied from the referenced result.json, never recomputed. If a value here disagrees with the file it references, the file is authoritative and this log is regenerated.",
+      "Records are append-only. An unclassified record (NOT_EVALUATED — INCOMPLETE_SET or INDETERMINATE_SET) may be updated exactly once under the S1 §2.5 single retry rule upon generation of its initial result.json during cycle W+1. Otherwise, an existing record is rewritten only when its underlying result.json is regenerated."
+    ],
+    "evaluation_status_enum": ["EVALUATED", "NOT_EVALUATED"],
+    "not_evaluated_reason_enum": ["INCOMPLETE_SET", "INDETERMINATE_SET", "PENDING_PUBLICATION_LAG", "EXHAUSTED_RETRY_INCOMPLETE_SET", "EXHAUSTED_RETRY_INDETERMINATE_SET"],
+    "label_enum": ["NULL", "ISOLATED", "REGIONAL", null]
+  },
+
+  "series_id": "<series-id>",
+  "instance_dir": "instances/<series-id>",
+  "selection_mode": "S1_scheduled",
+  "measurement_rule_version": "M1_SCARCITY_PERSISTENCE v0.7.2",
+  "classifier_rule_version": "C_CLASSIFIER_SCARCITY_PERSISTENCE v1.4.0",
+  "selection_rule_version": "S1_SCHEDULED_SELECTION v0.3.0",
+  "spec_commit": "<commit SHA pinning M, C, S, INSTANCE_ISOLATION, PARAMS and code together>",
+  "params_sha256": "<sha256 of PARAMS.md>",
+  "operating_start": "<YYYY-MM>",
+
+  "counts": {
+    "N_calendar_total": 0,
+    "N_classified_total": 0,
+    "N_not_evaluated": 0,
+    "_note": "Regenerated from records. Never hand-edited."
+  },
+
+  "records": [
+    {
+      "window": "YYYY-MM",
+      "evaluation_status": "EVALUATED",
+      "not_evaluated_reason": null,
+      "label": "NULL",
+
+      "baseline_window": {
+        "start_utc": "<YYYY-MM-DDT00:00:00Z>",
+        "end_utc": "<YYYY-MM-DDT23:59:59Z>",
+        "months": 12,
+        "_note": "Rolling. Differs per record by construction — S1 3.3. Baseline telemetry uncertainty is accepted rather than bounded — M1 4.6."
+      },
+
+      "zones": [
+        {
+          "zone": "<zone-id>",
+          "R": null,
+          "M1_pct": null,
+          "exposure_lower_pct": null,
+          "exposure_upper_pct": null,
+          "missing_fraction_pct": null,
+          "determinacy": "NOT_ELEVATED",
+          "admitted_intervals": null,
+          "nominal_intervals": null,
+          "completeness_pct": null,
+          "_note": "R is per zone and per record. Quoting M1 without R, exposure bounds, and baseline_window is prohibited — S1 3.3 and M1 4.4."
+        }
+      ],
+
+      "companions": [
+        {
+          "market": "<companion-id>",
+          "R": null,
+          "M1_pct": null,
+          "exposure_lower_pct": null,
+          "exposure_upper_pct": null,
+          "determinacy": "NOT_ELEVATED",
+          "voting": false,
+          "_note": "Descriptive only. Never enters N_elevated and never affects the label — C 3."
+        }
+      ],
+
+      "classification": {
+        "N_elevated": null,
+        "N_total": null,
+        "S_thresh_pct": null,
+        "_note": "N_total is the full comparison set. It is never scaled down to the measured subset — C 3.2."
+      },
+
+      "provenance": {
+        "result_path": "runs/YYYY-MM/result.json",
+        "result_sha256": "<sha256 of result.json>",
+        "completeness_path": "runs/YYYY-MM/completeness.json",
+        "inputs_manifest_sha256": "<sha256 of inputs/MANIFEST.json as read by this run>",
+        "run_commit": "<commit SHA at which this run execution was committed; equals spec_commit after repo consolidation>",
+        "re_evaluation_attempt": 1
+      }
+    },
+
+    {
+      "window": "YYYY-MM",
+      "evaluation_status": "NOT_EVALUATED",
+      "not_evaluated_reason": "INDETERMINATE_SET",
+      "label": null,
+
+      "baseline_window": null,
+      "zones": [
+        {
+          "zone": "<zone-id>",
+          "R": null,
+          "M1_pct": null,
+          "exposure_lower_pct": null,
+          "exposure_upper_pct": null,
+          "missing_fraction_pct": null,
+          "determinacy": "INDETERMINATE",
+          "admitted_intervals": null,
+          "nominal_intervals": null,
+          "completeness_pct": null
+        }
+      ],
+      "companions": [],
+      "classification": null,
+
+      "provenance": {
+        "result_path": null,
+        "result_sha256": null,
+        "completeness_path": "runs/YYYY-MM/completeness.json",
+        "inputs_manifest_sha256": "<sha256 of inputs/MANIFEST.json as read by this run>",
+        "run_commit": "<commit SHA>",
+        "re_evaluation_attempt": 1
+      },
+
+      "_note": "The completeness and determinacy account is published even though no measurement exists. Which zone failed, and by how much, is the finding for this window."
+    }
+  ]
+}
