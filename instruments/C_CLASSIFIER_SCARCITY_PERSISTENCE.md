@@ -1,7 +1,7 @@
 # C — Scarcity Persistence Classifier
 
 > **Document Status:** Draft — SPREMNO ZA GEJT (not frozen, not ratified)
-> **Version:** v1.3.0 · supersedes v1.2.0, v1.1.0, v1.0.0 (defects resolved — see §5)
+> **Version:** v1.4.0 · supersedes v1.3.0, v1.2.0, v1.1.0, v1.0.0 (defects resolved — see §5)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Role:** Classifier **C** for event class *scarcity persistence*, under
 > `INSTRUMENT_SPEC — Measurement Domain and Visibility Boundaries` (v0.3.0).
@@ -10,19 +10,27 @@
 
 ## 1. Input and Output Domain
 
-**Input:** A complete vector of scalar values $M_1(m, W) \in [0, 1]$ computed per market $m$ in comparison set $\mathcal{M}$ (containing $N_{\text{total}} = |\mathcal{M}|$ markets) over bounded window $W$, alongside local reference expectations $E[M_1(m)] = 1 - q$.
+**Input:** A complete vector of scalar values $M_1(m, W) \in [0, 1]$ and determinacy states emitted per market $m$ in comparison set $\mathcal{M}$ (containing $N_{\text{total}} = |\mathcal{M}|$ markets) over bounded window $W$, under $M_1$ v0.7.2 §4.4.
 
-**Output:** Exactly one classification label $L \in \{\text{NULL}, \text{ISOLATED}, \text{REGIONAL}\}$ emitted for window $W$, or evaluation status `NOT_EVALUATED — INCOMPLETE_SET` (`label: null`) if any market $m \in \mathcal{M}$ fails completeness floor or gap rules under M₁ §4.
+**Output:** Exactly one classification label $L \in \{\text{NULL}, \text{ISOLATED}, \text{REGIONAL}\}$ emitted for window $W$, or evaluation status `NOT_EVALUATED — INCOMPLETE_SET` / `NOT_EVALUATED — INDETERMINATE_SET` (`label: null`) if any market $m \in \mathcal{M}$ fails completeness floor or yields an indeterminate elevation state under $M_1$ §4.4.
 
 ---
 
 ## 2. Elevation Evaluation & Parameter References
 
-For each market $m \in \mathcal{M}$, elevation is evaluated against frozen threshold $S_{\text{thresh}}$:
+Determinacy is evaluated per market $m \in \mathcal{M}$ by $M_1$ §4.4 prior to classification. **Classifier C holds no independent definition of elevation.**
 
-$$\text{Elevated}(m) = \mathbb{I}\left(M_1(m, W) \ge S_{\text{thresh}}\right)$$
+For each market $m \in \mathcal{M}$, elevation is determined by the exposure bounds ($\text{Exposure}_{\text{lower}}$, $\text{Exposure}_{\text{upper}}$) against frozen threshold $S_{\text{thresh}}$:
 
-The total number of elevated markets in comparison set $\mathcal{M}$ is:
+$$\text{Elevated}(m) = \begin{cases} 
+1, & \text{if } \text{Exposure}_{\text{lower}}(m, W) \ge S_{\text{thresh}} \\ 
+0, & \text{if } \text{Exposure}_{\text{upper}}(m, W) < S_{\text{thresh}} \\ 
+\text{INDETERMINATE}, & \text{if } \text{Exposure}_{\text{lower}}(m, W) < S_{\text{thresh}} \le \text{Exposure}_{\text{upper}}(m, W) 
+\end{cases}$$
+
+Classification never receives an indeterminate elevation state. If any zone yields $\text{INDETERMINATE}$, classification aborts immediately with status `NOT_EVALUATED — INDETERMINATE_SET` (`label: null`).
+
+For a fully determinate comparison set, the total number of elevated markets in $\mathcal{M}$ is:
 
 $$N_{\text{elevated}}(W) = \sum_{m \in \mathcal{M}} \text{Elevated}(m)$$
 
@@ -41,8 +49,8 @@ The emission rules form a strict, exhaustive, non-overlapping partition over the
 | **`REGIONAL`** | $N_{\text{elevated}}(W) \ge N_{\text{high}}$ | $[N_{\text{high}}, N_{\text{total}}]$ | Systemic multi-zone regional elevation across the comparison set. |
 
 ### Partition, Incomplete Set, & Reachability Rules:
-1. **Partition Completeness:** Since $N_{\text{low}} < N_{\text{high}}$, every integer $k \in \{0, 1, \dots, N_{\text{total}}\}$ falls into exactly one range. The classifier emits exactly one classification label for every fully-measured comparison set.
-2. **Incomplete Set Abort:** If telemetry for any market $m \in \mathcal{M}$ is incomplete or aborted under M₁ §4, $N_{\text{total}} = |\mathcal{M}|$ is incomplete. Imputing zero elevation to missing markets is forbidden (M₁ §4.2), and dynamically scaling $N_{\text{high}}/N_{\text{low}}$ to $|\mathcal{M}_{\text{valid}}|$ is forbidden. The classifier emits record evaluation status `NOT_EVALUATED — INCOMPLETE_SET` with `label: null`. The window is published as an unclassified record entry in the series log ($S_1$ §2.5).
+1. **Partition Completeness:** Since $N_{\text{low}} < N_{\text{high}}$, every integer $k \in \{0, 1, \dots, N_{\text{total}}\}$ falls into exactly one range. The classifier emits exactly one classification label for every fully-determinate comparison set.
+2. **Incomplete Set & Indeterminate Set Abort:** If telemetry for any market $m \in \mathcal{M}$ is incomplete under $M_1$ §4.2, the classifier emits `NOT_EVALUATED — INCOMPLETE_SET`. If any market $m \in \mathcal{M}$ yields an indeterminate elevation state under $M_1$ §4.4, the classifier emits `NOT_EVALUATED — INDETERMINATE_SET`. Imputing zero elevation or scaling thresholds dynamically is strictly forbidden ($M_1$ §4.2). The window is published as an unclassified record entry in the series log ($S_1$ §2.5).
 3. **Reachability Constraint:** The `ISOLATED` label is reachable if and only if $N_{\text{high}} \ge N_{\text{low}} + 2$. If $N_{\text{high}} = N_{\text{low}} + 1$, the integer range $[N_{\text{low}}+1, N_{\text{low}}]$ is empty ($\emptyset$), and the vocabulary collapses into a clean binary partition $\{\text{NULL}, \text{REGIONAL}\}$.
 
 ---
@@ -56,6 +64,11 @@ The emission rules form a strict, exhaustive, non-overlapping partition over the
 ---
 
 ## 5. Amendment Record
+
+**v1.3.0 → v1.4.0.**
+1. Aligned §2 elevation condition with $M_1$ v0.7.2 §4.4 determinacy test over exposure bounds ($\text{Exposure}_{\text{lower}} \ge S_{\text{thresh}}$).
+2. Added `NOT_EVALUATED — INDETERMINATE_SET` to output vocabulary and §3 incomplete set abort rules for windows containing an indeterminate zone.
+3. Harmonized layer separation: classifier delegates all elevation state determinacy to $M_1$ §4.4.
 
 **v1.2.0 → v1.3.0.**
 1. Resolved $N_{\text{total}}$ handling under incomplete telemetry: defined `NOT_EVALUATED — INCOMPLETE_SET` status (`label: null`) prohibiting zero-imputation ($M_1$ §4.2) and dynamic threshold scaling.

@@ -1,7 +1,7 @@
 # S₁ — Scheduled Selection
 
 > **Document Status:** Draft — SPREMNO ZA GEJT (not frozen, not ratified)
-> **Version:** v0.2.0 · supersedes v0.1.0 (defects resolved — see §8)
+> **Version:** v0.3.0 · supersedes v0.2.0, v0.1.0 (defects resolved — see §8)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Role:** Selection rule **S** for scheduled operation, under
 > `INSTRUMENT_SPEC — Measurement Domain and Visibility Boundaries` (v0.3.0).
@@ -17,9 +17,9 @@ S does not decide what is measured (**M**) or how a result is labelled (**C**). 
 **which windows are measured at all**, and therefore **which population every statement
 about this instrument refers to**.
 
-Under S₁, the population is: *all calendar windows in the operating period that yield complete telemetry across all comparison zones ($\mathcal{M}$) under M₁ §4.*
+Under S₁, the population is: *all calendar windows in the operating period that yield complete telemetry across all comparison zones ($\mathcal{M}$) under M₁ §4.2 and yield determinate elevation states under M₁ §4.4.*
 
-Windows failing telemetry completeness floor or gap limits are published as unclassified record entries bearing evaluation status `NOT_EVALUATED — INCOMPLETE_SET` (`label: null`).
+Windows failing telemetry completeness floor or yielding indeterminate elevation states are published as unclassified record entries bearing evaluation status `NOT_EVALUATED — INCOMPLETE_SET` or `NOT_EVALUATED — INDETERMINATE_SET` (`label: null`).
 
 ---
 
@@ -31,9 +31,9 @@ Windows failing telemetry completeness floor or gap limits are published as uncl
    else. A window is never chosen, skipped, re-run for a different period, or deferred
    because its result is uninteresting or inconvenient.
 3. **Publication lag.** The run executes no earlier than L days after the end of W, where
-   L is frozen in `PARAMS.md`. **L is measured, not assumed** — it is defined as the number of calendar days after the end of W required for all designated comparison series across set $\mathcal{M}$ (the 6 ENTSO-E zones) to reach final published completeness (crossing M₁ §4 floor with no unrevised gaps > 15m). Descriptive companion markets (e.g. GB Elexon BMRS) carry non-voting status and do not alter or delay $L$. The measurement is recorded at freeze time. Prior to the elapsing of $L$ days post-W, the window record in `SERIES_LOG.json` carries evaluation status `NOT_EVALUATED — PENDING_PUBLICATION_LAG`. Upstream telemetry revisions published *prior* to $L$ are incorporated before freezing $R(W)$. Any post-$L$ upstream data revision altering a previously published measurement $M_1(m, W)$ or label $L(W)$ requires a new instance under `INSTANCE_ISOLATION_PROTOCOL.md` §6.
-4. **Every window is published**, including windows classified `NULL` and unclassified windows (`NOT_EVALUATED — INCOMPLETE_SET`). A `NULL` month is a measurement, not a non-event; the record of `NULL`s is what makes any non-`NULL` label interpretable at all. Unclassified record entries (`NOT_EVALUATED — INCOMPLETE_SET`) enter the denominator of total calendar operating windows ($N_{\text{calendar\_total}}$), but are strictly excluded from the denominator of classified evaluation labels ($N_{\text{classified\_total}}$) when calculating empirical label probabilities such as $P(\text{REGIONAL})$ or $P(\text{NULL})$.
-5. **Abort is not skip; single retry rule.** A window that aborts under the completeness floor or gap rule (M₁ §4) is published as an unclassified record entry (`evaluation_status: "NOT_EVALUATED — INCOMPLETE_SET"`, `label: null`). It is never silently omitted from the calendar log. A window marked `NOT_EVALUATED — INCOMPLETE_SET` may be re-evaluated **exactly once** during the subsequent publication cycle (at $W + 1$) under **100% identical parameters and code**, explicitly using target baseline window $B(W)$ (the 12 calendar months ending immediately prior to $W$, not $B(W+1)$). If the second attempt passes telemetry completeness floor, its record in `SERIES_LOG.json` updates to `EVALUATED` with provenance field `"re_evaluation_attempt": 2`. If the second attempt fails, status transitions to `NOT_EVALUATED — EXHAUSTED_RETRY_INCOMPLETE_SET`. Parameter relaxation or arbitrary re-runs under altered rules remain strictly prohibited (M₁ §4.2).
+   L is frozen in `PARAMS.md`. **L is declared under Option B as provisional ($L = 10$ calendar days)** — defined as the estimated number of calendar days after the end of W required for all designated comparison series across set $\mathcal{M}$ (the 6 ENTSO-E zones) to reach final published completeness (crossing M₁ §4 floor). Prospective monitoring during scheduled operation will establish the empirical publication curve. Descriptive companion markets (e.g. GB Elexon BMRS) carry non-voting status and do not alter or delay $L$. The measurement is recorded at freeze time. Prior to the elapsing of $L$ days post-W, the window record in `SERIES_LOG.json` carries evaluation status `NOT_EVALUATED — PENDING_PUBLICATION_LAG`. Upstream telemetry revisions published *prior* to $L$ are incorporated before freezing $R(W)$. Any post-$L$ upstream data revision altering a previously published measurement $M_1(m, W)$ or label $L(W)$ requires a new instance under `INSTANCE_ISOLATION_PROTOCOL.md` §6.
+4. **Every window is published**, including windows classified `NULL` and unclassified windows (`NOT_EVALUATED — INCOMPLETE_SET` / `NOT_EVALUATED — INDETERMINATE_SET`). A `NULL` month is a measurement, not a non-event; the record of `NULL`s is what makes any non-`NULL` label interpretable at all. Unclassified record entries enter the denominator of total calendar operating windows ($N_{\text{calendar\_total}}$), but are strictly excluded from the denominator of classified evaluation labels ($N_{\text{classified\_total}}$) when calculating empirical label probabilities such as $P(\text{REGIONAL})$ or $P(\text{NULL})$.
+5. **Abort is not skip; single retry rule.** A window that aborts under the completeness floor (M₁ §4.2) or determinacy bounds (M₁ §4.4) is published as an unclassified record entry (`evaluation_status: "NOT_EVALUATED — INCOMPLETE_SET"` or `"NOT_EVALUATED — INDETERMINATE_SET"`, `label: null`). It is never silently omitted from the calendar log. A window marked unclassified may be re-evaluated **exactly once** during the subsequent publication cycle (at $W + 1$) under **100% identical parameters and code**, explicitly using target baseline window $B(W)$ (the 12 calendar months ending immediately prior to $W$, not $B(W+1)$). If the second attempt passes telemetry completeness and determinacy, its record in `SERIES_LOG.json` updates to `EVALUATED` with provenance field `"re_evaluation_attempt": 2`. If the second attempt fails, status transitions to `NOT_EVALUATED — EXHAUSTED_RETRY_INCOMPLETE_SET` or `NOT_EVALUATED — EXHAUSTED_RETRY_INDETERMINATE_SET`. Parameter relaxation or arbitrary re-runs under altered rules remain strictly prohibited (M₁ §4.2).
 
 ---
 
@@ -75,7 +75,7 @@ The following are structural blindnesses introduced **by this selection rule**, 
 
 1. **Régime Drift Blindness:** Under a rolling baseline, the instrument cannot observe slow régime change. If the entire comparison set drifts in the same direction over a period comparable to or longer than B, the reference drifts with it and M₁ returns approximately (1 − q) regardless. The instrument reports "ordinary" precisely because "ordinary" has moved.
 2. **Variance Drift Blindness:** If market dispersion/volatility increases without shifting the median, the quantile $Q_q$ rises. Consequently, the instrument becomes less sensitive precisely during periods of elevated variance.
-3. **Telemetry Outage Selection Bias:** If telemetry publication failures or data gaps correlate with severe grid stress events, scheduled evaluation fails completeness under M₁ §4 and the window is published as `NOT_EVALUATED — INCOMPLETE_SET`. Under such co-occurring telemetry blackouts, the instrument cannot observe scarcity events.
+3. **Telemetry Outage Selection Bias:** If telemetry publication failures or data gaps correlate with severe grid stress events, scheduled evaluation fails completeness or determinacy under M₁ §4 and the window is published as `NOT_EVALUATED`. Under such co-occurring telemetry blackouts, the instrument cannot observe scarcity events.
 
 ### 4.2 Calibration & Baseline Incorporations
 1. **Built-in Expectation:** By construction, approximately (1 − q) of baseline time sits at or above R, so an ordinary window yields M₁ ≈ (1 − q). Any elevation threshold in **C** is read against that expectation, never as an absolute quantity.
@@ -121,6 +121,11 @@ run is executed under a triggered rationale. Legacy pre-registered probe runs (s
 ---
 
 ## 8. Amendment Record
+
+**v0.2.0 → v0.3.0.**
+1. Aligned population (§1) and retry rules (§2.5) with $M_1$ v0.7.2 §4.4 determinacy test and $C$ v1.4.0 output vocabulary (`INDETERMINATE_SET` and `EXHAUSTED_RETRY_INDETERMINATE_SET`).
+2. Confirmed Option B provisional status for publication lag $L$ in §2.3 and §5 parameter table ($L=10$ calendar days, $\text{run\_day} = 12$).
+3. Verified parameter table in §5: removed geometric gap limit $\Delta t_{\text{max}}$ for observation window $W$, matching $M_1$ v0.7.2.
 
 **v0.1.0 → v0.2.0.**
 1. Corrected §1 population definition to reflect complete telemetry condition under M₁ §4 and `NOT_EVALUATED — INCOMPLETE_SET` status.
