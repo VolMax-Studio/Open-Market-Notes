@@ -1,0 +1,90 @@
+{
+  "N_elevated_comparison_zones": 5,
+  "N_total_comparison_zones": 6,
+  "baseline_utc_bounds": {
+    "end": "2026-05-31T23:59:59Z",
+    "start": "2025-06-01T00:00:00Z"
+  },
+  "evaluation_status": "EVALUATED",
+  "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+  "instance_id": "entsoe-scarcity-s1",
+  "label": "REGIONAL",
+  "s_thresh_pct": 15.0,
+  "window": "2026-06",
+  "window_utc_bounds": {
+    "end": "2026-06-30T23:59:59Z",
+    "start": "2026-06-01T00:00:00Z"
+  },
+  "zone_metrics": {
+    "AT": {
+      "M1_pct": 15.4514,
+      "R_val": 172.4389,
+      "completeness_pct": 100.0,
+      "determinacy": "ELEVATED",
+      "exposure_lower_pct": 15.4514,
+      "exposure_upper_pct": 15.4514,
+      "is_companion": false,
+      "missing_fraction_pct": 0.0
+    },
+    "BE": {
+      "M1_pct": 23.0556,
+      "R_val": 152.214,
+      "completeness_pct": 100.0,
+      "determinacy": "ELEVATED",
+      "exposure_lower_pct": 23.0556,
+      "exposure_upper_pct": 23.0556,
+      "is_companion": false,
+      "missing_fraction_pct": 0.0
+    },
+    "DK_1": {
+      "M1_pct": 18.9583,
+      "R_val": 178.122,
+      "completeness_pct": 100.0,
+      "determinacy": "ELEVATED",
+      "exposure_lower_pct": 18.9583,
+      "exposure_upper_pct": 18.9583,
+      "is_companion": false,
+      "missing_fraction_pct": 0.0
+    },
+    "DK_2": {
+      "M1_pct": 12.0833,
+      "R_val": 200.0,
+      "completeness_pct": 100.0,
+      "determinacy": "NOT_ELEVATED",
+      "exposure_lower_pct": 12.0833,
+      "exposure_upper_pct": 12.0833,
+      "is_companion": false,
+      "missing_fraction_pct": 0.0
+    },
+    "FR": {
+      "M1_pct": 22.1875,
+      "R_val": 149.33,
+      "completeness_pct": 100.0,
+      "determinacy": "ELEVATED",
+      "exposure_lower_pct": 22.1875,
+      "exposure_upper_pct": 22.1875,
+      "is_companion": false,
+      "missing_fraction_pct": 0.0
+    },
+    "GB": {
+      "M1_pct": 24.7917,
+      "R_val": 127.0222,
+      "completeness_pct": 100.0,
+      "determinacy": "ELEVATED",
+      "exposure_lower_pct": 24.7917,
+      "exposure_upper_pct": 24.7917,
+      "is_companion": true,
+      "missing_fraction_pct": 0.0
+    },
+    "NL": {
+      "M1_pct": 31.7361,
+      "R_val": 150.0,
+      "completeness_pct": 100.0,
+      "determinacy": "ELEVATED",
+      "exposure_lower_pct": 31.7361,
+      "exposure_upper_pct": 31.7361,
+      "is_companion": false,
+      "missing_fraction_pct": 0.0
+    }
+  }
+}

@@ -1,0 +1,65 @@
+[
+  {
+    "filename": "imbalance_AT.feather",
+    "zone": "AT",
+    "covered_period": "2025-05-31T22:00:00+00:00 to 2026-07-31T21:45:00+00:00",
+    "rows": 40895,
+    "sha256": "1e2b15e5e0aacbbd1560f698a9c2300ed8cdb8e5a41147b28f870f8177e7930f",
+    "source": "ENTSO-E Transparency Platform (Item 17.1.g/17.2.f)",
+    "added_utc": "2026-08-09T20:30:00Z"
+  },
+  {
+    "filename": "imbalance_BE.feather",
+    "zone": "BE",
+    "covered_period": "2025-05-31T22:00:00+00:00 to 2026-07-31T21:45:00+00:00",
+    "rows": 40895,
+    "sha256": "7079b220e858b63dc3bae8c6a3d4e458a3961948e45fb854750f0a559f6271f0",
+    "source": "ENTSO-E Transparency Platform (Item 17.1.g/17.2.f)",
+    "added_utc": "2026-08-09T20:30:00Z"
+  },
+  {
+    "filename": "imbalance_DK_1.feather",
+    "zone": "DK_1",
+    "covered_period": "2025-05-31T22:00:00+00:00 to 2026-07-31T21:45:00+00:00",
+    "rows": 40846,
+    "sha256": "18c8d1b440934a6983f8bddcba73117d4c497ab34bada3aec7f73f5baec979cd",
+    "source": "ENTSO-E Transparency Platform (Item 17.1.g/17.2.f)",
+    "added_utc": "2026-08-09T20:30:00Z"
+  },
+  {
+    "filename": "imbalance_DK_2.feather",
+    "zone": "DK_2",
+    "covered_period": "2025-05-31T22:00:00+00:00 to 2026-07-31T21:45:00+00:00",
+    "rows": 40845,
+    "sha256": "b24e31281700f6ddb4c973573c8ac05a1e6bbd2fda16afea9b3f661547e664c8",
+    "source": "ENTSO-E Transparency Platform (Item 17.1.g/17.2.f)",
+    "added_utc": "2026-08-09T20:30:00Z"
+  },
+  {
+    "filename": "imbalance_FR.feather",
+    "zone": "FR",
+    "covered_period": "2025-05-31T22:00:00+00:00 to 2026-07-31T21:45:00+00:00",
+    "rows": 40895,
+    "sha256": "9a5be474e2b45dda8e3afe4f89d472af28ec6d253f8cbb94397e4f778c16782f",
+    "source": "ENTSO-E Transparency Platform (Item 17.1.g/17.2.f)",
+    "added_utc": "2026-08-09T20:30:00Z"
+  },
+  {
+    "filename": "imbalance_NL.feather",
+    "zone": "NL",
+    "covered_period": "2025-05-31T22:00:00+00:00 to 2026-07-31T21:45:00+00:00",
+    "rows": 40895,
+    "sha256": "a13d6481251a566d053d46846139712c1723c6ac438fa88b7ae7cebbda71a0bf",
+    "source": "ENTSO-E Transparency Platform (Item 17.1.g/17.2.f)",
+    "added_utc": "2026-08-09T20:30:00Z"
+  },
+  {
+    "filename": "gb_system_prices.feather",
+    "zone": "GB",
+    "covered_period": "2025-05-31T23:00:00+00:00 to 2026-07-31T22:30:00+00:00",
+    "rows": 20448,
+    "sha256": "973f114775366b89683edb75e307d7906b3632375ceba5ae8f4cdfd32b96c2ab",
+    "source": "Elexon BMRS System Prices API",
+    "added_utc": "2026-08-09T20:30:00Z"
+  }
+]

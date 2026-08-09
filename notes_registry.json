@@ -115,5 +115,21 @@
     "params_sha256": "f44f4c105ced3c94c4324bd75d4b6308d519cbfd7f76563f16e16dc46b6ab9c7",
     "evaluator_sha256": "7903b00bd637690217bffd638ae59c1da5f852466d4983b946179b8916a9d309",
     "results_sha256": "fe5ab59e996ce24b2a9572b7f0d04e9c0d92cfa2a3a6fb5c74f5eddea2711318"
+  },
+  {
+    "id": "entsoe-scarcity-s1",
+    "series_id": "entsoe-scarcity-s1",
+    "title": "Scheduled Series entsoe-scarcity-s1 — Monthly European Imbalance Scarcity Persistence",
+    "market": "ENTSO-E Imbalance (NL, BE, FR, DK1, DK2, AT, GB Comparator)",
+    "signal": "Strict Time-Weighted Scarcity Persistence (M1 v0.7.3, C v1.4.0, S1 v0.3.1)",
+    "selection_mode": "S1_scheduled",
+    "instance_dir": "instances/entsoe-scarcity-s1",
+    "operating_start": "2026-06",
+    "status": "RATIFIED — FROZEN for Series Operation",
+    "spec_commit": "f28e0a84b3795c5130a4eee23857f9d00c3e1c3e",
+    "series_log_path": "instances/entsoe-scarcity-s1/runs/SERIES_LOG.json",
+    "runs_completed": 2,
+    "runs_unevaluated": 0,
+    "params_sha256": "f7ed9d8e77d0c4e11fc1f67f276d0bf5fbe9705a67f17ea23a7ece623a4cff4b"
   }
 ]
