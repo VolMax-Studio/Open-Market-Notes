@@ -117,15 +117,17 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
         b_series = b_slice[col_name].dropna()
         R_val = float(np.percentile(b_series, q_ref * 100.0, method='linear'))
 
-        # Load probe feather
-        df_p = df_b if is_companion else pd.read_feather(p_path)
-        t_col_p = bind_timestamp_col(df_p)
-        if not is_companion:
+        # Load probe telemetry as evaluated in published v0.6.0 run
+        if is_companion:
+            df_p = df_b
+            p_slice = df_p.loc[p_start:p_end]
+        else:
+            df_p = pd.read_feather(p_path)
+            t_col_p = bind_timestamp_col(df_p)
             df_p[t_col_p] = pd.to_datetime(df_p[t_col_p], utc=True)
             df_p = df_p.set_index(t_col_p).sort_index()
+            p_slice = df_p
 
-        # Uniform UTC window slicing across all comparison and companion series
-        p_slice = df_p.loc[p_start:p_end]
         p_valid = p_slice.loc[p_slice[col_name].dropna().index]
 
         # Nominal seconds calculation from nominal intervals and duration
@@ -161,7 +163,12 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
         pub_R = pub_entry.get('R_val')
         elevated_v060 = pub_entry.get('elevated')
 
-        # Check numeric control of R_val against published v0.6.0 baseline
+        # Control checks against published v0.6.0 report baseline (M1_pct and R_val must match strictly)
+        m1_control_failed = False
+        if pub_m1 is None or abs(pub_m1 - m1_pct) > 1e-4:
+            m1_control_failed = True
+            implementation_error_occurred = True
+
         if pub_R is None or abs(pub_R - R_val) > 1e-4:
             implementation_error_occurred = True
 
@@ -178,7 +185,9 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
                 all_determinate = False
 
         # Determine change_reason
-        if determinacy == "INDETERMINATE":
+        if m1_control_failed or implementation_error_occurred:
+            change_reason = "IMPLEMENTATION_ERROR"
+        elif determinacy == "INDETERMINATE":
             change_reason = "BECAME_INDETERMINATE"
         elif elevated_v060 and determinacy == "NOT_ELEVATED":
             change_reason = "ELEVATED_TO_NOT_ELEVATED"
@@ -276,7 +285,7 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
     print("=======================================================\n")
 
     if implementation_error_occurred:
-        raise ValueError("INVARIANCE ABORT: Reference price control failed against published v0.6.0 report. Implementation error detected.")
+        raise ValueError("INVARIANCE ABORT: Control check failed against published v0.6.0 report. Implementation error detected.")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="M1 v0.7.2 Invariance Verification Script")
