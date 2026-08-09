@@ -1,7 +1,7 @@
 # C — Scarcity Persistence Classifier
 
 > **Document Status:** RATIFIED — FROZEN for Series Operation
-> **Version:** v1.4.0 · supersedes v1.3.0, v1.2.0, v1.1.0, v1.0.0 (defects resolved — see §5)
+> **Version:** v1.4.1 · supersedes v1.4.0, v1.3.0, v1.2.0, v1.1.0, v1.0.0 (defects resolved — see §5)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Role:** Classifier **C** for event class *scarcity persistence*, under
 > `INSTRUMENT_SPEC — Measurement Domain and Visibility Boundaries` (v0.3.0).
@@ -10,7 +10,7 @@
 
 ## 1. Input and Output Domain
 
-**Input:** A complete vector of scalar values $M_1(m, W) \in [0, 1]$ and determinacy states emitted per market $m$ in comparison set $\mathcal{M}$ (containing $N_{\text{total}} = |\mathcal{M}|$ markets) over bounded window $W$, under $M_1$ v0.7.2 §4.4.
+**Input:** A complete vector of scalar values $M_1(m, W) \in [0, 1]$ and determinacy states emitted per market $m$ in comparison set $\mathcal{M}$ (containing $N_{\text{total}} = |\mathcal{M}|$ markets) over bounded window $W$, under $M_1$ v0.7.3 §4.4.
 
 **Output:** Exactly one classification label $L \in \{\text{NULL}, \text{ISOLATED}, \text{REGIONAL}\}$ emitted for window $W$, or evaluation status `NOT_EVALUATED — INCOMPLETE_SET` / `NOT_EVALUATED — INDETERMINATE_SET` (`label: null`) if any market $m \in \mathcal{M}$ fails completeness floor or yields an indeterminate elevation state under $M_1$ §4.4.
 
@@ -18,7 +18,7 @@
 
 ## 2. Elevation Evaluation & Parameter References
 
-Determinacy is evaluated per market $m \in \mathcal{M}$ by $M_1$ §4.4 prior to classification. **Classifier C holds no independent definition of elevation.**
+Determinacy is evaluated per market $m \in \mathcal{M}$ by $M_1$ v0.7.3 §4.4 prior to classification. **Classifier C holds no independent definition of elevation.**
 
 For each market $m \in \mathcal{M}$, elevation is determined by the exposure bounds ($\text{Exposure}_{\text{lower}}$, $\text{Exposure}_{\text{upper}}$) against frozen threshold $S_{\text{thresh}}$:
 
@@ -64,6 +64,8 @@ The emission rules form a strict, exhaustive, non-overlapping partition over the
 ---
 
 ## 5. Amendment Record
+
+**v1.4.0 → v1.4.1.** Updated spec cross-references in §1 and §2 to point to $M_1$ v0.7.3 (from v0.7.2).
 
 **v1.3.0 → v1.4.0.**
 1. Aligned §2 elevation condition with $M_1$ v0.7.2 §4.4 determinacy test over exposure bounds ($\text{Exposure}_{\text{lower}} \ge S_{\text{thresh}}$).

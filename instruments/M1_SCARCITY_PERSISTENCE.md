@@ -1,7 +1,7 @@
 # M₁ — Scarcity Persistence Scalar
 
 > **Document Status:** RATIFIED — FROZEN for Series Operation
-> **Version:** v0.7.3 · supersedes v0.7.2, v0.6.0, v0.5.0, v0.4.0, v0.3.0, v0.2.0 (complete history preserved — see §9)
+> **Version:** v0.7.4 · supersedes v0.7.3, v0.7.2, v0.6.0, v0.5.0, v0.4.0, v0.3.0, v0.2.0 (complete history preserved — see §9)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Role:** Measurement Domain Specification **M₁** for event class *scarcity persistence*, under
 > `INSTRUMENT_SPEC — Measurement Domain and Visibility Boundaries` (v0.3.0).
@@ -168,6 +168,7 @@ The definition of $M_1$ is parameter-free. All specific numeric parameters and s
 - Reference Quantile $q \in (0, 1)$
 - Reference Baseline Window $B(m)$ (start UTC, end UTC)
 - Completeness Floor $\text{Floor}_{\text{completeness}} \in (0, 1]$
+- Market Interval Settlement Duration $\Delta t$ (`max_allowed_gap_seconds` / interval duration in seconds)
 - Designated Series Bindings per Market $m \in \mathcal{M}$ (`series_bindings`)
 
 ---
@@ -181,6 +182,8 @@ The definition of $M_1$ is parameter-free. All specific numeric parameters and s
 ---
 
 ## 9. Amendment Record
+
+**v0.7.4.** Added Market Interval Settlement Duration $\Delta t$ to §7 frozen parameter list in `PARAMS.md` as required by §3 fixed-resolution equivalence and §4.1 exposure calculations.
 
 **v0.7.3.** Added fixed-resolution parameter equivalence clause to §3 clarifying that on fixed-resolution markets where interval duration $\Delta t$ is a parameter frozen in `PARAMS.md`, time-weighted duration ratios simplify to $(K \cdot \Delta t) / (N \cdot \Delta t) = K / N$.
 
