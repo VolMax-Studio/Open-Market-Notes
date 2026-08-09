@@ -1,6 +1,6 @@
 # PARAMS — Instance entsoe-scarcity-s1 Frozen Parameters
 
-> **Document Status:** RATIFIED — FROZEN for Series Operation
+> **Document Status:** Draft — SPREMNO ZA GEJT (not ratified)
 > **Version:** v1.0.0
 > **Specification Standard:** INSTRUMENT_SPEC v0.3.0 · M1 v0.7.3 · C v1.4.0 · S1 v0.3.1 · INSTANCE_ISOLATION v0.1.0
 > **Instance Identifier:** `entsoe-scarcity-s1`
@@ -25,7 +25,6 @@
   "operating_start": "2026-06",
   "window_timezone": "UTC",
   "completeness_floor_pct": 98.0,
-  "max_allowed_gap_seconds": 900.0,
   "quantile_method": "linear",
   "timestamp_tz": "UTC",
   "comparison_zones": ["AT", "BE", "DK_1", "DK_2", "FR", "NL"],

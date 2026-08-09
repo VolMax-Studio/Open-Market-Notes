@@ -1,6 +1,6 @@
 # Scheduled Series Specification — entsoe-scarcity-s1
 
-> **Document Status:** RATIFIED — FROZEN for Series Operation
+> **Document Status:** Draft — SPREMNO ZA GEJT (not ratified)
 > **Series Identifier:** `entsoe-scarcity-s1`
 > **Version:** v1.0.0
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539

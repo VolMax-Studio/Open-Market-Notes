@@ -183,7 +183,7 @@ def execute_window_run(instance_dir, target_window):
         evaluation_status = "EVALUATED"
         label = "NULL"
 
-    # Deterministic result dictionary (NO timestamps inside result.json per SERIES_TEMPLATE §4)
+    # Deterministic result dictionary (NO timestamps, NO file hashes inside result.json per SERIES_TEMPLATE §4)
     result_data = {
         "instance_id": params.get('instance_id', 'entsoe-scarcity-s1'),
         "window": target_window,
@@ -200,7 +200,6 @@ def execute_window_run(instance_dir, target_window):
         "N_total_comparison_zones": len(comp_zones),
         "N_elevated_comparison_zones": n_elevated_v073,
         "s_thresh_pct": round(s_thresh * 100.0, 4),
-        "inputs_manifest_sha256": inputs_manifest_sha256,
         "zone_metrics": zone_metrics
     }
 

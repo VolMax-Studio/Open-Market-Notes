@@ -125,11 +125,11 @@
     "selection_mode": "S1_scheduled",
     "instance_dir": "instances/entsoe-scarcity-s1",
     "operating_start": "2026-06",
-    "status": "RATIFIED — FROZEN for Series Operation",
+    "status": "Draft — SPREMNO ZA GEJT",
     "spec_commit": "f28e0a84b3795c5130a4eee23857f9d00c3e1c3e",
     "series_log_path": "instances/entsoe-scarcity-s1/runs/SERIES_LOG.json",
     "runs_completed": 2,
     "runs_unevaluated": 0,
-    "params_sha256": "f7ed9d8e77d0c4e11fc1f67f276d0bf5fbe9705a67f17ea23a7ece623a4cff4b"
+    "params_sha256": "665e97cebc69de499f009378881b856e30a416bc7c29ab0cbea674789308c3e5"
   }
 ]

@@ -6,7 +6,6 @@
     "start": "2025-07-01T00:00:00Z"
   },
   "evaluation_status": "EVALUATED",
-  "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
   "instance_id": "entsoe-scarcity-s1",
   "label": "REGIONAL",
   "s_thresh_pct": 15.0,
