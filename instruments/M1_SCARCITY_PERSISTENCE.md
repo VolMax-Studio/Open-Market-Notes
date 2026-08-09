@@ -55,7 +55,7 @@ This specification imposes no guarantee that $R(m)$ is statistically stable acro
 
 $M_1(m, W)$ emits **exactly one dimensionless scalar in $[0, 1]$**. 
 - Absolute duration of scarcity episodes (e.g. total minutes) is a descriptive companion statistic outside $M_1$.
-- Ratio calculations based purely on interval counts are **non-conforming**, even when all intervals happen to have equal nominal duration. Ratios must be computed as explicit time-weighted duration ratios in seconds.
+- Ratio calculations based purely on interval counts without explicit duration bindings are **non-conforming**. On fixed-resolution markets where interval duration $\Delta t$ is a parameter frozen in `PARAMS.md`, time-weighted duration ratios simplify to $(K \cdot \Delta t) / (N \cdot \Delta t) = K / N$; on mixed-resolution markets, explicit time-weighted duration ratios in seconds are mandatory.
 
 ---
 

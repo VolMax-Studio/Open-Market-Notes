@@ -72,7 +72,7 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
             'M1_pct': gb_pub.get('jul_2026_share_q90_pct'),
             'R_val': gb_pub.get('baseline_q90_gbp'),
             'elevated': gb_pub.get('is_elevated_descriptive'),
-            'completeness_pct': gb_pub.get('completeness_pct', 99.8656)
+            'completeness_pct': gb_pub.get('completeness_pct')
         }
 
     zone_records = []
@@ -89,7 +89,9 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
     p_start = p_window.get('start_utc', '2026-07-01T00:00:00Z')
     p_end = p_window.get('end_utc', '2026-07-31T23:59:59Z')
 
-    nominal_15m_intervals = int(p_window.get('nominal_intervals_15m', 2976))
+    p_start_dt = pd.to_datetime(p_start, utc=True)
+    p_end_dt = pd.to_datetime(p_end, utc=True)
+    days_in_probe_window = (p_end_dt - p_start_dt).days + 1
 
     for z in comp_zones + companion_zones:
         is_companion = z in companion_zones
@@ -98,13 +100,13 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
             p_path = b_path
             col_name = params.get('series_bindings', {}).get('GB', {}).get('baseline_col', 'systemSellPrice')
             interval_sec = 1800.0  # 30-min settlement intervals in GB
-            nominal_intervals = int(nominal_15m_intervals / 2)  # 1488 30m intervals
         else:
             b_path = os.path.join(inputs_dir, 'baseline', f'imbalance_{z}.feather')
             p_path = os.path.join(inputs_dir, 'probe_jul2026', f'imbalance_{z}.feather')
             col_name = params.get('series_bindings', {}).get(z, {}).get('baseline_col', 'Short')
             interval_sec = 900.0   # 15-min settlement intervals in EU
-            nominal_intervals = nominal_15m_intervals  # 2976 15m intervals
+
+        nominal_intervals = int(round((days_in_probe_window * 86400.0) / interval_sec))
 
         # Load baseline feather
         df_b = pd.read_feather(b_path)
@@ -130,7 +132,7 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
 
         p_valid = p_slice.loc[p_slice[col_name].dropna().index]
 
-        # Nominal seconds calculation from PARAMS nominal intervals
+        # Nominal seconds calculation from nominal intervals and duration
         nominal_seconds = float(nominal_intervals * interval_sec)
         
         # Admitted interval count and duration (excluding missing rows)
@@ -203,9 +205,9 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
             'M1_pct': m1_pct,
             'published_v060_M1_pct': pub_m1,
             'completeness_pct': round(completeness_pct, 4),
+            'missing_fraction_pct': missing_fraction_pct,
             'exposure_lower_pct': exp_lower_pct,
             'exposure_upper_pct': exp_upper_pct,
-            'missing_fraction_pct': missing_fraction_pct,
             'elevated_v060': elevated_v060,
             'determinacy_v072': determinacy,
             'changed': changed,
@@ -262,7 +264,6 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
         json.dump(report, f, indent=2)
 
     report_sha256 = compute_sha256(out_path)
-    report['_metadata']['report_sha256'] = report_sha256
 
     print("\n=======================================================")
     print("      M1 v0.7.2 INVARIANCE VERIFICATION REPORT")
@@ -273,7 +274,7 @@ def run_invariance_check(instance_dir, rule_version="v0.7.2"):
     print(f"Report SHA-256: {report_sha256}\n")
 
     df_out = pd.DataFrame(zone_records)
-    print(df_out[['zone', 'M1_pct', 'published_v060_M1_pct', 'R_val', 'published_v060_R_val', 'exposure_lower_pct', 'exposure_upper_pct', 'determinacy_v072', 'changed', 'change_reason']].to_string(index=False))
+    print(df_out[['zone', 'M1_pct', 'published_v060_M1_pct', 'R_val', 'published_v060_R_val', 'completeness_pct', 'missing_fraction_pct', 'exposure_lower_pct', 'exposure_upper_pct', 'determinacy_v072', 'changed', 'change_reason']].to_string(index=False))
 
     print("\n--- WINDOW-LEVEL VERDICT COMPARISON ---")
     print(f"v0.6.0 Verdict: {verdict_v060}")
