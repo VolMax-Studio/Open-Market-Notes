@@ -55,7 +55,7 @@ notes/[id]-[slug]/
 
 ## The Parametric Changelog (Notes Integrity)
 
-Unlike Verification Audits, Open Market Notes do not carry a formal **Per-Asset Failure Registry** because they do not pronounce a PASS/FAIL/DEFERRED verdict on specific commercial power assets. *(Note: The repository maintains an infrastructure process Failure Registry in [`FAILURES.md`](./FAILURES.md) to track pipeline governance defects, cryptographic audit discoveries, and remediation history).*
+Unlike Verification Audits, Open Market Notes do not carry a formal **Per-Asset Failure Registry** because they do not pronounce a PASS/FAIL/DEFERRED verdict on specific commercial power assets. *(Note: The VolMax Observatory process Failure Registry is maintained within the internal studio notebook (`beleznica/protokol/failures.md`), relocated from the public repository tree on 2026-08-08 via commit `5a5a2aa` to preserve layer separation).*
 
 Instead, they maintain a **Parametric Changelog** within each note directory. If a frozen parameter proves uninformative or physically inappropriate after analysis (e.g., a scarcity price threshold that captures zero events due to changing grid dynamics):
 1. The original result is published under the frozen parameters.
