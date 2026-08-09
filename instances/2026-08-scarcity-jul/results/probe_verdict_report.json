@@ -1,0 +1,121 @@
+{
+  "metadata": {
+    "instance_id": "2026-08-scarcity-jul",
+    "overall_completeness_pct": 100.0,
+    "mandate_8_status": "PASSED"
+  },
+  "provenance": {
+    "evaluator_script": "src/evaluate_probe.py",
+    "params_file": "PARAMS.md",
+    "data_license_attribution": "Primary ENTSO-E Transparency Platform Telemetry (Imbalance Prices [17.1.g / 17.2.f]), formally listed under CC BY 4.0 free re-use (Item #27). All raw files anchored with SHA-256 hashes in inputs/MANIFEST.json.",
+    "pre_registered_ratifier": "Nestorov, Ivan / VolMax Studio Lab"
+  },
+  "benchmark_metrics": {
+    "gb_companion": {
+      "market": "GB",
+      "baseline_q90_gbp": 131.537,
+      "jul_2026_share_q90_pct": 28.8694,
+      "is_elevated_descriptive": true
+    },
+    "eu_zones": {
+      "AT": {
+        "baseline_q90_eur": 177.3013,
+        "baseline_admitted_obs": 32055,
+        "baseline_nominal_obs": 32064,
+        "baseline_completeness_pct": 99.9719,
+        "jul_2026_share_q90_pct": 18.3468,
+        "is_elevated": true,
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true,
+        "manifest_bound_baseline_col": "Short",
+        "manifest_bound_probe_col": "Short"
+      },
+      "BE": {
+        "baseline_q90_eur": 157.918,
+        "baseline_admitted_obs": 32055,
+        "baseline_nominal_obs": 32064,
+        "baseline_completeness_pct": 99.9719,
+        "jul_2026_share_q90_pct": 18.7836,
+        "is_elevated": true,
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true,
+        "manifest_bound_baseline_col": "Short",
+        "manifest_bound_probe_col": "Short"
+      },
+      "DK_1": {
+        "baseline_q90_eur": 183.204,
+        "baseline_admitted_obs": 32009,
+        "baseline_nominal_obs": 32064,
+        "baseline_completeness_pct": 99.8285,
+        "jul_2026_share_q90_pct": 17.4731,
+        "is_elevated": true,
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true,
+        "manifest_bound_baseline_col": "Short",
+        "manifest_bound_probe_col": "Short"
+      },
+      "DK_2": {
+        "baseline_q90_eur": 201.508,
+        "baseline_admitted_obs": 32009,
+        "baseline_nominal_obs": 32064,
+        "baseline_completeness_pct": 99.8285,
+        "jul_2026_share_q90_pct": 11.3239,
+        "is_elevated": false,
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true,
+        "manifest_bound_baseline_col": "Short",
+        "manifest_bound_probe_col": "Short"
+      },
+      "FR": {
+        "baseline_q90_eur": 156.186,
+        "baseline_admitted_obs": 32055,
+        "baseline_nominal_obs": 32064,
+        "baseline_completeness_pct": 99.9719,
+        "jul_2026_share_q90_pct": 31.8212,
+        "is_elevated": true,
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true,
+        "manifest_bound_baseline_col": "Short",
+        "manifest_bound_probe_col": "Short"
+      },
+      "NL": {
+        "baseline_q90_eur": 153.0,
+        "baseline_admitted_obs": 32055,
+        "baseline_nominal_obs": 32064,
+        "baseline_completeness_pct": 99.9719,
+        "jul_2026_share_q90_pct": 23.2863,
+        "is_elevated": true,
+        "probe_intervals": 2976,
+        "completeness_pct": 100.0,
+        "no_gaps_exceeding_15min": true,
+        "manifest_bound_baseline_col": "Short",
+        "manifest_bound_probe_col": "Short"
+      }
+    }
+  },
+  "decision_evaluation": {
+    "q_ref": 0.9,
+    "e_m1_ref": 0.09999999999999998,
+    "k_multiplier": 1.5,
+    "dynamically_coupled_s_thresh_pct": 14.999999999999996,
+    "frozen_n_high_threshold": 4,
+    "frozen_n_low_threshold": 1,
+    "total_eu_zones_elevated": 5,
+    "elevated_eu_zones_list": [
+      "AT",
+      "BE",
+      "DK_1",
+      "FR",
+      "NL"
+    ],
+    "non_elevated_eu_zones_list": [
+      "DK_2"
+    ],
+    "classifier_c_emitted_verdict": "REGIONAL"
+  }
+}

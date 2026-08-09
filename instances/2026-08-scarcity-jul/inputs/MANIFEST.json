@@ -1,0 +1,132 @@
+[
+  {
+    "file": "baseline/imbalance_AT.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/data/processed/imbalance_AT.feather",
+    "source_commit": "a930946242900384b0b5de344fef8ae9e2d382db",
+    "sha256": "31dfa56004380f6bb9dc7af3b731fc77cbecf0aaf183441c2de875916deb23a1",
+    "source_sha256": "31dfa56004380f6bb9dc7af3b731fc77cbecf0aaf183441c2de875916deb23a1",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 770562
+  },
+  {
+    "file": "baseline/imbalance_BE.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/data/processed/imbalance_BE.feather",
+    "source_commit": "a930946242900384b0b5de344fef8ae9e2d382db",
+    "sha256": "75e5487b848a5b0bf025a12601ed3161134a79028ed739930b8a93a700b11d51",
+    "source_sha256": "75e5487b848a5b0bf025a12601ed3161134a79028ed739930b8a93a700b11d51",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 581858
+  },
+  {
+    "file": "baseline/imbalance_DK_1.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/data/processed/imbalance_DK_1.feather",
+    "source_commit": "a930946242900384b0b5de344fef8ae9e2d382db",
+    "sha256": "fea6acbd0174ace9f6c76db26fa21217204b10ca76a9bf282ceae5d1c4d174e1",
+    "source_sha256": "fea6acbd0174ace9f6c76db26fa21217204b10ca76a9bf282ceae5d1c4d174e1",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 582754
+  },
+  {
+    "file": "baseline/imbalance_DK_2.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/data/processed/imbalance_DK_2.feather",
+    "source_commit": "a930946242900384b0b5de344fef8ae9e2d382db",
+    "sha256": "8082f184e09624502c83088c78489b5d0947b09e611eda06e65ac712dae762c0",
+    "source_sha256": "8082f184e09624502c83088c78489b5d0947b09e611eda06e65ac712dae762c0",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 583858
+  },
+  {
+    "file": "baseline/imbalance_FR.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/data/processed/imbalance_FR.feather",
+    "source_commit": "a930946242900384b0b5de344fef8ae9e2d382db",
+    "sha256": "0fbdc41196c98e5fac8a6f4e30111a925e491f895599170220ea9e94f49a8d6c",
+    "source_sha256": "0fbdc41196c98e5fac8a6f4e30111a925e491f895599170220ea9e94f49a8d6c",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 594594
+  },
+  {
+    "file": "baseline/imbalance_NL.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/data/processed/imbalance_NL.feather",
+    "source_commit": "a930946242900384b0b5de344fef8ae9e2d382db",
+    "sha256": "995145d80c2835b73bd8e22b9c7878febb79aadc1fa64e35d75ff56410a32af5",
+    "source_sha256": "995145d80c2835b73bd8e22b9c7878febb79aadc1fa64e35d75ff56410a32af5",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 534498
+  },
+  {
+    "file": "gb_system_prices.feather",
+    "source_repo_path": "notes/004-gb-duration-baseline/data/processed/gb_system_prices.feather",
+    "source_commit": "a930946242900384b0b5de344fef8ae9e2d382db",
+    "sha256": "6060af4434f0af6c183e3fa5a6368effe5e7bdeab612140acd6d054be0467528",
+    "source_sha256": "6060af4434f0af6c183e3fa5a6368effe5e7bdeab612140acd6d054be0467528",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 1613178
+  },
+  {
+    "file": "probe_jul2026/imbalance_AT.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/probe_jul2026/processed/imbalance_AT.feather",
+    "source_commit": "3c8354b5c6217a10de83bd60177fe396765be270",
+    "sha256": "5dff4b236cefceec114988818f1bb265ac27f4da1203f8b2c2ce10bc0c8b4449",
+    "source_sha256": "5dff4b236cefceec114988818f1bb265ac27f4da1203f8b2c2ce10bc0c8b4449",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 63210
+  },
+  {
+    "file": "probe_jul2026/imbalance_BE.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/probe_jul2026/processed/imbalance_BE.feather",
+    "source_commit": "3c8354b5c6217a10de83bd60177fe396765be270",
+    "sha256": "4e12e55a6d1bfc32f4cd9323207eafd607f5fb384771aa40645a12844235e591",
+    "source_sha256": "4e12e55a6d1bfc32f4cd9323207eafd607f5fb384771aa40645a12844235e591",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 49962
+  },
+  {
+    "file": "probe_jul2026/imbalance_DK_1.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/probe_jul2026/processed/imbalance_DK_1.feather",
+    "source_commit": "3c8354b5c6217a10de83bd60177fe396765be270",
+    "sha256": "7b02493073f4f2b73e7438e0522f8ca61ddd17846f9da850b28d6f33b84aff04",
+    "source_sha256": "7b02493073f4f2b73e7438e0522f8ca61ddd17846f9da850b28d6f33b84aff04",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 49898
+  },
+  {
+    "file": "probe_jul2026/imbalance_DK_2.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/probe_jul2026/processed/imbalance_DK_2.feather",
+    "source_commit": "3c8354b5c6217a10de83bd60177fe396765be270",
+    "sha256": "351626b570d4cb8a242882d7e78459de9574123a921cfe20ab80cbdaaf659767",
+    "source_sha256": "351626b570d4cb8a242882d7e78459de9574123a921cfe20ab80cbdaaf659767",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 50346
+  },
+  {
+    "file": "probe_jul2026/imbalance_FR.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/probe_jul2026/processed/imbalance_FR.feather",
+    "source_commit": "3c8354b5c6217a10de83bd60177fe396765be270",
+    "sha256": "33862677ff888fa3f1749570042a4839a795d0516e0893f07f01d7def84f77e1",
+    "source_sha256": "33862677ff888fa3f1749570042a4839a795d0516e0893f07f01d7def84f77e1",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 49826
+  },
+  {
+    "file": "probe_jul2026/imbalance_NL.feather",
+    "source_repo_path": "notes/003-entsoe-imbalance-baseline/probe_jul2026/processed/imbalance_NL.feather",
+    "source_commit": "3c8354b5c6217a10de83bd60177fe396765be270",
+    "sha256": "81b7194094205b3e0048740d6e1f1c8a05e281c8f17192c0e2c63f7f425b139d",
+    "source_sha256": "81b7194094205b3e0048740d6e1f1c8a05e281c8f17192c0e2c63f7f425b139d",
+    "copied_at_utc": "2026-08-09T08:22:54.477253+00:00",
+    "verified_identical_to_source": true,
+    "size_bytes": 46442
+  }
+]
