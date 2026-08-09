@@ -1,7 +1,7 @@
 {
   "_schema": {
     "name": "SERIES_LOG",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "purpose": "Index of every calendar window in a scheduled series. Regenerated from the per-run result.json files; references their hashes and never restates their numbers as an independent computation. This file is an index, not a measurement — its own hash is not registered and carries no claim.",
     "invariants": [
       "One record per calendar window in the operating period, with no gaps and no omissions.",
