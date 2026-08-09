@@ -1,7 +1,7 @@
 # S₁ — Scheduled Selection
 
 > **Document Status:** Draft — SPREMNO ZA GEJT (not frozen, not ratified)
-> **Version:** v0.3.0 · supersedes v0.2.0, v0.1.0 (defects resolved — see §8)
+> **Version:** v0.3.1 · supersedes v0.3.0, v0.2.0, v0.1.0 (defects resolved — see §8)
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Role:** Selection rule **S** for scheduled operation, under
 > `INSTRUMENT_SPEC — Measurement Domain and Visibility Boundaries` (v0.3.0).
@@ -27,6 +27,26 @@ Windows failing telemetry completeness floor or yielding indeterminate elevation
 
 1. **Cadence.** One run per calendar month, covering the immediately preceding complete
    calendar month as W. No partial months.
+
+   **W is a calendar month in UTC**, from `YYYY-MM-01T00:00:00Z` to the final interval
+   ending at `YYYY-MM-<last>T23:59:59Z`. Local market months are never used.
+
+   This is not a preference. `INSTRUMENT_SPEC` §2 requires that *the window is identical
+   across every market in the comparison set*, and a local month is a different interval
+   for each timezone: the six CET/CEST zones and a UTC/BST companion do not share a local
+   month, so a local-month window would compare different periods under one name. A local
+   month is also not a fixed length — DST transitions make it 2975 or 2977 fifteen-minute
+   intervals in March and October — which makes the nominal denominator of M₁ §4.1 unstable
+   across the year.
+
+   `nominal_intervals` for W is therefore always `days_in_month × (86400 / Δt)`, with `Δt`
+   the market's frozen interval duration.
+
+   **Consequence for acquisition.** Telemetry must be requested for the UTC range, not for
+   the market's operational month. Where a source publishes on local-month boundaries, the
+   request spans both adjacent local months and is sliced to UTC before evaluation. A run
+   that evaluates whatever the source happened to return is measuring an undeclared window
+   — see `FAILURES.md` Entry #025.
 2. **No manual window choice.** The window is a function of the calendar and nothing
    else. A window is never chosen, skipped, re-run for a different period, or deferred
    because its result is uninteresting or inconvenient.
@@ -89,6 +109,7 @@ S₁ is parameter-free as a definition. Values live in `PARAMS.md`:
 
 | Parameter | Meaning | Status / Constraint |
 |---|---|---|
+| `window_timezone` | Timezone in which W is defined | **FROZEN: `UTC`.** Not a free parameter; fixed by `INSTRUMENT_SPEC` §2 (identical window across the comparison set). Recorded in `PARAMS.md` so that any run asserting a different value is non-conforming on inspection rather than silently. |
 | `L` | Publication lag in days before a run may execute | PROVISIONAL — unmeasured estimate (Option B); requires prospective monitoring |
 | `N` | Rolling baseline length in calendar months | TO BE FROZEN (Constraint: $N \ge 12$) |
 | `run_day` | Day of month on which the scheduled run executes | TO BE FROZEN (Constraint: $\text{run\_day} > L$) |
@@ -121,6 +142,11 @@ run is executed under a triggered rationale. Legacy pre-registered probe runs (s
 ---
 
 ## 8. Amendment Record
+
+**v0.3.0 → v0.3.1.**
+1. §2.1 now defines W explicitly as a UTC calendar month, with the derivation from `INSTRUMENT_SPEC` §2 (identical window across markets) and the DST argument for a stable nominal denominator stated rather than assumed.
+2. §2.1 adds the acquisition consequence: telemetry is requested for the UTC range and sliced to UTC before evaluation; a run that evaluates whatever the source returned is measuring an undeclared window (`FAILURES.md` Entry #025).
+3. §5 adds `window_timezone`, frozen to `UTC`, so that a deviation is visible in `PARAMS.md` rather than only in behaviour.
 
 **v0.2.0 → v0.3.0.**
 1. Aligned population (§1) and retry rules (§2.5) with $M_1$ v0.7.2 §4.4 determinacy test and $C$ v1.4.0 output vocabulary (`INDETERMINATE_SET` and `EXHAUSTED_RETRY_INDETERMINATE_SET`).
