@@ -34,6 +34,15 @@ chart or one frequency without stating that they are two.
 ## 2. Layout
 
 ```
+instruments/
+├── INSTRUMENT_SPEC.md              domain and visibility boundaries
+├── M1_SCARCITY_PERSISTENCE.md       metric M1
+├── C_CLASSIFIER_SCARCITY_PERSISTENCE.md classifier C
+├── S1_SCHEDULED_SELECTION.md       scheduled selection rule S1
+├── INSTANCE_ISOLATION_PROTOCOL.md  isolation doctrine
+├── SERIES_TEMPLATE.md              this template
+└── SERIES_LOG_SCHEMA.json          index schema
+
 instances/<series-id>/
 ├── PARAMS.md            frozen once for the whole series
 ├── PROVENANCE.md        inherited inputs, per Isolation Protocol §4
@@ -66,9 +75,10 @@ Instead:
   are never edited.
 - Each run records the manifest state it read (`inputs_manifest_sha256`), so a run remains
   tied to the exact input state that produced it even though the files later grow.
-- If an already-covered period changes upstream (settlement revision), that is **not** an
-  extension. It is a data change, and it requires a new instance, not an edit — per
-  Isolation Protocol §6.
+- **Upstream Data Revision Rule:**
+  - Upstream telemetry revisions published *prior* to publication lag $L$ are incorporated into the input files before freezing $R$ and running evaluation.
+  - If an upstream data revision occurs *after* publication lag $L$ and alters any previously published measurement $M_1(m, W)$ or label $L(W)$: **It requires a new instance with a new DOI under `INSTANCE_ISOLATION_PROTOCOL.md` §6.** The existing instance and published record remain immutable.
+  - If an upstream data revision touches only data outside any published operating window $W$ or baseline window $B$: It is recorded in `inputs/MANIFEST.json` without triggering a new instance.
 
 ---
 

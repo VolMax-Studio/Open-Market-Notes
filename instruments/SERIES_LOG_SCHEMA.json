@@ -78,7 +78,8 @@
         "result_sha256": "<sha256 of result.json>",
         "completeness_path": "runs/YYYY-MM/completeness.json",
         "inputs_manifest_sha256": "<sha256 of inputs/MANIFEST.json as read by this run>",
-        "run_commit": "<commit SHA at which this run execution was committed; equals spec_commit after repo consolidation>"
+        "run_commit": "<commit SHA at which this run execution was committed; equals spec_commit after repo consolidation>",
+        "re_evaluation_attempt": 1
       }
     },
 
@@ -109,7 +110,8 @@
         "result_sha256": null,
         "completeness_path": "runs/YYYY-MM/completeness.json",
         "inputs_manifest_sha256": "<sha256 of inputs/MANIFEST.json as read by this run>",
-        "run_commit": "<commit SHA>"
+        "run_commit": "<commit SHA>",
+        "re_evaluation_attempt": 1
       },
 
       "_note": "The completeness account is published even though no measurement exists. Which zone failed, and by how much, is the finding for this window."
