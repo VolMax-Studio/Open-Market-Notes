@@ -1,6 +1,6 @@
-# PARAMS — Instance nem-scarcity-s1 Parameters (Unfrozen Proposal)
+# PARAMS — Instance nem-scarcity-s1 Frozen Parameters
 
-> **Document Status:** Draft — SPREMNO ZA GEJT (not ratified)
+> **Document Status:** RATIFIED & FROZEN
 > **Version:** v1.0.0
 > **Specification Standard:** INSTRUMENT_SPEC v0.3.0 · M1 v0.7.3 · C v1.4.0 · S1 v0.3.1 · INSTANCE_ISOLATION v0.1.0
 > **Instance Identifier:** `nem-scarcity-s1`
@@ -8,7 +8,7 @@
 
 ---
 
-## 1. Parameter Proposal Configuration
+## 1. Frozen Parameter Configuration
 
 ```json
 {
@@ -19,9 +19,13 @@
   "q_ref": 0.90,
   "k_multiplier": 1.50,
   "n_low": 1,
-  "n_high": "TO BE FROZEN (Option 1: 4 for unanimity, Option 2: 3 for majority)",
+  "n_high": 3,
   "N": 12,
-  "L_publication_lag_days": "PROVISIONAL (AEMO lag 7-18 days)",
+  "L_publication_lag_days": {
+    "value": 20,
+    "status": "PROVISIONAL",
+    "basis": "AEMO lag 7-18 days, not re-derived"
+  },
   "run_day": 21,
   "operating_start": "2026-06",
   "window_timezone": "UTC",
@@ -29,8 +33,8 @@
   "completeness_floor_pct": 98.0,
   "quantile_method": "linear",
   "timestamp_tz": "UTC",
-  "comparison_zones": "TO BE FROZEN (Option A: [NSW1, QLD1, SA1, VIC1], Option B: [NSW1, QLD1, SA1, VIC1, TAS1])",
-  "companion_zones": "TO BE FROZEN (Option A: [TAS1], Option B: [])",
+  "comparison_zones": ["NSW1", "QLD1", "SA1", "VIC1"],
+  "companion_zones": ["TAS1"],
   "series_bindings": {
     "NSW1": {"baseline_col": "RRP", "probe_col": "RRP", "interval_duration_sec": 300.0},
     "QLD1": {"baseline_col": "RRP", "probe_col": "RRP", "interval_duration_sec": 300.0},

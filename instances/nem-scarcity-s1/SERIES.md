@@ -1,6 +1,6 @@
 # Scheduled Series Specification — nem-scarcity-s1
 
-> **Document Status:** Draft — SPREMNO ZA GEJT (not ratified)
+> **Document Status:** RATIFIED & FROZEN
 > **Series Identifier:** `nem-scarcity-s1`
 > **Version:** v1.0.0
 > **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
@@ -21,18 +21,18 @@ This scheduled series evaluates Australian AEMO NEM regional imbalance scarcity 
 - **This series (`nem-scarcity-s1`)** measures scarcity persistence above a **market-local tail quantile** ($R_z = P_{90}$).
 - These are separate physical quantities. This series does not reproduce, extend, or supersede OMN-001; it is an independent measurement over the same market infrastructure.
 
-- **Primary Comparison Set ($\mathcal{M}$):** `NSW1`, `QLD1`, `SA1`, `VIC1` (4 AEMO mainland bidding regions).
-- **Descriptive Companion Market:** `TAS1` (Tasmania island region, non-voting comparator).
+- **Primary Comparison Set ($\mathcal{M}$):** `NSW1`, `QLD1`, `SA1`, `VIC1` (4 AEMO mainland bidding regions sharing AC frequency).
+- **Descriptive Companion Market:** `TAS1` (Tasmania island region behind HVDC Basslink, non-voting comparator).
 - **Baseline Window ($B$):** Rolling $N = 12$ calendar months ending immediately prior to observation window $W$.
 - **Operating Start Window ($W_{\text{start}}$):** `2026-06` (12 months post telemetry start `2025-06-01T00:00:00Z`).
 
 ---
 
-## 2. Parameter Configuration Proposal
+## 2. Frozen Parameter Configuration
 
-Parameters are proposed in `instances/nem-scarcity-s1/PARAMS.md`:
+Parameters are frozen in `instances/nem-scarcity-s1/PARAMS.md`:
 - $q_{\text{ref}} = 0.90$, $k_{\text{mult}} = 1.50 \implies S_{\text{thresh}} = 0.150$ (15.0% threshold)
-- $N_{\text{low}} = 1$, $N_{\text{high}} = 4$ (Pending Ivan's decision on reachability constraint)
+- $N_{\text{low}} = 1$, $N_{\text{high}} = 3$ (Majority rule for 4 comparison zones: 75.0% proportion)
 - $N = 12$ calendar months rolling baseline
 - Telemetry resolution: 300.0 seconds (5-minute dispatch interval)
 - Telemetry completeness floor: $98.0\%$

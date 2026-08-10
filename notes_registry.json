@@ -158,11 +158,11 @@
     "instance_dir": "instances/nem-scarcity-s1",
     "derived_from": "OMN-001",
     "operating_start": "2026-06",
-    "status": "Draft — SPREMNO ZA GEJT",
+    "status": "Ratified",
     "spec_commit": "82b1daa7d594265fe468730dd7ef7d1080fe874a",
     "series_log_path": "instances/nem-scarcity-s1/runs/SERIES_LOG.json",
-    "runs_completed": 0,
+    "runs_completed": 1,
     "runs_unevaluated": 0,
-    "params_sha256": "b071c5b27cc45c1a71f1a81616f3391ab7c23525402d2304a260a3b52d70e067"
+    "params_sha256": "3779e960461d17aa1e0f1dedae5063ec413090717a62e0dd0e06164b25c5e98e"
   }
 ]

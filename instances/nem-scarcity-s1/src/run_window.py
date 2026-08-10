@@ -61,7 +61,7 @@ def execute_window_run(instance_dir, target_window):
     s_thresh = k_mult * (1.0 - q_ref)  # 0.150 = 15.0%
 
     n_low = int(params.get('n_low', 1))
-    n_high = int(params.get('n_high', 4))
+    n_high = int(params.get('n_high', 3))
     n_baseline_months = int(params.get('N', 12))
     floor_pct = float(params.get('completeness_floor_pct', 98.0))
 

@@ -1,0 +1,51 @@
+{
+  "completeness_floor_pct": 98.0,
+  "window": "2026-06",
+  "zone_completeness": {
+    "NSW1": {
+      "admitted_intervals": 8640,
+      "admitted_seconds": 2592000.0,
+      "completeness_pct": 100.0,
+      "missing_intervals": 0,
+      "nominal_intervals": 8640,
+      "nominal_seconds": 2592000.0,
+      "passes_floor": true
+    },
+    "QLD1": {
+      "admitted_intervals": 8640,
+      "admitted_seconds": 2592000.0,
+      "completeness_pct": 100.0,
+      "missing_intervals": 0,
+      "nominal_intervals": 8640,
+      "nominal_seconds": 2592000.0,
+      "passes_floor": true
+    },
+    "SA1": {
+      "admitted_intervals": 8640,
+      "admitted_seconds": 2592000.0,
+      "completeness_pct": 100.0,
+      "missing_intervals": 0,
+      "nominal_intervals": 8640,
+      "nominal_seconds": 2592000.0,
+      "passes_floor": true
+    },
+    "TAS1": {
+      "admitted_intervals": 8640,
+      "admitted_seconds": 2592000.0,
+      "completeness_pct": 100.0,
+      "missing_intervals": 0,
+      "nominal_intervals": 8640,
+      "nominal_seconds": 2592000.0,
+      "passes_floor": true
+    },
+    "VIC1": {
+      "admitted_intervals": 8640,
+      "admitted_seconds": 2592000.0,
+      "completeness_pct": 100.0,
+      "missing_intervals": 0,
+      "nominal_intervals": 8640,
+      "nominal_seconds": 2592000.0,
+      "passes_floor": true
+    }
+  }
+}
