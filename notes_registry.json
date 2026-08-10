@@ -147,5 +147,22 @@
     "runs_completed": 8,
     "runs_unevaluated": 0,
     "params_sha256": "5c5a343ed6fc8ab6ac3ee4bc521faca90954dbc6e745749a46c2d52ecabd6efa"
+  },
+  {
+    "id": "nem-scarcity-s1",
+    "series_id": "nem-scarcity-s1",
+    "title": "Scheduled Series nem-scarcity-s1 — Monthly Australian NEM Imbalance Scarcity Persistence",
+    "market": "AEMO NEM (NSW1, QLD1, SA1, VIC1, TAS1 Comparator)",
+    "signal": "Strict Time-Weighted Scarcity Persistence (M1 v0.7.3, C v1.4.0, S1 v0.3.1)",
+    "selection_mode": "S1_scheduled",
+    "instance_dir": "instances/nem-scarcity-s1",
+    "derived_from": "OMN-001",
+    "operating_start": "2026-06",
+    "status": "Draft — SPREMNO ZA GEJT",
+    "spec_commit": "82b1daa7d594265fe468730dd7ef7d1080fe874a",
+    "series_log_path": "instances/nem-scarcity-s1/runs/SERIES_LOG.json",
+    "runs_completed": 0,
+    "runs_unevaluated": 0,
+    "params_sha256": "bc63983a94378047e7a0f1732bd39e41efce1a0a7f3b559b0412d009eb9eec01"
   }
 ]
