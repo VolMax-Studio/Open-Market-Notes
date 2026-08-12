@@ -111,7 +111,7 @@ def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
         date_str = curr.isoformat()
         url = f"{BASE_URL}/{date_str}"
         fetched = False
-        max_attempts = 3
+        max_attempts = 5
         for attempt in range(1, max_attempts + 1):
             try:
                 resp = requests.get(url, timeout=15)
@@ -129,7 +129,7 @@ def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
                         print(f"Warning: Unexpected JSON structure for {date_str} (attempt {attempt}/{max_attempts})")
                 elif resp.status_code in (429, 500, 502, 503, 504):
                     retry_after = resp.headers.get("Retry-After")
-                    sleep_sec = float(retry_after) if retry_after and retry_after.isdigit() else (0.5 * (2 ** (attempt - 1)))
+                    sleep_sec = float(retry_after) if retry_after and retry_after.isdigit() else (2 ** (attempt - 1))
                     print(f"Warning: HTTP {resp.status_code} for {date_str} (attempt {attempt}/{max_attempts}). Retrying in {sleep_sec:.1f}s...")
                     time.sleep(sleep_sec)
                     continue
@@ -137,7 +137,7 @@ def fetch_elexon_system_prices(start_date="2025-06-01", end_date="2026-06-30"):
                     print(f"Warning: HTTP {resp.status_code} for {date_str} (attempt {attempt}/{max_attempts})")
             except Exception as e:
                 print(f"Error fetching {date_str} (attempt {attempt}/{max_attempts}): {e}")
-            sleep_sec = 0.5 * (2 ** (attempt - 1))
+            sleep_sec = 2 ** (attempt - 1)
             time.sleep(sleep_sec)
         if not fetched:
             raise RuntimeError(f"FATAL: FAILED to fetch telemetry for {date_str} after {max_attempts} attempts. Aborting per Mandate 8.")
