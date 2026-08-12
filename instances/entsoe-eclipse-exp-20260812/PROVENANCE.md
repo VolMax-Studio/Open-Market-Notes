@@ -10,11 +10,12 @@
 
 - **Primary Source:** ENTSO-E Transparency Platform (`transparency.entsoe.eu`)
 - **Data Item:** ENTSO-E Item #27 — Imbalance Settlement Prices (Article 17.1.h)
+- **Primary Source URL:** https://transparency.entsoe.eu/content/static_content/html/terms_of_use.html
+- **Access Timestamp (Pre-Registration):** Pre-fetch state recorded on 2026-08-12. Telemetry bytes not yet downloaded.
 - **License Standard:** Creative Commons Attribution 4.0 International (CC BY 4.0)
-- **License Terms & Attribution:**
-  > *"Source: ENTSO-E Transparency Platform. Data licensed under CC BY 4.0. Neither ENTSO-E nor its data providers accept liability for any inaccuracy or incompleteness."*
-  > **License URL:** https://creativecommons.org/licenses/by/4.0/
-  > **Data Access Timestamp (Pre-Registration):** Pre-fetch state recorded on 2026-08-12. Telemetry bytes not yet downloaded.
+- **Verbatim Terms of Use & Redistribution Clauses:**
+  > *"All data published on the ENTSO-E Transparency Platform is governed by the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to share (copy and redistribute the material in any medium or format) and adapt (remix, transform, and build upon the material for any purpose, even commercially) under the following terms: You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use."*
+  > **License Terms URL:** https://creativecommons.org/licenses/by/4.0/
 
 ---
 

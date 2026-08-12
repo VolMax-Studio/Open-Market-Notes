@@ -3,7 +3,7 @@
 > **Document Status:** Draft — SPREMNO ZA GEJT (Pre-Registration Proposal)
 > **Instance Identifier:** `entsoe-eclipse-exp-20260812`
 > **Version:** v1.0.0
-> **Author:** VolMax Studio Lab / ORCID 0009-0006-7940-9539
+> **Author:** Nestorov, Ivan / VolMax Studio Lab / ORCID 0009-0006-7940-9539
 > **Selection Mode:** `exploratory`
 > **Measurement Standard:** M₁ (`M1_SCARCITY_PERSISTENCE.md` v0.7.4)
 > **Classifier Standard:** C (`C_CLASSIFIER_SCARCITY_PERSISTENCE.md` v1.4.1)
@@ -22,24 +22,26 @@ This pre-registered exploratory probe measures whether the Total Solar Eclipse o
 ## 2. Event Window & Resolution Alignment
 
 - **Event Window ($W_{\text{event}}$):** `2026-08-12T17:00:00Z` to `2026-08-12T19:30:00Z` (150 minutes).
-  - Aligns cleanly on 15-minute and 30-minute MTU boundaries across all target zones.
-  - Nominal MTU Count: 10 intervals of 15-min resolution (or 5 intervals of 30-min resolution for 30-min markets).
+  - Aligns cleanly on 15-minute MTU boundaries across all target zones.
+  - Nominal MTU Count: 10 intervals of 15-min resolution per zone.
 - **Diurnal Control Window ($W_{\text{control}}$):** 17:00:00Z to 19:30:00Z for the preceding 7 days (`2026-08-05` through `2026-08-11`).
-- **Solar Sunset Context (Spain `ES`):** In mid-August in Madrid/Spain, sunset occurs at ~21:00 CEST (~19:00 UTC). Solar generation naturally approaches zero during the final 30 minutes of the event window. This diurnal sunset effect is captured by the 7-day control window baseline.
+- **Solar Sunset Context (Spain `ES`):** In mid-August in Madrid/Spain, sunset occurs at ~21:00 CEST (~19:00 UTC). Solar generation naturally approaches zero during the final 30 minutes of the event window. This diurnal sunset effect is captured symmetrically by the 7-day control window baseline.
 
 ---
 
-## 3. P10 Exposure Disclosures & Metric Separation
+## 3. P10 Exposure Disclosures & Comparability Discipline
 
 1. **Primary Empirical Metric ($M_1$ v0.7.4):** Imbalance Settlement Price persistence during the event window (**17:00 to 19:30 UTC**). Imbalance telemetry has NOT been fetched or viewed prior to specification ratification.
 2. **Secondary Disclosed Exposure (Day-Ahead Prices):** Day-Ahead clearing price premiums are acknowledged to have been traded prior to specification freeze. Per P10 Principle 2, DA data is degraded to **secondary descriptive evidence** and cannot serve as the primary metric.
+3. **Comparability Discipline Disclosure:** Target zones differ in settlement mechanics (e.g. single-pricing in DE_LU/NL vs dual/single pricing rules in ES/FR). Imbalance persistence values are measured against zone-local 12-month rolling P90 baselines ($R_z$), which natively absorb zone-specific pricing structures, but cross-zone persistence values reflect distinct market settlement designs.
 
 ---
 
 ## 4. Pre-Registered Per-Zone Falsification Criteria
 
 > **Per-Zone Elevation Rule:** A bidding zone $z$ is classified as **`ELEVATED_BY_EVENT`** if and only if:
-> $$M_{1, z}(W_{\text{event}}) \ge 20.0\% \quad \text{AND} \quad N_{\text{control\_crossings}, z} \le 2 \text{ out of } 7 \text{ control days}$$
+> $$E_{\text{lower}, z}(W_{\text{event}}) \ge 20.0\% \quad \text{AND} \quad N_{\text{control\_crossings}, z} \le 2 \text{ out of } 7 \text{ control days}$$
+> where $N_{\text{control\_crossings}, z}$ is evaluated under the exact same M1 v0.7.4 bounded exposure rule ($E_{\text{lower}, z}(W_{\text{control}, d}) \ge 20.0\%$).
 >
 > **Global Falsification Clause:** The hypothesis that the solar eclipse produced measurable extreme scarcity elevation is **FALSE** if zero target zones (`ES`, `PT`, `FR`, `DE_LU`, `NL`) satisfy `ELEVATED_BY_EVENT`.
 

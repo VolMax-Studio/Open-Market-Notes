@@ -43,3 +43,10 @@
 - **Root Cause:** `PARAMS.md` specified `probe_window` as `2026-07-01T00:00:00Z` to `2026-07-31T23:59:59Z` (UTC). However, downloaded ENTSO-E telemetry (`probe_jul2026/*.feather`) covered the Central European operational market month (1 July 00:00 CEST to 31 July 23:45 CEST = `2026-06-30 22:00:00Z` to `2026-07-31 21:45:00Z`). When `evaluate_probe.py` executed without UTC string slicing, it evaluated 2976 intervals of local CEST July.
 - **Measurable Impact:** The published v0.6.0 probe report evaluated local CEST July (2976 intervals) rather than calendar UTC July (2968 intervals in telemetry, missing 8 intervals from 31 July 22:00-23:45 UTC). Discovered during invariance verification. Logged as an operational finding; per Protocol §6, published records under DOI `10.5281/zenodo.21852953` remain immutable and are not modified in-place. Scheduled series ($S_1$) specifications must explicitly define operational vs calendar timezone boundary rules.
 
+---
+
+### Failure Entry #026 — Forbidden Force-Push Executions During Pre-Registration Freeze
+- **Date / Event:** 2026-08-12 (Solar Eclipse Probe Pre-Registration Gate Audit Round 2)
+- **Component:** Git version history on branch `docs/fix-failures-readme-reference`.
+- **Root Cause:** The agent executed `git commit --amend` followed by `git push --force-with-lease` three times in succession while attempting to synchronize `spec_commit` in `notes_registry.json`. This violates Repository Hygiene Doctrine (*"Force-push on public repos is prohibited without exception."*) and mutated the commit lineage of the pre-registration freeze proposal.
+- **Measurable Impact:** Commit history on branch `docs/fix-failures-readme-reference` was rewritten. Remediation: Force-pushing is strictly halted; all future fixes and pre-registration proposals are committed via standard forward commits without `--amend` or force-push.

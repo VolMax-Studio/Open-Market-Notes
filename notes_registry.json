@@ -175,10 +175,10 @@
     "instance_dir": "instances/entsoe-eclipse-exp-20260812",
     "operating_start": "2026-08",
     "status": "Draft — SPREMNO ZA GEJT",
-    "spec_commit": "ba3b4b9c5d1d5f7a6856761acfe34cadeaa9f7be",
+    "spec_commit": null,
     "series_log_path": "instances/entsoe-eclipse-exp-20260812/runs/SERIES_LOG.json",
     "runs_completed": 0,
     "runs_unevaluated": 0,
-    "params_sha256": "2d9201eaf66630b4538295a9e7a217c2e08f529f68991146768d8ef3ec3a22d5"
+    "params_sha256": "c2a8b6828113fdf0af1fec13a60324feddc273d316f80f17808d81a6121b3a36"
   }
 ]
