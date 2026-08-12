@@ -14,7 +14,7 @@
 ## 1. Scope & Objective
 
 This pre-registered exploratory probe measures whether the Total Solar Eclipse of **August 12, 2026** induced extreme imbalance scarcity persistence ($M_1 \ge 20.0\%$, corresponding to $\ge 2$ out of 10 15-minute MTUs) across Western European bidding zones (`ES`, `PT`, `FR`, `DE_LU`, `NL`) relative to:
-1. Market-local 12-month rolling $P_{90}$ reference thresholds ($B = 12\text{M}$: August 1, 2025 to July 31, 2026).
+1. Market-local 12-month fixed baseline reference thresholds ($B = 12\text{M}$: August 1, 2025 to July 31, 2026).
 2. The 7-day diurnal baseline control window (17:00 to 19:30 UTC, August 5–11, 2026).
 
 ---
@@ -22,10 +22,12 @@ This pre-registered exploratory probe measures whether the Total Solar Eclipse o
 ## 2. Event Window & Resolution Alignment
 
 - **Event Window ($W_{\text{event}}$):** `2026-08-12T17:00:00Z` to `2026-08-12T19:30:00Z` (150 minutes).
-  - Aligns cleanly on 15-minute MTU boundaries across all target zones.
-  - Nominal MTU Count: 10 intervals of 15-min resolution per zone.
-- **Diurnal Control Window ($W_{\text{control}}$):** 17:00:00Z to 19:30:00Z for the preceding 7 days (`2026-08-05` through `2026-08-11`).
+  - Filtering uses half-open interval slicing `[17:00:00Z, 19:30:00Z)` on UTC timestamp index.
+  - Timestamp convention: ENTSO-E Item #27 timestamps represent **Interval Start Time in UTC**.
+  - Nominal MTU Count: Exactly 10 intervals of 15-min resolution per zone.
+- **Diurnal Control Window ($W_{\text{control}}$):** 17:00:00Z to 19:30:00Z for the preceding 7 days (`2026-08-05` through `2026-08-11`). Note that control days include weekend days (`2026-08-08` Saturday and `2026-08-09` Sunday), capturing natural weekly diurnal profiles.
 - **Solar Sunset Context (Spain `ES`):** In mid-August in Madrid/Spain, sunset occurs at ~21:00 CEST (~19:00 UTC). Solar generation naturally approaches zero during the final 30 minutes of the event window. This diurnal sunset effect is captured symmetrically by the 7-day control window baseline.
+- **V-Component Blindspot Disclosure:** The 12-month all-hours $P_{90}$ reference $R_z$ measures overall annual scarcity and does not isolate evening net-load peak variance from solar eclipse variance. The 7-day diurnal control delta is mandatory to absorb evening peak artifacts.
 
 ---
 
@@ -33,19 +35,19 @@ This pre-registered exploratory probe measures whether the Total Solar Eclipse o
 
 1. **Primary Empirical Metric ($M_1$ v0.7.4):** Imbalance Settlement Price persistence during the event window (**17:00 to 19:30 UTC**). Imbalance telemetry has NOT been fetched or viewed prior to specification ratification.
 2. **Secondary Disclosed Exposure (Day-Ahead Prices):** Day-Ahead clearing price premiums are acknowledged to have been traded prior to specification freeze. Per P10 Principle 2, DA data is degraded to **secondary descriptive evidence** and cannot serve as the primary metric.
-3. **Comparability Discipline Disclosure:** Target zones differ in settlement mechanics (e.g. single-pricing in DE_LU/NL vs dual/single pricing rules in ES/FR). Imbalance persistence values are measured against zone-local 12-month rolling P90 baselines ($R_z$), which natively absorb zone-specific pricing structures, but cross-zone persistence values reflect distinct market settlement designs.
+3. **Comparability Discipline Disclosure:** Target zones differ in settlement mechanics (e.g. single-pricing in DE_LU/NL vs dual/single pricing rules in ES/FR). Imbalance persistence values are measured against zone-local 12-month P90 baselines ($R_z$), which natively absorb zone-specific pricing structures, but cross-zone persistence values reflect distinct market settlement designs.
 
 ---
 
 ## 4. Pre-Registered Per-Zone Falsification Criteria
 
 > **Per-Zone Elevation Rule:** A bidding zone $z$ is classified as **`ELEVATED_BY_EVENT`** if and only if:
-> $$E_{\text{lower}, z}(W_{\text{event}}) \ge 20.0\% \quad \text{AND} \quad N_{\text{control\_crossings}, z} \le 2 \text{ out of } 7 \text{ control days}$$
-> where $N_{\text{control\_crossings}, z}$ is evaluated under the exact same M1 v0.7.4 bounded exposure rule ($E_{\text{lower}, z}(W_{\text{control}, d}) \ge 20.0\%$).
+> $$\text{Zone } z \text{ Event Status} == \mathtt{ELEVATED} \quad \text{AND} \quad N_{\text{control\_crossings}, z} \le 2 \text{ out of } 7 \text{ control days}$$
+> where control days are evaluated symmetrically under M1 v0.7.4 exposure bounds.
 >
 > **Global Falsification Clause:** The hypothesis that the solar eclipse produced measurable extreme scarcity elevation is **FALSE** if zero target zones (`ES`, `PT`, `FR`, `DE_LU`, `NL`) satisfy `ELEVATED_BY_EVENT`.
 
 ### Unconditional Disclosure Commitment
-Even if all zones return `NOT_ELEVATED` or `FALSE`, the **`NULL` result will be published without modification or cherry-picking**.
+Even if all zones return `NOT_ELEVATED` or `NULL`, the **`NULL` result will be published without modification or cherry-picking**.
 
 *VolMax Studio Lab · Pre-Registered Exploratory Probe*

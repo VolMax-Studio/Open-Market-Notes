@@ -10,12 +10,9 @@
 
 - **Primary Source:** ENTSO-E Transparency Platform (`transparency.entsoe.eu`)
 - **Data Item:** ENTSO-E Item #27 — Imbalance Settlement Prices (Article 17.1.h)
-- **Primary Source URL:** https://transparency.entsoe.eu/content/static_content/html/terms_of_use.html
-- **Access Timestamp (Pre-Registration):** Pre-fetch state recorded on 2026-08-12. Telemetry bytes not yet downloaded.
-- **License Standard:** Creative Commons Attribution 4.0 International (CC BY 4.0)
-- **Verbatim Terms of Use & Redistribution Clauses:**
-  > *"All data published on the ENTSO-E Transparency Platform is governed by the Creative Commons Attribution 4.0 International License (CC BY 4.0). You are free to share (copy and redistribute the material in any medium or format) and adapt (remix, transform, and build upon the material for any purpose, even commercially) under the following terms: You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use."*
-  > **License Terms URL:** https://creativecommons.org/licenses/by/4.0/
+- **Primary Source Terms URL:** https://transparency.entsoe.eu/content/static_content/html/terms_of_use.html
+- **L0 Source Licensing Status:** **`[BLOCKED — source not opened]`**
+  - *Governance Note (Check 4):* Primary source terms page has not been loaded into an active browser/page session in this execution context. Per P10 Check 4, terms text is NOT composed or reconstructed from memory. Verbatim license text will be recorded upon opening the source page prior to telemetry download.
 
 ---
 
@@ -25,7 +22,7 @@
 
 | Input File | Zone | Covered Period (UTC) | Rows | SHA-256 Checksum | License / Attribution |
 |---|---|---|---|---|---|
-| *Pending execution* | - | - | - | - | ENTSO-E Item #27 / CC BY 4.0 |
+| *Pending execution* | - | - | - | - | ENTSO-E Item #27 (Pending L0 session) |
 
 ---
 

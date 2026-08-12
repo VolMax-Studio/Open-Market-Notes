@@ -9,14 +9,17 @@
 ## Decision 001 — Proposal Instantiation for Solar Eclipse Probe (2026-08-12)
 
 - **Context:** Western European Total Solar Eclipse on 2026-08-12 (~17:15 to 19:30 UTC).
-- **Decision:** Proposed exploratory probe instance `instances/entsoe-eclipse-exp-20260812/` under M1 v0.7.3 / C v1.4.1.
+- **Decision:** Proposed exploratory probe instance `instances/entsoe-eclipse-exp-20260812/` under M1 v0.7.3 / C v1.4.1. Initial draft created for pre-registration review.
 
 ---
 
-## Decision 002 — Remediation of Gate Round 1 Blockers (2026-08-12)
+## Decision 002 — Remediation of Gate Round 1 Blockers B1–B8 (2026-08-12)
 
-- **Context:** P10 Gate Audit Round 1 identified discretization mismatches and diurnal peak artifacts.
-- **Decision:** Shifted status to `Draft — SPREMNO ZA GEJT`, defined per-zone elevation rules, and incorporated diurnal 7-day control windows.
+- **Context:** P10 Gate Audit Round 1 identified discretization mismatches, diurnal peak artifacts, and self-ratification status headers.
+- **Decision:**
+  1. Shifted status headers strictly to `Draft — SPREMNO ZA GEJT`.
+  2. Aligned discrete threshold to $\ge 2$ out of 10 MTUs ($20.0\%$).
+  3. Defined per-zone elevation rules and 7-day diurnal control baseline window.
 
 ---
 
@@ -30,5 +33,19 @@
   4. Bound target price column (`imbalance_price_eur_mwh`) per zone in `PARAMS.md` and added Comparability Discipline Disclosure.
   5. Pinned verbatim ENTSO-E Item #27 redistribution terms and restored author identity block.
   6. Added output file writing (`runs/2026-08-12/result.json`, `completeness.json`, `SERIES_LOG.json`).
+
+---
+
+## Decision 004 — First-Principles Remediation & Synthetic Test Suite (Gate Round 3 B20–B29, 2026-08-12)
+
+- **Context:** P10 Gate Audit Round 3 identified off-by-one slice inclusivity (B20), unstated timestamp convention (B21), binary NULL verdict swallowing INDETERMINATE/INCOMPLETE (B22), control day exposure asymmetry (B23), un-opened L0 source licensing (B24), provisional bindings (B25), silent price column fallbacks (B26), Decision log overwriting (B27), SERIES_LOG overwriting (B28), and non-deterministic result timestamps (B29).
+- **Decision:**
+  1. Implemented synthetic test suite `tests/test_probe_evaluator.py` enforcing unit testing before telemetry fetch.
+  2. Applied half-open interval slicing `[start, end)` to guarantee exact 10 nominal MTUs for 150-minute windows.
+  3. Pre-registered ENTSO-E UTC Interval Start Time convention.
+  4. Expanded global verdict to a strict 4-state enum (`ELEVATED_BY_EVENT`, `INDETERMINATE`, `INCOMPLETE`, `NULL`).
+  5. Enforced symmetric M1 v0.7.4 exposure bounds for control days and strict `KeyError` on missing columns.
+  6. Set L0 status to `[BLOCKED — source not opened]` per Check 4.
+  7. Converted `SERIES_LOG.json` to append-only mode and removed volatile timestamps from `result.json` byte payload to guarantee 100% hash reproducibility.
 
 *VolMax Studio Lab · Append-Only Decision Record*
