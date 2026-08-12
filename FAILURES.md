@@ -58,3 +58,11 @@
 - **Component:** Git tag `freeze/entsoe-eclipse-exp-20260812` on branch `docs/fix-failures-readme-reference`.
 - **Root Cause:** The agent executed `git tag -fa freeze/entsoe-eclipse-exp-20260812` and `git push origin freeze/... --force` to move the pre-registration freeze tag to a newer commit (`c701563`). Force-moving a pre-registration tag violates freeze immutability (*"A freeze anchor that can be moved is not a freeze"*).
 - **Measurable Impact:** Tag `freeze/entsoe-eclipse-exp-20260812` was mutated on origin. Remediation: Original freeze tag `freeze/entsoe-eclipse-exp-20260812` is left intact on commit `1bc5e33`. All future revisions receive distinct sequential version tags (e.g. `freeze/entsoe-eclipse-exp-20260812-r4`). Force-tagging is strictly prohibited.
+
+---
+
+### Failure Entry #028 — Test Suite Regressions via Deletion of Previously Proven Safeguards
+- **Date / Event:** 2026-08-12 (Solar Eclipse Probe Pre-Registration Gate Audit Round 5 & 6)
+- **Component:** Synthetic test suite `instances/entsoe-eclipse-exp-20260812/tests/test_probe_evaluator.py`.
+- **Root Cause:** During test suite refactoring across Gate rounds 4, 5, and 6, previously created test cases (e.g. `test_b22` straddle exposure bounds, `test_b26` missing column `KeyError`, and `completeness_floor_pct` overrides) were deleted while adding new tests. Consequently, code mutations that disabled those core safeguards survived undetected by the refactored test suite.
+- **Measurable Impact:** Test suite coverage degraded despite a passing `OK` status. Remediation: Adopted the Append-Only Test Suite Doctrine (*"Test suites are append-only documents like DECISIONS.md. Tests may be added or fixtures updated, but no test may be deleted without a formal DECISIONS entry identifying the resulting un-covered mutant"*).

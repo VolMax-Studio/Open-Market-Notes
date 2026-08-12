@@ -36,13 +36,13 @@
 
 ---
 
-## Decision 004 — First-Principles Remediation & Synthetic Test Suite (Gate Round 3 B20–B29, 2026-08-12)
+## Decision 004 — Remediation of Gate Round 3 Blockers B20–B29 (2026-08-12)
 
 - **Context:** P10 Gate Audit Round 3 identified off-by-one slice inclusivity (B20), unstated timestamp convention (B21), binary NULL verdict swallowing INDETERMINATE/INCOMPLETE (B22), control day exposure asymmetry (B23), un-opened L0 source licensing (B24), provisional bindings (B25), silent price column fallbacks (B26), Decision log overwriting (B27), SERIES_LOG overwriting (B28), and non-deterministic result timestamps (B29).
 - **Decision:**
   1. Implemented synthetic test suite `tests/test_probe_evaluator.py` enforcing unit testing before telemetry fetch.
   2. Applied half-open interval slicing `[start, end)` to guarantee exact 10 nominal MTUs for 150-minute windows.
-  3. Pre-registered ENTSO-E UTC Interval Start Time convention.
+  3. Pre-registered ENTSO-E UTC Interval Start Time convention (provisional status).
   4. Expanded global verdict to a strict 4-state enum (`ELEVATED_BY_EVENT`, `INDETERMINATE`, `INCOMPLETE`, `NULL`).
   5. Enforced symmetric M1 v0.7.4 exposure bounds for control days and strict `KeyError` on missing columns.
   6. Set L0 status to `[BLOCKED — source not opened]` per Check 4.
@@ -50,15 +50,23 @@
 
 ---
 
-## Decision 005 — Gate Round 5 Remediation & Mutation-Proof Test Suite (Blockers B38–B42, 2026-08-12)
+## Decision 005 — Remediation of Gate Round 4 & 5 Blockers B30–B42 (2026-08-12)
 
-- **Context:** P10 Gate Audit Round 5 identified that `DATA_PENDING` un-fetched zones fell through into `NULL` (B40), `NULL` definition in spec vs code diverged (B41), force-tagging tag `freeze/...` was logged in Entry #027 (B30), and unit test suite lacked mutation kill coverage for positive elevation paths (B38, B39, B42).
+- **Context:** P10 Gate Audit Round 4 and 5 identified force-tagging of `freeze/...` logged in Entry #027 (B30), fixture missing 19:30 boundary (B31), missing control branch unit test coverage (B32), un-fetched data falling through into NULL (B40), and NULL definition divergence (B41).
 - **Decision:**
   1. Expanded global verdict enum to 5 states (`ELEVATED_BY_EVENT`, `INDETERMINATE`, `INCOMPLETE`, `DATA_PENDING`, `NULL`).
   2. Added hard pre-condition check: evaluator raises `ValueError` if telemetry execution is attempted while `binding_status` or `timestamp_convention` remains `PROVISIONAL`.
   3. Enforced `DATA_PENDING` global verdict whenever any comparison zone telemetry is un-fetched, preventing un-fetched data from swallowing into `NULL`.
   4. Aligned `NULL` definition across `PARAMS.md`, `SERIES.md`, and code: `NULL` requires 100% evaluated target zones with completeness $\ge 80.0\%$ and zero elevated zones.
-  5. Rewrote `test_probe_evaluator.py` into a mutation-proof test suite with 100% kill rate on all core logic mutants (positive elevation path, straddle exposure bounds, control day `INDETERMINATE` crossings, `DATA_PENDING` handling, missing columns, and provisional execution bounds).
-  6. Pinned exact versions in `requirements.txt` (`pandas==2.2.2`, `numpy==2.0.0`, `pyarrow==16.1.0`).
+  5. Pinned exact versions in `requirements.txt` (`pandas==2.2.2`, `numpy==2.0.0`, `pyarrow==16.1.0`).
+
+---
+
+## Decision 006 — Instance Abandonment & Append-Only Test Suite Doctrine (2026-08-12)
+
+- **Context:** Operator review of Gate Round 6 identified architectural friction in pre-registration freeze hash mutation upon binding resolution (B43) and test suite coverage regressions across refactorings (B44).
+- **Decision:**
+  1. **Clean Instance Abandonment:** Telemetry data was not downloaded, and the probe evaluator was never executed against live telemetry. The instance directory `instances/entsoe-eclipse-exp-20260812/` is preserved in the repository for audit history, and its registry status in `notes_registry.json` is set to `"Abandoned — pre-registered, never executed"`.
+  2. **Append-Only Test Suite Rule Codified:** Formally adopted the Append-Only Test Suite Rule into P10 methodology: *"A test suite is an append-only document like DECISIONS.md. Tests may be added or fixtures updated, but no test may be deleted without a formal DECISIONS entry identifying the resulting un-covered mutant."*
 
 *VolMax Studio Lab · Append-Only Decision Record*
