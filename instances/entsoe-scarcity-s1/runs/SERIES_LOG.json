@@ -1,0 +1,20 @@
+[
+  {
+    "window": "2026-06",
+    "evaluation_status": "EVALUATED",
+    "label": "REGIONAL",
+    "result_json_sha256": "112b8f26dd32f67118f49e05562af9706cd037677827a891bf2f7ff4190858a8",
+    "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+    "N_elevated": 5,
+    "evaluated_at_utc": "2026-08-09T18:38:25Z"
+  },
+  {
+    "window": "2026-07",
+    "evaluation_status": "EVALUATED",
+    "label": "REGIONAL",
+    "result_json_sha256": "46d2c46434b7dbb74222b11021508b39dbb007a77a27febd2d1faca8fd3ca830",
+    "inputs_manifest_sha256": "f6c4d18a3d56369266b4f949b445f12d0f6182464c2e56e74b6545205b8c28bc",
+    "N_elevated": 5,
+    "evaluated_at_utc": "2026-08-09T18:38:25Z"
+  }
+]

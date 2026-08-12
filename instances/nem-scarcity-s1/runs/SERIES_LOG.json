@@ -1,0 +1,11 @@
+[
+  {
+    "window": "2026-06",
+    "evaluation_status": "EVALUATED",
+    "label": "NULL",
+    "result_json_sha256": "be834491a082dc00064d855a3c2d7e9d62b870ccc4e4b58e5d3f0097969cd84d",
+    "inputs_manifest_sha256": "44693469332b76d8b313e228ad7b1579ee88da2135ca5a241cb5e0b34b8a45c3",
+    "N_elevated": 0,
+    "evaluated_at_utc": "2026-08-10T20:33:44Z"
+  }
+]

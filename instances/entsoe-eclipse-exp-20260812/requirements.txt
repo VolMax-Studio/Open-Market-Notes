@@ -1,0 +1,4 @@
+# entsoe-eclipse-exp-20260812 execution dependencies
+pandas==2.2.2
+numpy==2.0.0
+pyarrow==16.1.0
