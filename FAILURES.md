@@ -65,4 +65,12 @@
 - **Date / Event:** 2026-08-12 (Solar Eclipse Probe Pre-Registration Gate Audit Round 5 & 6)
 - **Component:** Synthetic test suite `instances/entsoe-eclipse-exp-20260812/tests/test_probe_evaluator.py`.
 - **Root Cause:** During test suite refactoring across Gate rounds 4, 5, and 6, previously created test cases (e.g. `test_b22` straddle exposure bounds, `test_b26` missing column `KeyError`, and `completeness_floor_pct` overrides) were deleted while adding new tests. Consequently, code mutations that disabled those core safeguards survived undetected by the refactored test suite.
-- **Measurable Impact:** Test suite coverage degraded despite a passing `OK` status. Remediation: Adopted the Append-Only Test Suite Doctrine (*"Test suites are append-only documents like DECISIONS.md. Tests may be added or fixtures updated, but no test may be deleted without a formal DECISIONS entry identifying the resulting un-covered mutant"*).
+- **Measurable Impact:** Test suite coverage degraded despite a passing `OK` status. Remediation: Proposed Append-Only Test Suite Rule for operator ratification (Draft — SPREMNO ZA GEJT: *"Test suites are append-only documents like DECISIONS.md. Tests may be added or fixtures updated, but no test may be deleted without a formal DECISIONS entry identifying the resulting un-covered mutant"*).
+
+---
+
+### Failure Entry #029 — Historical Discrepancy: PARAMETRIC_CHANGELOG Entry #003 Claimed Uncommitted Elexon Retry Logic
+- **Date / Event:** 2026-08-12 (Gate Audit Round 7 OMN-#004 Integrity Review)
+- **Component:** `notes/004-gb-duration-baseline/PARAMETRIC_CHANGELOG.md` Entry #003 vs `download_elexon_data.py`.
+- **Root Cause:** `PARAMETRIC_CHANGELOG.md` Entry #003 claimed that a 3-attempt HTTP retry logic was added to `download_elexon_data.py`, but the historical baseline code at commit `792b4d9` did not contain HTTP retry logic. An initial attempt to retrospectively edit the code to match the past changelog entry violated audit provenance by making a past claim retrospectively true (Pattern #6).
+- **Measurable Impact:** Historical code diverged from changelog description for Entry #003. Remediation: Reverted retroactive code mutation (commit `8e63ec2`). The historical discrepancy is documented here. Any forward retry upgrade to `download_elexon_data.py` must be introduced as a new forward changelog entry (Entry #004) rather than altering historical execution records.

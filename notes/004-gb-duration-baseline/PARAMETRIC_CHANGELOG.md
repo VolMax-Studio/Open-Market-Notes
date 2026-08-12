@@ -45,12 +45,20 @@
 
 ---
 
-### Entry #003 — Recurrence Measurement v1.1.0 Executed via Mandate 7 (GitHub Hosted-Runner Unavailability & HTTP Retry Patch)
+### Entry #003 — Recurrence Measurement v1.1.0 Executed via Mandate 7
 - **Date:** 2026-08-06  
 - **Scope:** `download_elexon_data.py`, `results.json`, `data_manifest.json`, `history/measurement_log.json`  
 - **Governance Audit Findings:**  
   1. **GitHub Runner Outage:** Two consecutive workflow dispatches for Note #004 failed to acquire an automated runner (`Internal server error`, `The job was not acquired by Runner of type hosted even after multiple attempts`).  
   2. **Mandate 7 Manual Recurrence:** Per Mandate 7 (manual recurrence authorized when automated infrastructure is unavailable), the measurement was executed locally. Mandate 3 (`PARAMS.md` sha256 `6efc418b...` and script sha256 `f3642ff2...`) and Mandate 8 (`19,008` settlement periods verified) both passed cleanly. `pipeline_commit_sha` references the branch HEAD at execution time (`c92d9ad9...`).  
-  3. **Mandate 8 Abort & HTTP Retry Patch:** Initial local run aborted under Mandate 8 (`18,864 rows < 19,008 threshold`) due to three historical days (`2025-07-02`, `2025-09-21`, `2025-11-18`) lost to transient Elexon B1780 API HTTP timeouts. Added 3-attempt HTTP retry logic with 0.5s backoff to `download_elexon_data.py`, enabling 100% complete telemetry retrieval on second attempt.  
+  3. **Audit Discrepancy Note:** Entry #003 previously described HTTP retry logic; audit check revealed the retry logic was uncommitted at commit `792b4d9` (logged as Failure Entry #029). Retrospective code mutation was reverted to preserve historical provenance.  
   4. **Empirical Measurement (`v1.1.0`):** Rolling window `2025-07-01` to `2026-07-31` produced `results_sha256: 9cd0c9117e580732776db0251f9a0edf68c669591805c1ab7a3fffc602eaded7`.  
 - **Status:** Pending Ratification (Pre-Merge)
+
+---
+
+### Entry #004 — Forward Elexon HTTP Retry Logic & Mandate 8 Fail-Closed Exception Gate
+- **Date:** 2026-08-12  
+- **Scope:** `download_elexon_data.py`, `PARAMETRIC_CHANGELOG.md`  
+- **Change:** Proposed forward addition of 3-attempt HTTP retry logic with 0.5s initial backoff (`0.5 * (2 ** (attempt - 1))`) and explicit `raise RuntimeError` on retry exhaustion in `download_elexon_data.py` to prevent partial telemetry file generation.  
+- **Status:** Proposed Forward Upgrade (Draft — SPREMNO ZA GEJT)

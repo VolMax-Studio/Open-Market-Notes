@@ -67,6 +67,6 @@
 - **Context:** Operator review of Gate Round 6 identified architectural friction in pre-registration freeze hash mutation upon binding resolution (B43) and test suite coverage regressions across refactorings (B44).
 - **Decision:**
   1. **Clean Instance Abandonment:** Telemetry data was not downloaded, and the probe evaluator was never executed against live telemetry. The instance directory `instances/entsoe-eclipse-exp-20260812/` is preserved in the repository for audit history, and its registry status in `notes_registry.json` is set to `"Abandoned — pre-registered, never executed"`.
-  2. **Append-Only Test Suite Rule Codified:** Formally adopted the Append-Only Test Suite Rule into P10 methodology: *"A test suite is an append-only document like DECISIONS.md. Tests may be added or fixtures updated, but no test may be deleted without a formal DECISIONS entry identifying the resulting un-covered mutant."*
+  2. **Proposed Append-Only Test Suite Rule (Draft — SPREMNO ZA GEJT):** Proposed rule for operator ratification into P10 methodology: *"A test suite is an append-only document like DECISIONS.md. Tests may be added or fixtures updated, but no test may be deleted without a formal DECISIONS entry identifying the resulting un-covered mutant."*
 
 *VolMax Studio Lab · Append-Only Decision Record*
