@@ -41,12 +41,13 @@ This pre-registered exploratory probe measures whether the Total Solar Eclipse o
 
 ## 4. Pre-Registered Per-Zone & Global Verdict Rules
 
-### 4-State Global Verdict Enum
-The global probe verdict is chosen from a strict 4-state enum:
+### 5-State Global Verdict Enum
+The global probe verdict is chosen from a strict 5-state enum:
 1. **`ELEVATED_BY_EVENT`**: At least one comparison zone returns `ELEVATED_BY_EVENT`.
 2. **`INDETERMINATE`**: Zero zones are `ELEVATED_BY_EVENT`, and at least one zone returns `INDETERMINATE`.
-3. **`INCOMPLETE`**: Zero zones are `ELEVATED_BY_EVENT`, and at least one zone returns `INCOMPLETE`.
-4. **`NULL`**: All target zones evaluated cleanly with $100\%$ completeness and returned `NOT_ELEVATED`.
+3. **`INCOMPLETE`**: Zero zones are `ELEVATED_BY_EVENT`, zero zones are `INDETERMINATE`, and at least one zone returns `INCOMPLETE`.
+4. **`DATA_PENDING`**: Zero zones are `ELEVATED_BY_EVENT`, `INDETERMINATE`, or `INCOMPLETE`, and at least one target zone has un-fetched telemetry (`DATA_PENDING`). An un-fetched zone can NEVER yield global `NULL`.
+5. **`NULL`**: All target zones evaluated cleanly with completeness $\ge 80.0\%$ and zero target zones returned `ELEVATED_BY_EVENT`.
 
 ### Per-Zone Elevation Rule
 A bidding zone $z$ is classified as **`ELEVATED_BY_EVENT`** if and only if:
@@ -54,6 +55,6 @@ $$\text{Event Status}_z == \mathtt{ELEVATED} \quad \text{AND} \quad N_{\text{con
 where each control day is evaluated under symmetric M1 v0.7.4 exposure bounds. A control day counts as a crossing if its status is `ELEVATED` or `INDETERMINATE` (conservative inclusion against false elevation claims). If $N_{\text{incomplete\_control\_days}, z} \ge 2$, zone $z$ status is `INCOMPLETE`.
 
 ### Unconditional Disclosure Commitment
-Even if all zones return `NOT_ELEVATED`, `INDETERMINATE`, `INCOMPLETE`, or `NULL`, the final result will be published without modification or cherry-picking.
+Even if all zones return `NOT_ELEVATED`, `INDETERMINATE`, `INCOMPLETE`, `DATA_PENDING`, or `NULL`, the final result will be published without modification or cherry-picking.
 
 *VolMax Studio Lab · Pre-Registered Exploratory Probe*

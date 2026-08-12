@@ -21,7 +21,7 @@
   "classifier_version": "v1.4.1",
   "q_ref": 0.90,
   "k_multiplier": 1.50,
-  "s_thresh_formula": "S_thresh is selected conservatively as 20.0% (exactly >= 2 out of 10 MTUs) over 10.0% (1 out of 10 MTUs) to require >= 30 min of extreme scarcity persistence.",
+  "s_thresh_formula": "S_thresh = k * (1 - q_ref) = 1.50 * 0.10 = 0.15 (15.0%). Selected conservatively as 20.0% (exactly >= 2 out of 10 MTUs) over 10.0% (1 out of 10 MTUs) to require >= 30 min of extreme scarcity persistence.",
   "s_thresh_pct": 20.0,
   "s_thresh_discrete_intervals": ">= 2 out of 10 MTUs (15-min MTU resolution)",
   "timestamp_convention": "PROVISIONAL_INTERVAL_START_UTC (Pending L0 source session check)",
@@ -64,7 +64,8 @@
   "completeness_rationale": "Allows 1 missing 15-min MTU out of 10 (8/10 = 80.0%), evaluated under M1 v0.7.4 exposure bounds [E_lower, E_upper].",
   "max_control_crossings_allowed": 2,
   "max_incomplete_control_days_allowed": 1,
-  "global_verdict_enum": ["ELEVATED_BY_EVENT", "INDETERMINATE", "INCOMPLETE", "NULL"],
+  "provisional_execution_gate": true,
+  "global_verdict_enum": ["ELEVATED_BY_EVENT", "INDETERMINATE", "INCOMPLETE", "DATA_PENDING", "NULL"],
   "comparability_discipline_disclosure": "Target zones differ in settlement mechanics (single-pricing in DE_LU/NL vs dual/single rules in ES/FR). Imbalance persistence values are measured against zone-local 12-month fixed P90 baselines (R_z), which natively absorb zone-specific pricing structures, but cross-zone persistence values reflect distinct market settlement designs.",
   "per_zone_elevation_rule": "A zone z is ELEVATED_BY_EVENT iff event_determinacy == ELEVATED AND control_crossings <= 2 AND incomplete_control_days < 2. Control day crossings include days with status ELEVATED or INDETERMINATE (conservative inclusion against false elevation claim). If incomplete_control_days >= 2, zone status is INCOMPLETE.",
   "falsification_rule": "The hypothesis that the solar eclipse produced measurable extreme scarcity elevation is FALSE if zero comparison zones return ELEVATED_BY_EVENT."

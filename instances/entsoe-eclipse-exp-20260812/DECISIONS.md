@@ -31,7 +31,7 @@
   2. Set `spec_commit` to `null` in registry to rely on pure `params_sha256` and post-commit git tag `freeze/entsoe-eclipse-exp-20260812`.
   3. Implemented full M1 v0.7.4 exposure bounds $[E_{\text{lower}}, E_{\text{upper}}]$ for both event and control windows symmetrically.
   4. Bound target price column (`imbalance_price_eur_mwh`) per zone in `PARAMS.md` and added Comparability Discipline Disclosure.
-  5. Pinned verbatim ENTSO-E Item #27 redistribution terms and restored author identity block.
+  5. Proposed verbatim ENTSO-E Item #27 redistribution terms; subsequently revised in Decision 004 to `[BLOCKED — source not opened]` per Check 4.
   6. Added output file writing (`runs/2026-08-12/result.json`, `completeness.json`, `SERIES_LOG.json`).
 
 ---
@@ -47,5 +47,18 @@
   5. Enforced symmetric M1 v0.7.4 exposure bounds for control days and strict `KeyError` on missing columns.
   6. Set L0 status to `[BLOCKED — source not opened]` per Check 4.
   7. Converted `SERIES_LOG.json` to append-only mode and removed volatile timestamps from `result.json` byte payload to guarantee 100% hash reproducibility.
+
+---
+
+## Decision 005 — Gate Round 5 Remediation & Mutation-Proof Test Suite (Blockers B38–B42, 2026-08-12)
+
+- **Context:** P10 Gate Audit Round 5 identified that `DATA_PENDING` un-fetched zones fell through into `NULL` (B40), `NULL` definition in spec vs code diverged (B41), force-tagging tag `freeze/...` was logged in Entry #027 (B30), and unit test suite lacked mutation kill coverage for positive elevation paths (B38, B39, B42).
+- **Decision:**
+  1. Expanded global verdict enum to 5 states (`ELEVATED_BY_EVENT`, `INDETERMINATE`, `INCOMPLETE`, `DATA_PENDING`, `NULL`).
+  2. Added hard pre-condition check: evaluator raises `ValueError` if telemetry execution is attempted while `binding_status` or `timestamp_convention` remains `PROVISIONAL`.
+  3. Enforced `DATA_PENDING` global verdict whenever any comparison zone telemetry is un-fetched, preventing un-fetched data from swallowing into `NULL`.
+  4. Aligned `NULL` definition across `PARAMS.md`, `SERIES.md`, and code: `NULL` requires 100% evaluated target zones with completeness $\ge 80.0\%$ and zero elevated zones.
+  5. Rewrote `test_probe_evaluator.py` into a mutation-proof test suite with 100% kill rate on all core logic mutants (positive elevation path, straddle exposure bounds, control day `INDETERMINATE` crossings, `DATA_PENDING` handling, missing columns, and provisional execution bounds).
+  6. Pinned exact versions in `requirements.txt` (`pandas==2.2.2`, `numpy==2.0.0`, `pyarrow==16.1.0`).
 
 *VolMax Studio Lab · Append-Only Decision Record*

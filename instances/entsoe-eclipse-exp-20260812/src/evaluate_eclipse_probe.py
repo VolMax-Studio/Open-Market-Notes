@@ -48,6 +48,16 @@ def evaluate_eclipse_probe(instance_dir=None):
     inputs_manifest_path = os.path.join(inputs_dir, 'MANIFEST.json')
     inputs_manifest_sha256 = compute_sha256(inputs_manifest_path) if os.path.exists(inputs_manifest_path) else None
 
+    # Fix F1: Pre-condition check for provisional bindings/conventions during telemetry execution
+    t_conv = str(params.get('timestamp_convention', ''))
+    has_provisional_binding = any('PROVISIONAL' in str(z_b.get('binding_status', '')) for z_b in series_bindings.values())
+    has_provisional_conv = 'PROVISIONAL' in t_conv
+
+    # Check if telemetry files actually exist in inputs_dir
+    telemetry_files_exist = any(os.path.exists(os.path.join(inputs_dir, f'imbalance_{z}.feather')) for z in comp_zones)
+    if telemetry_files_exist and (has_provisional_binding or has_provisional_conv):
+        raise ValueError("Pre-registration execution gate failure: Telemetry execution is forbidden while bindings or timestamp_convention remain PROVISIONAL.")
+
     print(f"========================================================================")
     print(f"  PRE-REGISTERED SOLAR ECLIPSE PROBE EVALUATOR ({params.get('instance_id')})")
     print(f"========================================================================")
@@ -74,14 +84,13 @@ def evaluate_eclipse_probe(instance_dir=None):
 
         df = pd.read_feather(filepath)
 
-        # Fix B26 / F1 / F2: Require explicit series_bindings per zone, NO silent fallbacks!
         if z not in series_bindings:
             raise KeyError(f"Zone '{z}' missing from series_bindings in PARAMS.md.")
 
         z_bind = series_bindings[z]
         t_col = z_bind.get('timestamp_col', 'DateTime')
         val_col = z_bind.get('imbalance_col', 'imbalance_price_eur_mwh')
-        nominal_mtus = z_bind['nominal_mtus']  # Require nominal_mtus explicitly!
+        nominal_mtus = z_bind['nominal_mtus']
 
         if t_col not in df.columns:
             raise KeyError(f"Timestamp column '{t_col}' specified in series_bindings not found in file for zone {z}. Available: {list(df.columns)}")
@@ -211,24 +220,25 @@ def evaluate_eclipse_probe(instance_dir=None):
 
         print(f"Zone {z:6s} | R_z = {r_val:7.2f} | Admitted: {admitted_mtus}/{nominal_mtus} | Exp Lower: {exp_lower*100:5.1f}% | Exp Upper: {exp_upper*100:5.1f}% | Control Crossings: {control_crossings}/7 | Verdict: {zone_determinacy}")
 
-    all_pending = all(d == 'DATA_PENDING' for d in zone_determinacies)
-    if all_pending:
-        print("\nProbe evaluation state: SPREMNO ZA EVALUACIJU (Specification Frozen, Awaiting Telemetry Download).")
-        return {"status": "SPREMNO ZA EVALUACIJU", "inputs_manifest_sha256": inputs_manifest_sha256}
-
-    # 4-State global verdict enum
+    # Fix B40: Strict 5-state global verdict enum
     if any(d == "ELEVATED_BY_EVENT" for d in zone_determinacies):
         final_verdict = "ELEVATED_BY_EVENT"
     elif any(d == "INDETERMINATE" for d in zone_determinacies):
         final_verdict = "INDETERMINATE"
     elif any(d == "INCOMPLETE" for d in zone_determinacies):
         final_verdict = "INCOMPLETE"
+    elif any(d == "DATA_PENDING" for d in zone_determinacies):
+        final_verdict = "DATA_PENDING"
     else:
         final_verdict = "NULL"
 
     print(f"\nFinal Global Probe Verdict: {final_verdict} (Elevated zones: {n_elevated_by_event}/{len(comp_zones)})")
 
-    # Output artifact generation (Fix B19, B28, B29)
+    if final_verdict == "DATA_PENDING" and all(d == "DATA_PENDING" for d in zone_determinacies):
+        print("\nProbe evaluation state: SPREMNO ZA EVALUACIJU (Specification Frozen, Awaiting Telemetry Download).")
+        return {"status": "SPREMNO ZA EVALUACIJU", "verdict": "DATA_PENDING", "inputs_manifest_sha256": inputs_manifest_sha256}
+
+    # Output artifact generation
     runs_dir = os.path.join(instance_dir, 'runs')
     event_date_str = event_win.get('date', '2026-08-12')
     run_date_dir = os.path.join(runs_dir, event_date_str)
@@ -265,7 +275,6 @@ def evaluate_eclipse_probe(instance_dir=None):
     with open(completeness_json_path, 'w') as f:
         json.dump({"zone_completeness": zone_completeness, "floor_pct": floor_pct}, f, indent=2)
 
-    # Fix B36: Pure append-only SERIES_LOG.json without deleting prior entries!
     existing_log = []
     if os.path.exists(series_log_path):
         try:
