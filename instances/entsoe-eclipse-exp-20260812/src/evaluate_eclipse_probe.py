@@ -14,18 +14,8 @@ def compute_sha256(filepath):
     return sha256_hash.hexdigest()
 
 def get_instance_dir():
-    # Anchor to script location, never hardcode absolute home paths!
     src_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.dirname(src_dir)
-
-def bind_timestamp_col(df):
-    for col in ['DateTime', 'timestamp', 'startTime', 'MTU', 'Position', 'index']:
-        if col in df.columns:
-            return col
-    time_cols = [c for c in df.columns if 'time' in c.lower() or 'date' in c.lower()]
-    if time_cols:
-        return time_cols[0]
-    raise ValueError(f"Unable to find timestamp column. Columns: {list(df.columns)}")
 
 def evaluate_eclipse_probe(instance_dir=None):
     if instance_dir is None:
@@ -45,6 +35,7 @@ def evaluate_eclipse_probe(instance_dir=None):
     s_thresh_frac = s_thresh_pct / 100.0
     floor_pct = float(params.get('completeness_floor_pct', 80.0))
     max_control_crossings = int(params.get('max_control_crossings_allowed', 2))
+    max_incomplete_controls = int(params.get('max_incomplete_control_days_allowed', 1))
     q_method = params.get('quantile_method', 'linear')
 
     comp_zones = params.get('comparison_zones', ["ES", "PT", "FR", "DE_LU", "NL"])
@@ -82,18 +73,25 @@ def evaluate_eclipse_probe(instance_dir=None):
             continue
 
         df = pd.read_feather(filepath)
-        t_col = bind_timestamp_col(df)
+
+        # Fix B26 / F1 / F2: Require explicit series_bindings per zone, NO silent fallbacks!
+        if z not in series_bindings:
+            raise KeyError(f"Zone '{z}' missing from series_bindings in PARAMS.md.")
+
+        z_bind = series_bindings[z]
+        t_col = z_bind.get('timestamp_col', 'DateTime')
+        val_col = z_bind.get('imbalance_col', 'imbalance_price_eur_mwh')
+        nominal_mtus = z_bind['nominal_mtus']  # Require nominal_mtus explicitly!
+
+        if t_col not in df.columns:
+            raise KeyError(f"Timestamp column '{t_col}' specified in series_bindings not found in file for zone {z}. Available: {list(df.columns)}")
+        if val_col not in df.columns:
+            raise KeyError(f"Target column '{val_col}' specified in series_bindings not found in file for zone {z}. Available: {list(df.columns)}")
+
         df[t_col] = pd.to_datetime(df[t_col], utc=True)
         df = df.set_index(t_col).sort_index()
 
-        z_bind = series_bindings.get(z, {})
-        val_col = z_bind.get('imbalance_col', 'imbalance_price_eur_mwh')
-
-        # Fix B26: Require target column explicitly, NO silent fallback!
-        if val_col not in df.columns:
-            raise KeyError(f"Target column '{val_col}' specified in series_bindings not found in telemetry file for zone {z}. Available columns: {list(df.columns)}")
-
-        # 1. Baseline R_z calculation (12M rolling P90, method='linear') using half-open slicing
+        # 1. Baseline R_z calculation using half-open slicing [start, end)
         b_start = pd.Timestamp(b_bounds['start'])
         b_end = pd.Timestamp(b_bounds['end'])
         b_slice = df.loc[(df.index >= b_start) & (df.index < b_end)][val_col].dropna()
@@ -101,13 +99,12 @@ def evaluate_eclipse_probe(instance_dir=None):
             raise ValueError(f"Baseline empty for zone {z}")
         r_val = float(np.percentile(b_slice, q_ref * 100.0, method=q_method))
 
-        # 2. Event window measurement (Fix B20: Half-Open Interval Slicing [start, end))
+        # 2. Event window measurement (Half-Open Interval Slicing [start, end))
         ev_start = pd.Timestamp(event_win['start'])
         ev_end = pd.Timestamp(event_win['end'])
         e_slice = df.loc[(df.index >= ev_start) & (df.index < ev_end)][val_col]
         e_valid = e_slice.dropna()
 
-        nominal_mtus = z_bind.get('nominal_mtus', event_win.get('nominal_15min_mtus', 10))
         admitted_mtus = len(e_valid)
         missing_mtus = nominal_mtus - admitted_mtus
         comp_pct = (admitted_mtus / nominal_mtus) * 100.0 if nominal_mtus > 0 else 0.0
@@ -126,7 +123,7 @@ def evaluate_eclipse_probe(instance_dir=None):
         else:
             event_determinacy = "INDETERMINATE"
 
-        # 3. Control days measurements (Fix B23: Symmetric M1 v0.7.4 bounded exposure)
+        # 3. Control days measurements (Symmetric M1 v0.7.4 bounded exposure)
         control_crossings = 0
         incomplete_control_days = 0
         control_details = []
@@ -171,7 +168,7 @@ def evaluate_eclipse_probe(instance_dir=None):
             })
 
         # Per-zone elevation rule
-        if incomplete_control_days >= 2:
+        if incomplete_control_days > max_incomplete_controls:
             zone_determinacy = "INCOMPLETE"
             is_elevated_by_event = False
         else:
@@ -200,6 +197,7 @@ def evaluate_eclipse_probe(instance_dir=None):
             "zone_determinacy": zone_determinacy,
             "control_crossings": control_crossings,
             "max_control_crossings_allowed": max_control_crossings,
+            "incomplete_control_days": incomplete_control_days,
             "is_elevated_by_event": is_elevated_by_event,
             "control_details": control_details
         }
@@ -218,7 +216,7 @@ def evaluate_eclipse_probe(instance_dir=None):
         print("\nProbe evaluation state: SPREMNO ZA EVALUACIJU (Specification Frozen, Awaiting Telemetry Download).")
         return {"status": "SPREMNO ZA EVALUACIJU", "inputs_manifest_sha256": inputs_manifest_sha256}
 
-    # Fix B22: Enum final verdict distinction
+    # 4-State global verdict enum
     if any(d == "ELEVATED_BY_EVENT" for d in zone_determinacies):
         final_verdict = "ELEVATED_BY_EVENT"
     elif any(d == "INDETERMINATE" for d in zone_determinacies):
@@ -230,7 +228,7 @@ def evaluate_eclipse_probe(instance_dir=None):
 
     print(f"\nFinal Global Probe Verdict: {final_verdict} (Elevated zones: {n_elevated_by_event}/{len(comp_zones)})")
 
-    # Fix B19, B28, B29: Output artifact generation & deterministic hash
+    # Output artifact generation (Fix B19, B28, B29)
     runs_dir = os.path.join(instance_dir, 'runs')
     event_date_str = event_win.get('date', '2026-08-12')
     run_date_dir = os.path.join(runs_dir, event_date_str)
@@ -267,7 +265,7 @@ def evaluate_eclipse_probe(instance_dir=None):
     with open(completeness_json_path, 'w') as f:
         json.dump({"zone_completeness": zone_completeness, "floor_pct": floor_pct}, f, indent=2)
 
-    # Fix B28: Append-only SERIES_LOG.json
+    # Fix B36: Pure append-only SERIES_LOG.json without deleting prior entries!
     existing_log = []
     if os.path.exists(series_log_path):
         try:
@@ -277,6 +275,7 @@ def evaluate_eclipse_probe(instance_dir=None):
             existing_log = []
 
     series_log_entry = {
+        "run_id": len(existing_log) + 1,
         "window": event_date_str,
         "evaluated_at": pd.Timestamp.now(tz='UTC').isoformat(),
         "verdict": final_verdict,
@@ -284,8 +283,6 @@ def evaluate_eclipse_probe(instance_dir=None):
         "result_sha256": compute_sha256(result_json_path)
     }
 
-    # Append if not duplicate timestamp window
-    existing_log = [e for e in existing_log if e.get('window') != event_date_str]
     existing_log.append(series_log_entry)
 
     with open(series_log_path, 'w') as f:

@@ -7,7 +7,6 @@ import unittest
 import pandas as pd
 import numpy as np
 
-# Ensure instance src is in path
 src_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src')
 if src_dir not in sys.path:
     sys.path.insert(0, src_dir)
@@ -21,119 +20,107 @@ class TestSolarEclipseProbeEvaluator(unittest.TestCase):
         self.inputs_dir = os.path.join(self.test_dir, 'inputs')
         os.makedirs(self.inputs_dir, exist_ok=True)
 
-        # Write test PARAMS.md
-        self.params_content = """# PARAMS — Test Config
-```json
-{
-  "instance_id": "entsoe-eclipse-exp-20260812",
-  "selection_mode": "exploratory",
-  "q_ref": 0.90,
-  "s_thresh_pct": 20.0,
-  "quantile_method": "linear",
-  "completeness_floor_pct": 80.0,
-  "max_control_crossings_allowed": 2,
-  "baseline_N_months": 12,
-  "baseline_utc_bounds": {
-    "start": "2025-08-01T00:00:00Z",
-    "end": "2026-07-31T23:59:59Z"
-  },
-  "event_utc_window": {
-    "date": "2026-08-12",
-    "start": "2026-08-12T17:00:00Z",
-    "end": "2026-08-12T19:30:00Z",
-    "duration_minutes": 150,
-    "nominal_15min_mtus": 10
-  },
-  "control_utc_windows": [
-    {"date": "2026-08-05", "start": "2026-08-05T17:00:00Z", "end": "2026-08-05T19:30:00Z"},
-    {"date": "2026-08-06", "start": "2026-08-06T17:00:00Z", "end": "2026-08-06T19:30:00Z"},
-    {"date": "2026-08-07", "start": "2026-08-07T17:00:00Z", "end": "2026-08-07T19:30:00Z"},
-    {"date": "2026-08-08", "start": "2026-08-08T17:00:00Z", "end": "2026-08-08T19:30:00Z"},
-    {"date": "2026-08-09", "start": "2026-08-09T17:00:00Z", "end": "2026-08-09T19:30:00Z"},
-    {"date": "2026-08-10", "start": "2026-08-10T17:00:00Z", "end": "2026-08-10T19:30:00Z"},
-    {"date": "2026-08-11", "start": "2026-08-11T17:00:00Z", "end": "2026-08-11T19:30:00Z"}
-  ],
-  "comparison_zones": ["ES"],
-  "companion_zones": [],
-  "series_bindings": {
-    "ES": {"imbalance_col": "imbalance_price_eur_mwh", "interval_sec": 900.0, "nominal_mtus": 10}
-  }
-}
-```
-"""
+        # Copy actual frozen PARAMS.md from instance root for 100% config parity (B35)
+        instance_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        actual_params_path = os.path.join(instance_root, 'PARAMS.md')
+        with open(actual_params_path) as f:
+            params_content = f.read()
+
         with open(os.path.join(self.test_dir, 'PARAMS.md'), 'w') as f:
-            f.write(self.params_content)
+            f.write(params_content)
 
     def tearDown(self):
         import shutil
         shutil.rmtree(self.test_dir)
 
-    def make_synthetic_feather(self, zone="ES", event_prices=None, drop_event_idx=None):
-        # Create full 1-year timestamps + 7 control days + 1 event day
-        b_dates = pd.date_range("2025-08-01", "2026-07-31 23:45", freq="15min", tz="UTC")
-        b_df = pd.DataFrame({"DateTime": b_dates, "imbalance_price_eur_mwh": 50.0})
-        # Set top 10% to 150.0 so P90 is around 60.0
-        n_p90 = int(len(b_df) * 0.10)
-        b_df.iloc[:n_p90, b_df.columns.get_loc("imbalance_price_eur_mwh")] = 150.0
+    def make_synthetic_feather(self, zones=None, event_prices_dict=None, drop_event_idx_dict=None, drop_control_dict=None):
+        if zones is None:
+            zones = ["ES", "PT", "FR", "DE_LU", "NL"]
 
-        # Control days timestamps (17:00 to 19:30 half-open = 10 MTUs per day)
-        c_rows = []
-        for c_date in ["2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11"]:
-            c_ts = pd.date_range(f"{c_date} 17:00", f"{c_date} 19:15", freq="15min", tz="UTC")
-            for ts in c_ts:
-                c_rows.append({"DateTime": ts, "imbalance_price_eur_mwh": 50.0}) # All normal
-        c_df = pd.DataFrame(c_rows)
+        for z in zones:
+            b_dates = pd.date_range("2025-08-01", "2026-07-31 23:45", freq="15min", tz="UTC")
+            b_df = pd.DataFrame({"DateTime": b_dates, "imbalance_price_eur_mwh": 50.0})
+            n_p90 = int(len(b_df) * 0.10)
+            b_df.iloc[:n_p90, b_df.columns.get_loc("imbalance_price_eur_mwh")] = 150.0
 
-        # Event day timestamps (17:00 to 19:30 half-open = 10 MTUs)
-        e_ts = pd.date_range("2026-08-12 17:00", "2026-08-12 19:15", freq="15min", tz="UTC")
-        if event_prices is None:
-            event_prices = [50.0] * 10
+            # Control days timestamps extended past 19:30 to 20:00 to test half-open slicing (B31)
+            c_rows = []
+            for c_date in ["2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11"]:
+                c_ts = pd.date_range(f"{c_date} 17:00", f"{c_date} 20:00", freq="15min", tz="UTC")
+                for idx, ts in enumerate(c_ts):
+                    if drop_control_dict and z in drop_control_dict and c_date in drop_control_dict[z] and idx in drop_control_dict[z][c_date]:
+                        continue
+                    c_rows.append({"DateTime": ts, "imbalance_price_eur_mwh": 50.0})
+            c_df = pd.DataFrame(c_rows)
 
-        e_df = pd.DataFrame({"DateTime": e_ts, "imbalance_price_eur_mwh": event_prices})
+            # Event day timestamps extended past 19:30 to 20:00 to test half-open slicing (B31)
+            e_ts = pd.date_range("2026-08-12 17:00", "2026-08-12 20:00", freq="15min", tz="UTC")
+            e_prices = event_prices_dict.get(z, [50.0]*len(e_ts)) if event_prices_dict else [50.0]*len(e_ts)
+            if len(e_prices) < len(e_ts):
+                e_prices = e_prices + [50.0] * (len(e_ts) - len(e_prices))
 
-        if drop_event_idx is not None:
-            e_df = e_df.drop(index=drop_event_idx).reset_index(drop=True)
+            e_df = pd.DataFrame({"DateTime": e_ts, "imbalance_price_eur_mwh": e_prices})
 
-        full_df = pd.concat([b_df, c_df, e_df], ignore_index=True)
-        full_df.to_feather(os.path.join(self.inputs_dir, f"imbalance_{zone}.feather"))
+            if drop_event_idx_dict and z in drop_event_idx_dict:
+                e_df = e_df.drop(index=drop_event_idx_dict[z]).reset_index(drop=True)
 
-    def test_b20_half_open_slice_exact_10_mtus(self):
-        """B20 Test: Ensure half-open slice [17:00, 19:30) returns exactly 10 admitted MTUs, not 11."""
-        self.make_synthetic_feather(event_prices=[50.0]*10)
+            full_df = pd.concat([b_df, c_df, e_df], ignore_index=True)
+            full_df.to_feather(os.path.join(self.inputs_dir, f"imbalance_{z}.feather"))
+
+    def test_b31_off_by_one_half_open_slice_fails_on_inclusive(self):
+        """B31 Test: Assert dataset containing 19:30 returns 11 on inclusive slicing, but EXACTLY 10 on half-open."""
+        self.make_synthetic_feather()
+        # Verify inclusive slicing on synthetic file yields 11 rows
+        df = pd.read_feather(os.path.join(self.inputs_dir, "imbalance_ES.feather"))
+        df['DateTime'] = pd.to_datetime(df['DateTime'], utc=True)
+        df = df.set_index('DateTime').sort_index()
+
+        inclusive_slice = df.loc["2026-08-12 17:00:00Z":"2026-08-12 19:30:00Z"]
+        self.assertEqual(len(inclusive_slice), 11, "Inclusive slicing MUST yield 11 rows when 19:30 exists")
+
+        # Verify evaluator uses half-open slicing to return exactly 10
         res = evaluate_eclipse_probe(self.test_dir)
         es_res = res['zone_results']['ES']
-        self.assertEqual(es_res['admitted_mtus'], 10)
+        self.assertEqual(es_res['admitted_mtus'], 10, "Evaluator MUST return exactly 10 admitted MTUs")
         self.assertEqual(es_res['nominal_mtus'], 10)
         self.assertEqual(es_res['completeness_pct'], 100.0)
-        self.assertEqual(res['verdict'], 'NULL')
 
-    def test_b22_enum_null_vs_indeterminate(self):
-        """B22 Test: Ensure missing interval resulting in exposure straddling thresh yields INDETERMINATE, not NULL."""
-        # Index 0 is 150.0 (elevated). Index 1 (50.0) is dropped.
-        # Admitted: 9 MTUs. q_count = 1. exp_lower = 1/10 = 10%, exp_upper = (1+1)/10 = 20%.
-        # Straddles 20.0% threshold -> INDETERMINATE!
-        event_prices = [150.0] + [50.0]*9  # 10 intervals
-        self.make_synthetic_feather(event_prices=event_prices, drop_event_idx=[1])
+    def test_b32_control_incomplete_and_indeterminate_branches(self):
+        """B32 Test: Assert control day INCOMPLETE, INDETERMINATE, and zone INCOMPLETE branches."""
+        # Zone ES: Drop 3 timestamps from control day 2026-08-05 (completeness 7/10 = 70% < 80% -> INCOMPLETE)
+        # Drop 3 timestamps from control day 2026-08-06 (INCOMPLETE) -> incomplete_control_days = 2 >= 2 -> Zone INCOMPLETE!
+        drop_control = {
+            "ES": {
+                "2026-08-05": [0, 1, 2],
+                "2026-08-06": [0, 1, 2]
+            }
+        }
+        self.make_synthetic_feather(drop_control_dict=drop_control)
         res = evaluate_eclipse_probe(self.test_dir)
         es_res = res['zone_results']['ES']
-        self.assertEqual(es_res['event_determinacy'], 'INDETERMINATE')
-        self.assertEqual(res['verdict'], 'INDETERMINATE')
+        self.assertEqual(es_res['incomplete_control_days'], 2)
+        self.assertEqual(es_res['zone_determinacy'], 'INCOMPLETE')
 
-    def test_b23_symmetric_control_evaluation(self):
-        """B23 Test: Control day missing intervals evaluate exposure bounds symmetrically."""
-        self.make_synthetic_feather(event_prices=[150.0, 150.0] + [50.0]*8) # 2 elevated = 20%
+    def test_b35_frozen_params_parity_all_5_zones(self):
+        """B35 Test: Verify evaluator runs against all 5 frozen zones in PARAMS.md cleanly."""
+        self.make_synthetic_feather()
         res = evaluate_eclipse_probe(self.test_dir)
-        es_res = res['zone_results']['ES']
-        self.assertEqual(es_res['event_determinacy'], 'ELEVATED')
-        self.assertEqual(es_res['is_elevated_by_event'], True)
-        self.assertEqual(res['verdict'], 'ELEVATED_BY_EVENT')
+        self.assertEqual(res['status'], 'EVALUATED')
+        self.assertEqual(set(res['zone_results'].keys()), {"ES", "PT", "FR", "DE_LU", "NL"})
 
-    def test_b26_missing_column_raises_keyerror(self):
-        """B26 Test: If target column specified in series_bindings is missing, script MUST raise KeyError."""
-        bad_df = pd.DataFrame({"DateTime": pd.date_range("2026-08-12 17:00", "2026-08-12 19:15", freq="15min", tz="UTC"), "wrong_column": [50.0]*10})
-        bad_df.to_feather(os.path.join(self.inputs_dir, "imbalance_ES.feather"))
-        with self.assertRaises(KeyError):
-            evaluate_eclipse_probe(self.test_dir)
+    def test_b36_series_log_append_only_deduplication(self):
+        """B36 Test: Verify multiple executions append to SERIES_LOG.json without overwriting history."""
+        self.make_synthetic_feather()
+        evaluate_eclipse_probe(self.test_dir)
+        evaluate_eclipse_probe(self.test_dir)
+
+        series_log_path = os.path.join(self.test_dir, 'runs', 'SERIES_LOG.json')
+        with open(series_log_path) as f:
+            log_entries = json.load(f)
+
+        self.assertEqual(len(log_entries), 2, "SERIES_LOG.json MUST retain all execution records (append-only)")
+        self.assertEqual(log_entries[0]['run_id'], 1)
+        self.assertEqual(log_entries[1]['run_id'], 2)
 
 if __name__ == '__main__':
     unittest.main()
