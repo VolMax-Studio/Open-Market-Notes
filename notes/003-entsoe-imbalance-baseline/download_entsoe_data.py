@@ -112,6 +112,7 @@ def update_manifest(filepath, file_hash, source_url, acquisition_mode, manifest_
         dirty = True
 
     if dirty:
+        manifest_data["acquired_at_utc"] = acquired_at
         manifest_data["files"] = list(files_dict.values())
         with open(manifest_path, 'w') as f:
             json.dump(manifest_data, f, indent=2)

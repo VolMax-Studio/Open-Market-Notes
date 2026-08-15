@@ -160,13 +160,20 @@ def run_l10_evaluation(baseline_dir, fresh_dir, report_out_path=None):
             manifest_found = True
             with open(mpath) as mf:
                 mdata = json.load(mf)
-                acq_str = mdata.get("acquired_at_utc")
-                if acq_str:
-                    acq_dt = pd.to_datetime(acq_str, utc=True)
+                acq_timestamps = []
+                if mdata.get("acquired_at_utc"):
+                    acq_timestamps.append(mdata.get("acquired_at_utc"))
+                for fitem in mdata.get("files", []):
+                    if isinstance(fitem, dict) and fitem.get("acquired_at_utc"):
+                        acq_timestamps.append(fitem.get("acquired_at_utc"))
+
+                if acq_timestamps:
                     cutoff_dt = pd.to_datetime(BASELINE_SNAPSHOT_CUTOFF_UTC, utc=True)
-                    if acq_dt <= cutoff_dt:
-                        print(f"FATAL ERROR: Manifest acquired_at_utc ({acq_str}) is not strictly newer than baseline snapshot cutoff ({BASELINE_SNAPSHOT_CUTOFF_UTC}). Lineage violated. Aborting.", file=sys.stderr)
-                        sys.exit(1)
+                    for acq_str in acq_timestamps:
+                        acq_dt = pd.to_datetime(acq_str, utc=True)
+                        if acq_dt <= cutoff_dt:
+                            print(f"FATAL ERROR: Manifest acquired_at_utc ({acq_str}) <= baseline cutoff ({BASELINE_SNAPSHOT_CUTOFF_UTC}). Lineage violated. Aborting.", file=sys.stderr)
+                            sys.exit(1)
             break
 
     # Strict validation check 3: Filesystem mtime fallback check
