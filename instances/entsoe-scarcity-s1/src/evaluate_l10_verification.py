@@ -3,6 +3,7 @@ import os
 import sys
 import json
 import argparse
+import subprocess
 import pandas as pd
 import numpy as np
 
@@ -13,16 +14,28 @@ FLOAT_TOLERANCE = 1e-4
 VOTING_ZONES = ["AT", "BE", "DK_1", "DK_2", "FR", "NL"]
 COMPANION_ZONES = ["GB"]
 
+def get_git_commit(cwd):
+    try:
+        res = subprocess.run(["git", "rev-parse", "HEAD"], cwd=cwd, capture_output=True, text=True, check=True)
+        return res.stdout.strip()
+    except Exception:
+        return "UNKNOWN"
+
 def evaluate_column_pair(df_base, df_fresh, zone, col_name, is_duplicate=False):
     if is_duplicate:
         return {
             "status": "DUPLICATE_SERIES (Long == Short)",
-            "N_revised_archive": 0,
-            "pct_revised_archive": 0.0,
-            "N_revised_july": 0,
-            "pct_revised_july": 0.0,
-            "max_abs_drift": 0.0,
-            "monthly_distribution": {}
+            "N_price_revisions_archive": 0,
+            "pct_price_revisions_archive": 0.0,
+            "N_coverage_changes_archive": 0,
+            "pct_coverage_changes_archive": 0.0,
+            "N_price_revisions_july": 0,
+            "pct_price_revisions_july": 0.0,
+            "N_coverage_changes_july": 0,
+            "pct_coverage_changes_july": 0.0,
+            "max_abs_drift_eur_mwh": 0.0,
+            "monthly_price_revisions": {},
+            "monthly_coverage_changes": {}
         }
 
     # Slice overlapping window
@@ -34,14 +47,15 @@ def evaluate_column_pair(df_base, df_fresh, zone, col_name, is_duplicate=False):
     base_aligned = base_slice.reindex(all_indices)
     fresh_aligned = fresh_slice.reindex(all_indices)
 
-    # Monthly breakdown tracking
-    monthly_rev = {}
+    # Separate monthly tracking
+    monthly_price_rev = {}
+    monthly_cov_change = {}
     
-    n_revised_archive = 0
-    n_revised_july = 0
+    n_price_rev_archive = 0
+    n_cov_change_archive = 0
+    n_price_rev_july = 0
+    n_cov_change_july = 0
     max_drift = 0.0
-    has_coverage_change = False
-    has_price_revision = False
 
     july_start = pd.Timestamp("2026-07-01 00:00:00", tz="UTC")
     july_end = pd.Timestamp("2026-07-31 21:45:00", tz="UTC")
@@ -51,37 +65,40 @@ def evaluate_column_pair(df_base, df_fresh, zone, col_name, is_duplicate=False):
         p1_nan = pd.isna(p1)
         p2_nan = pd.isna(p2)
 
-        is_revised = False
-        is_coverage = False
-        drift = 0.0
+        m_str = idx.strftime("%Y-%m")
+        is_july = (july_start <= idx <= july_end)
 
         if p1_nan and p2_nan:
             pass  # STABLE
         elif p1_nan != p2_nan:
-            is_coverage = True
-            has_coverage_change = True
+            # Explicit coverage change (one side is missing)
+            monthly_cov_change[m_str] = monthly_cov_change.get(m_str, 0) + 1
+            n_cov_change_archive += 1
+            if is_july:
+                n_cov_change_july += 1
         else:
             diff = abs(float(p2) - float(p1))
             if diff > FLOAT_TOLERANCE:
-                is_revised = True
-                has_price_revision = True
-                drift = diff
+                # Explicit price revision
+                monthly_price_rev[m_str] = monthly_price_rev.get(m_str, 0) + 1
+                n_price_rev_archive += 1
+                if is_july:
+                    n_price_rev_july += 1
                 if diff > max_drift:
                     max_drift = diff
-
-        if is_revised or is_coverage:
-            m_str = idx.strftime("%Y-%m")
-            monthly_rev[m_str] = monthly_rev.get(m_str, 0) + 1
-            n_revised_archive += 1
-            if july_start <= idx <= july_end:
-                n_revised_july += 1
 
     total_archive = len(all_indices)
     july_indices = [idx for idx in all_indices if july_start <= idx <= july_end]
     total_july = len(july_indices)
 
-    pct_archive = (n_revised_archive / total_archive * 100.0) if total_archive > 0 else 0.0
-    pct_july = (n_revised_july / total_july * 100.0) if total_july > 0 else 0.0
+    pct_rev_archive = (n_price_rev_archive / total_archive * 100.0) if total_archive > 0 else 0.0
+    pct_cov_archive = (n_cov_change_archive / total_archive * 100.0) if total_archive > 0 else 0.0
+
+    pct_rev_july = (n_price_rev_july / total_july * 100.0) if total_july > 0 else 0.0
+    pct_cov_july = (n_cov_change_july / total_july * 100.0) if total_july > 0 else 0.0
+
+    has_price_revision = (n_price_rev_archive > 0)
+    has_coverage_change = (n_cov_change_archive > 0)
 
     if has_price_revision and has_coverage_change:
         status = "PRICE_REVISION + COVERAGE_CHANGE"
@@ -94,14 +111,19 @@ def evaluate_column_pair(df_base, df_fresh, zone, col_name, is_duplicate=False):
 
     return {
         "status": status,
-        "N_revised_archive": n_revised_archive,
+        "N_price_revisions_archive": n_price_rev_archive,
+        "pct_price_revisions_archive": round(pct_rev_archive, 4),
+        "N_coverage_changes_archive": n_cov_change_archive,
+        "pct_coverage_changes_archive": round(pct_cov_archive, 4),
         "total_archive_intervals": total_archive,
-        "pct_revised_archive": round(pct_archive, 4),
-        "N_revised_july": n_revised_july,
+        "N_price_revisions_july": n_price_rev_july,
+        "pct_price_revisions_july": round(pct_rev_july, 4),
+        "N_coverage_changes_july": n_cov_change_july,
+        "pct_coverage_changes_july": round(pct_cov_july, 4),
         "total_july_intervals": total_july,
-        "pct_revised_july": round(pct_july, 4),
         "max_abs_drift_eur_mwh": round(max_drift, 4),
-        "monthly_distribution": monthly_rev
+        "monthly_price_revisions": monthly_price_rev,
+        "monthly_coverage_changes": monthly_cov_change
     }
 
 def run_l10_evaluation(baseline_dir, fresh_dir, report_out_path=None):
@@ -121,16 +143,18 @@ def run_l10_evaluation(baseline_dir, fresh_dir, report_out_path=None):
         df_b.index = pd.to_datetime(df_b.index, utc=True)
         df_f.index = pd.to_datetime(df_f.index, utc=True)
 
-        is_single_pricing = (df_b['Long'] == df_b['Short']).all()
+        # Enforce duplicate check across BOTH baseline AND fresh snapshots
+        is_single_pricing = (df_b['Long'] == df_b['Short']).all() and (df_f['Long'] == df_f['Short']).all()
 
         res_short = evaluate_column_pair(df_b, df_f, z, 'Short')
         res_long = evaluate_column_pair(df_b, df_f, z, 'Long', is_duplicate=is_single_pricing)
 
-        if "PRICE_REVISION" in res_short['status']:
+        # Apply primary condition to ALL non-duplicate columns
+        if "PRICE_REVISION" in res_short['status'] or ("PRICE_REVISION" in res_long['status'] and not is_single_pricing):
             overall_l10_sufficient = False
 
         results[z] = {
-            "is_single_pricing": bool(is_single_pricing),
+            "is_single_pricing_both_snapshots": bool(is_single_pricing),
             "columns": {
                 "Short": res_short,
                 "Long": res_long
@@ -151,7 +175,7 @@ def run_l10_evaluation(baseline_dir, fresh_dir, report_out_path=None):
         res_gb_sell = evaluate_column_pair(df_gb_b, df_gb_f, "GB", 'systemSellPrice')
         res_gb_buy = evaluate_column_pair(df_gb_b, df_gb_f, "GB", 'systemBuyPrice')
 
-        if "PRICE_REVISION" in res_gb_sell['status']:
+        if "PRICE_REVISION" in res_gb_sell['status'] or "PRICE_REVISION" in res_gb_buy['status']:
             overall_l10_sufficient = False
 
         results["GB"] = {
@@ -161,9 +185,12 @@ def run_l10_evaluation(baseline_dir, fresh_dir, report_out_path=None):
             }
         }
 
+    script_cwd = os.path.dirname(os.path.abspath(__file__))
+    current_commit = get_git_commit(script_cwd)
+
     summary = {
         "protocol_version": "v1.0.0",
-        "preregistration_commit": "3057a72",
+        "preregistration_commit": current_commit,
         "overall_l10_sufficient": overall_l10_sufficient,
         "zone_results": results
     }
@@ -182,3 +209,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     run_l10_evaluation(args.baseline_dir, args.fresh_dir, args.out_report)
+
