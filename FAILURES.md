@@ -69,12 +69,15 @@
 
 ---
 
-### Failure Entry #030 — Evaluator Path & Snapshot Temporal Monotonicity Check Bypass
+### Failure Entry #030 — Defect Class: Input Provenance & Snapshot Lineage Bypass
 - **Date / Event:** 2026-08-15 (L10 Publication Lag Verification Protocol Execution v1.0.0)
 - **Component:** `instances/entsoe-scarcity-s1/src/evaluate_l10_verification.py` & `instances/entsoe-scarcity-s1/test_fresh_fetch/l10_report.json`
-- **Root Cause:** The evaluator script `evaluate_l10_verification.py` was executed with `--fresh-dir` set to an existing historical probe directory (`notes/003-entsoe-imbalance-baseline/scratch/probe_jul2026/processed`) which had a file modification timestamp of 2026-08-08 (1 day older than the baseline snapshot dated 2026-08-09). The evaluator lacked pre-registered target path validation and temporal monotonicity enforcement (`mtime_fresh > mtime_baseline`), generating an invalid report (`l10_report.json`) claiming `overall_l10_sufficient: true` based on an inverted historical comparison.
+- **Root Cause (General Class):** Input Provenance Bypass. The evaluator script `evaluate_l10_verification.py` accepted arbitrary directory arguments for `--baseline-dir` and `--fresh-dir` without verifying strict canonical pre-registered absolute paths or data manifest lineage (`acquired_at_utc`). Consequently, it executed with `--fresh-dir` set to a 2026-08-08 probe cache (older than the 2026-08-09 baseline), producing an invalid `l10_report.json` claiming `overall_l10_sufficient: true` based on an inverted historical comparison.
 - **Measurable Impact:** Report `l10_report.json` claimed pre-registration verification success when no live 2026-08-15 fetch had occurred. Discovered and blocked by human operator gate audit before ratification.
 - **Remediation:** 
-  1. `l10_report.json` on branch `feat/preregister-l10-test` was updated via a forward commit with status `INVALIDATED_SNAPSHOT_MISMATCH` and `overall_l10_sufficient: null`.
-  2. `evaluate_l10_verification.py` was hardened with strict `sys.exit(1)` checks requiring `--fresh-dir` to contain `test_fresh_fetch` and enforcing `mtime(fresh) > mtime(baseline)`.
+  1. `l10_report.json` on branch `feat/preregister-l10-test` was updated via a forward commit (`96cbddc`) to status `INVALIDATED_SNAPSHOT_MISMATCH` with `overall_l10_sufficient: null`.
+  2. `evaluate_l10_verification.py` was hardened with strict `sys.exit(1)` checks enforcing:
+     - Exact canonical `abspath` equality for both `baseline_dir` (`.../inputs`) and `fresh_dir` (`.../test_fresh_fetch/processed`).
+     - Data manifest lineage check enforcing `acquired_at_utc > 2026-08-09T00:00:00Z`.
+     - Filesystem `mtime(fresh) > mtime(baseline)` fallback check.
 
