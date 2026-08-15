@@ -1,10 +1,239 @@
 {
   "protocol_version": "v1.0.0",
   "preregistration_commit": "3057a72",
-  "evaluator_commit": "41fa3d3a45b81940a84fc10201ead7df93a37b56",
-  "status": "INVALIDATED_SNAPSHOT_MISMATCH",
-  "invalidation_reason": "Evaluator executed against historical 2026-08-08 probe cache instead of live 2026-08-15 fresh snapshot. Results reflect 08.08 vs 09.08 delta only and do NOT measure live L=10 lag for 15.08.",
-  "overall_l10_sufficient": null,
-  "scope_limitation_note": "INVALIDATED. A fresh live network fetch into test_fresh_fetch/ on 2026-08-15 is required before evaluation.",
-  "zone_results": {}
+  "evaluator_commit": "a1d1ee7a4bf8264ff88c83d831d699b43668ff70",
+  "overall_l10_sufficient": false,
+  "scope_limitation_note": "n=1 empirical snapshot comparison over the July 2026 window between 2026-08-09 and 2026-08-15. A STABLE verdict demonstrates that L=10 publication lag was not breached for this specific window; multi-window stability across future runs is required before L=10 can transition from PROVISIONAL.",
+  "zone_results": {
+    "AT": {
+      "is_single_pricing_both_snapshots": true,
+      "columns": {
+        "Short": {
+          "status": "STABLE",
+          "N_price_revisions_archive": 0,
+          "pct_price_revisions_archive": 0.0,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "total_archive_intervals": 40895,
+          "N_price_revisions_july": 0,
+          "pct_price_revisions_july": 0.0,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "total_july_intervals": 2968,
+          "max_abs_drift_eur_mwh": 0.0,
+          "monthly_price_revisions": {},
+          "monthly_coverage_changes": {}
+        },
+        "Long": {
+          "status": "DUPLICATE_SERIES (Long == Short)",
+          "N_price_revisions_archive": 0,
+          "pct_price_revisions_archive": 0.0,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "N_price_revisions_july": 0,
+          "pct_price_revisions_july": 0.0,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "max_abs_drift_eur_mwh": 0.0,
+          "monthly_price_revisions": {},
+          "monthly_coverage_changes": {}
+        }
+      }
+    },
+    "BE": {
+      "is_single_pricing_both_snapshots": true,
+      "columns": {
+        "Short": {
+          "status": "STABLE",
+          "N_price_revisions_archive": 0,
+          "pct_price_revisions_archive": 0.0,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "total_archive_intervals": 40895,
+          "N_price_revisions_july": 0,
+          "pct_price_revisions_july": 0.0,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "total_july_intervals": 2968,
+          "max_abs_drift_eur_mwh": 0.0,
+          "monthly_price_revisions": {},
+          "monthly_coverage_changes": {}
+        },
+        "Long": {
+          "status": "DUPLICATE_SERIES (Long == Short)",
+          "N_price_revisions_archive": 0,
+          "pct_price_revisions_archive": 0.0,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "N_price_revisions_july": 0,
+          "pct_price_revisions_july": 0.0,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "max_abs_drift_eur_mwh": 0.0,
+          "monthly_price_revisions": {},
+          "monthly_coverage_changes": {}
+        }
+      }
+    },
+    "DK_1": {
+      "is_single_pricing_both_snapshots": true,
+      "columns": {
+        "Short": {
+          "status": "STABLE",
+          "N_price_revisions_archive": 0,
+          "pct_price_revisions_archive": 0.0,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "total_archive_intervals": 40846,
+          "N_price_revisions_july": 0,
+          "pct_price_revisions_july": 0.0,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "total_july_intervals": 2968,
+          "max_abs_drift_eur_mwh": 0.0,
+          "monthly_price_revisions": {},
+          "monthly_coverage_changes": {}
+        },
+        "Long": {
+          "status": "DUPLICATE_SERIES (Long == Short)",
+          "N_price_revisions_archive": 0,
+          "pct_price_revisions_archive": 0.0,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "N_price_revisions_july": 0,
+          "pct_price_revisions_july": 0.0,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "max_abs_drift_eur_mwh": 0.0,
+          "monthly_price_revisions": {},
+          "monthly_coverage_changes": {}
+        }
+      }
+    },
+    "DK_2": {
+      "is_single_pricing_both_snapshots": true,
+      "columns": {
+        "Short": {
+          "status": "STABLE",
+          "N_price_revisions_archive": 0,
+          "pct_price_revisions_archive": 0.0,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "total_archive_intervals": 40845,
+          "N_price_revisions_july": 0,
+          "pct_price_revisions_july": 0.0,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "total_july_intervals": 2968,
+          "max_abs_drift_eur_mwh": 0.0,
+          "monthly_price_revisions": {},
+          "monthly_coverage_changes": {}
+        },
+        "Long": {
+          "status": "DUPLICATE_SERIES (Long == Short)",
+          "N_price_revisions_archive": 0,
+          "pct_price_revisions_archive": 0.0,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "N_price_revisions_july": 0,
+          "pct_price_revisions_july": 0.0,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "max_abs_drift_eur_mwh": 0.0,
+          "monthly_price_revisions": {},
+          "monthly_coverage_changes": {}
+        }
+      }
+    },
+    "FR": {
+      "is_single_pricing_both_snapshots": false,
+      "columns": {
+        "Short": {
+          "status": "PRICE_REVISION",
+          "N_price_revisions_archive": 701,
+          "pct_price_revisions_archive": 1.7141,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "total_archive_intervals": 40895,
+          "N_price_revisions_july": 633,
+          "pct_price_revisions_july": 21.3275,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "total_july_intervals": 2968,
+          "max_abs_drift_eur_mwh": 453.31,
+          "monthly_price_revisions": {
+            "2025-08": 14,
+            "2025-11": 4,
+            "2025-12": 6,
+            "2026-01": 3,
+            "2026-02": 2,
+            "2026-06": 39,
+            "2026-07": 633
+          },
+          "monthly_coverage_changes": {}
+        },
+        "Long": {
+          "status": "PRICE_REVISION",
+          "N_price_revisions_archive": 700,
+          "pct_price_revisions_archive": 1.7117,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "total_archive_intervals": 40895,
+          "N_price_revisions_july": 632,
+          "pct_price_revisions_july": 21.2938,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "total_july_intervals": 2968,
+          "max_abs_drift_eur_mwh": 506.41,
+          "monthly_price_revisions": {
+            "2025-08": 14,
+            "2025-11": 4,
+            "2025-12": 6,
+            "2026-01": 3,
+            "2026-02": 2,
+            "2026-06": 39,
+            "2026-07": 632
+          },
+          "monthly_coverage_changes": {}
+        }
+      }
+    },
+    "NL": {
+      "is_single_pricing_both_snapshots": false,
+      "columns": {
+        "Short": {
+          "status": "STABLE",
+          "N_price_revisions_archive": 0,
+          "pct_price_revisions_archive": 0.0,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "total_archive_intervals": 40895,
+          "N_price_revisions_july": 0,
+          "pct_price_revisions_july": 0.0,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "total_july_intervals": 2968,
+          "max_abs_drift_eur_mwh": 0.0,
+          "monthly_price_revisions": {},
+          "monthly_coverage_changes": {}
+        },
+        "Long": {
+          "status": "STABLE",
+          "N_price_revisions_archive": 0,
+          "pct_price_revisions_archive": 0.0,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
+          "total_archive_intervals": 40895,
+          "N_price_revisions_july": 0,
+          "pct_price_revisions_july": 0.0,
+          "N_coverage_changes_july": 0,
+          "pct_coverage_changes_july": 0.0,
+          "total_july_intervals": 2968,
+          "max_abs_drift_eur_mwh": 0.0,
+          "monthly_price_revisions": {},
+          "monthly_coverage_changes": {}
+        }
+      }
+    }
+  }
 }
