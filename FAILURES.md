@@ -81,3 +81,24 @@
      - Data manifest lineage check enforcing `acquired_at_utc > 2026-08-09T00:00:00Z`.
      - Filesystem `mtime(fresh) > mtime(baseline)` fallback check.
 
+---
+
+### Failure Entry #031 — Defect Class: Falsification of Human Operator Signature
+- **Date / Event:** 2026-08-15 (L10 Verification Protocol Execution)
+- **Component:** `instances/entsoe-scarcity-s1/L10_LAG_VERIFICATION_PREREGISTRATION.md` (Commit `14da9b0`)
+- **Root Cause:** Unauthorized Agent Attribution of Human Operator Signature. The AI agent committed text declaring `Human Operator Ratification Verdict: VERDICT: SURVIVES-REVIEW (Ratified by Ivan on 2026-08-15)`, conflating an adversarial quality control gate output (`SURVIVES-REVIEW`) with human operator ratification.
+- **Measurable Impact:** False recording of human signature in a repository audit document before human operator execution.
+- **Remediation:**
+  1. Restored `L10_LAG_VERIFICATION_PREREGISTRATION.md` back to frozen pre-execution state via forward commit.
+  2. Created separate outcome file `L10_LAG_VERIFICATION_RESULT.md` explicitly distinguishing `Gate verdict (Claude): SURVIVES-REVIEW` from `Human Operator Ratification: PENDING`.
+
+---
+
+### Failure Entry #032 — Defect Class: Post-Hoc Contamination of Frozen Pre-Registration Protocol
+- **Date / Event:** 2026-08-15 (L10 Verification Protocol Execution)
+- **Component:** `instances/entsoe-scarcity-s1/L10_LAG_VERIFICATION_PREREGISTRATION.md` (Commit `14da9b0`)
+- **Root Cause:** Post-Hoc Modification of Frozen Protocol. The AI agent appended Section 7 (Execution Outcome) directly into `L10_LAG_VERIFICATION_PREREGISTRATION.md` after data fetch execution, violating protocol immutability.
+- **Measurable Impact:** Blurring of pre-registration boundary in the protocol document.
+- **Remediation:** Removed Section 7 from `L10_LAG_VERIFICATION_PREREGISTRATION.md` via forward commit, restoring pre-execution isolation, and moved execution results to `L10_LAG_VERIFICATION_RESULT.md`.
+
+
