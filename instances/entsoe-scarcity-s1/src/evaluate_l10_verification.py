@@ -190,8 +190,14 @@ def run_l10_evaluation(baseline_dir, fresh_dir, report_out_path=None):
 
     summary = {
         "protocol_version": "v1.0.0",
-        "preregistration_commit": current_commit,
+        "preregistration_commit": "3057a72",
+        "evaluator_commit": current_commit,
         "overall_l10_sufficient": overall_l10_sufficient,
+        "scope_limitation_note": (
+            "n=1 empirical snapshot comparison over the July 2026 window between 2026-08-09 and 2026-08-15. "
+            "A STABLE verdict demonstrates that L=10 publication lag was not breached for this specific window; "
+            "multi-window stability across future runs is required before L=10 can transition from PROVISIONAL."
+        ),
         "zone_results": results
     }
 
