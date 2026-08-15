@@ -126,10 +126,13 @@ def evaluate_column_pair(df_base, df_fresh, zone, col_name, is_duplicate=False):
         "monthly_coverage_changes": monthly_cov_change
     }
 
-PREREGISTERED_BASELINE_DIR = "/home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/instances/entsoe-scarcity-s1/inputs"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", ".."))
+
+PREREGISTERED_BASELINE_DIR = os.path.join(REPO_ROOT, "instances", "entsoe-scarcity-s1", "inputs")
 PREREGISTERED_FRESH_DIR_TARGETS = [
-    "/home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/instances/entsoe-scarcity-s1/test_fresh_fetch",
-    "/home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/instances/entsoe-scarcity-s1/test_fresh_fetch/processed"
+    os.path.join(REPO_ROOT, "instances", "entsoe-scarcity-s1", "test_fresh_fetch"),
+    os.path.join(REPO_ROOT, "instances", "entsoe-scarcity-s1", "test_fresh_fetch", "processed")
 ]
 BASELINE_SNAPSHOT_CUTOFF_UTC = "2026-08-09T00:00:00+00:00"
 
