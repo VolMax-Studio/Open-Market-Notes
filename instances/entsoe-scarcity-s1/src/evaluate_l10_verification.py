@@ -127,6 +127,22 @@ def evaluate_column_pair(df_base, df_fresh, zone, col_name, is_duplicate=False):
     }
 
 def run_l10_evaluation(baseline_dir, fresh_dir, report_out_path=None):
+    # Strict validation check 1: Enforce pre-registered fresh directory path
+    norm_fresh = os.path.normpath(fresh_dir)
+    if "test_fresh_fetch" not in norm_fresh:
+        print(f"FATAL ERROR: fresh_dir '{fresh_dir}' violates pre-registered path requirement (must contain 'test_fresh_fetch'). Aborting.", file=sys.stderr)
+        sys.exit(1)
+
+    # Strict validation check 2: Temporal monotonicity (fresh snapshot mtime > baseline mtime)
+    base_sample = os.path.join(baseline_dir, "imbalance_AT.feather")
+    fresh_sample = os.path.join(fresh_dir, "imbalance_AT.feather")
+    if os.path.exists(base_sample) and os.path.exists(fresh_sample):
+        base_mtime = os.path.getmtime(base_sample)
+        fresh_mtime = os.path.getmtime(fresh_sample)
+        if fresh_mtime <= base_mtime:
+            print(f"FATAL ERROR: Fresh fetch timestamp ({fresh_mtime}) is older or equal to baseline snapshot timestamp ({base_mtime}). Temporal monotonicity violated. Aborting.", file=sys.stderr)
+            sys.exit(1)
+
     results = {}
     overall_l10_sufficient = True
 

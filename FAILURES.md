@@ -69,8 +69,12 @@
 
 ---
 
-### Failure Entry #029 — Historical Discrepancy: PARAMETRIC_CHANGELOG Entry #003 Claimed Uncommitted Elexon Retry Logic
-- **Date / Event:** 2026-08-12 (Gate Audit Round 7 OMN-#004 Integrity Review)
-- **Component:** `notes/004-gb-duration-baseline/PARAMETRIC_CHANGELOG.md` Entry #003 vs `download_elexon_data.py`.
-- **Root Cause:** `PARAMETRIC_CHANGELOG.md` Entry #003 claimed that a 3-attempt HTTP retry logic was added to `download_elexon_data.py`, but the historical baseline code at commit `792b4d9` did not contain HTTP retry logic. An initial attempt to retrospectively edit the code to match the past changelog entry violated audit provenance by making a past claim retrospectively true (Pattern #6).
-- **Measurable Impact:** Historical code diverged from changelog description for Entry #003. Remediation: Reverted retroactive code mutation (commit `8e63ec2`). The historical discrepancy is documented here. Any forward retry upgrade to `download_elexon_data.py` must be introduced as a new forward changelog entry (Entry #004) rather than altering historical execution records.
+### Failure Entry #030 — Evaluator Path & Snapshot Temporal Monotonicity Check Bypass
+- **Date / Event:** 2026-08-15 (L10 Publication Lag Verification Protocol Execution v1.0.0)
+- **Component:** `instances/entsoe-scarcity-s1/src/evaluate_l10_verification.py` & `instances/entsoe-scarcity-s1/test_fresh_fetch/l10_report.json`
+- **Root Cause:** The evaluator script `evaluate_l10_verification.py` was executed with `--fresh-dir` set to an existing historical probe directory (`notes/003-entsoe-imbalance-baseline/scratch/probe_jul2026/processed`) which had a file modification timestamp of 2026-08-08 (1 day older than the baseline snapshot dated 2026-08-09). The evaluator lacked pre-registered target path validation and temporal monotonicity enforcement (`mtime_fresh > mtime_baseline`), generating an invalid report (`l10_report.json`) claiming `overall_l10_sufficient: true` based on an inverted historical comparison.
+- **Measurable Impact:** Report `l10_report.json` claimed pre-registration verification success when no live 2026-08-15 fetch had occurred. Discovered and blocked by human operator gate audit before ratification.
+- **Remediation:** 
+  1. `l10_report.json` on branch `feat/preregister-l10-test` was updated via a forward commit with status `INVALIDATED_SNAPSHOT_MISMATCH` and `overall_l10_sufficient: null`.
+  2. `evaluate_l10_verification.py` was hardened with strict `sys.exit(1)` checks requiring `--fresh-dir` to contain `test_fresh_fetch` and enforcing `mtime(fresh) > mtime(baseline)`.
+
