@@ -121,14 +121,17 @@ def download_month(year, month):
             table_name='DISPATCH_UNIT_SCADA',
             raw_data_location=raw_dir
         )
+        if scada_df is None or len(scada_df) == 0:
+            raise RuntimeError(f"Empty payload returned for DISPATCH_UNIT_SCADA on {year}-{month:02d}")
         
         # Find raw CSV file in raw_dir
         csv_files = glob.glob(os.path.join(raw_dir, f"*DISPATCH_UNIT_SCADA*{year}{month:02d}*.CSV"))
-        if csv_files:
-            raw_csv = csv_files[0]
-            print(f"Computing hash for raw CSV: {raw_csv}")
-            file_hash = compute_sha256(raw_csv)
-            update_manifest(raw_csv, file_hash)
+        if not csv_files:
+            raise RuntimeError(f"Raw CSV file missing for DISPATCH_UNIT_SCADA on {year}-{month:02d}")
+        raw_csv = csv_files[0]
+        print(f"Computing hash for raw CSV: {raw_csv}")
+        file_hash = compute_sha256(raw_csv)
+        update_manifest(raw_csv, file_hash)
         
         # Filter BESS units
         print("Filtering and processing SCADA...")
@@ -144,7 +147,7 @@ def download_month(year, month):
         purge_cache('DISPATCH_UNIT_SCADA', year, month)
         
     except Exception as e:
-        print(f"Error processing SCADA for {year}-{month:02d}: {e}")
+        raise RuntimeError(f"FATAL: Error processing SCADA for {year}-{month:02d}: {e}") from e
 
     # 2. DISPATCHLOAD (Bypassed: not needed for Note #001 duration baseline analysis)
     print(f"\n--- Skipping DISPATCHLOAD (Bypassed) ---")
