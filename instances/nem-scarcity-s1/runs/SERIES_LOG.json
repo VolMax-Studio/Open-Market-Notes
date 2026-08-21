@@ -7,5 +7,14 @@
     "inputs_manifest_sha256": "44693469332b76d8b313e228ad7b1579ee88da2135ca5a241cb5e0b34b8a45c3",
     "N_elevated": 0,
     "evaluated_at_utc": "2026-08-10T20:33:44Z"
+  },
+  {
+    "window": "2026-07",
+    "evaluation_status": "EVALUATED",
+    "label": "NULL",
+    "result_json_sha256": "a842a85c6ead9fc8e66872522530857c9be11491737055eb2e1dece15dc0d5bb",
+    "inputs_manifest_sha256": "e9b6ccb09f5800697e7defac9b736df99d2e8bf747252b5faf10a2104cedf2be",
+    "N_elevated": 0,
+    "evaluated_at_utc": "2026-08-21T17:49:53Z"
   }
 ]

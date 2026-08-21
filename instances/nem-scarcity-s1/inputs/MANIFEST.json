@@ -1,55 +1,55 @@
 {
   "instance_id": "nem-scarcity-s1",
-  "source": "AEMO NEM Market Data (omn-001 archive + AEMO NEMWEB July 1st report)",
+  "source": "AEMO NEM Market Data (Monthly DISPATCHPRICE archives through 2026-07)",
   "license": "CC BY 4.0 AEMO",
   "files": [
     {
       "filename": "nem_NSW1.feather",
-      "sha256": "4105b71691818681d0c6a5ed3b35096905c689f58604844a877a9602e4e35daa",
-      "rows": 113880,
+      "sha256": "2704a936ec12e4b57aa7f70b926bb6ed7a4f783c0b044e3bdea3de3be762e9e0",
+      "rows": 122688,
       "region": "NSW1",
       "period_start_utc": "2025-05-31T14:05:00Z",
-      "period_end_utc": "2026-07-01T00:00:00Z",
+      "period_end_utc": "2026-07-31T14:00:00Z",
       "interval_sec": 300.0,
       "price_col": "RRP"
     },
     {
       "filename": "nem_QLD1.feather",
-      "sha256": "cd609adadedac2519197f9ab83f4b73013dd50ce0671dc715da4dbdfd5e49dc0",
-      "rows": 113880,
+      "sha256": "cfb046acafd964ac0b7be68caab8da1c28b285cae0a483c7402ad3a275a96b4d",
+      "rows": 122688,
       "region": "QLD1",
       "period_start_utc": "2025-05-31T14:05:00Z",
-      "period_end_utc": "2026-07-01T00:00:00Z",
+      "period_end_utc": "2026-07-31T14:00:00Z",
       "interval_sec": 300.0,
       "price_col": "RRP"
     },
     {
       "filename": "nem_SA1.feather",
-      "sha256": "6d27829c4d6a7803cbff4497a354ee04e35c3a630f220d55c7def0d410c7467e",
-      "rows": 113880,
+      "sha256": "07d7de7f2fc7910c68482bf0083e418640e2f56c4d7c7fdba2024e108f51cd5b",
+      "rows": 122688,
       "region": "SA1",
       "period_start_utc": "2025-05-31T14:05:00Z",
-      "period_end_utc": "2026-07-01T00:00:00Z",
+      "period_end_utc": "2026-07-31T14:00:00Z",
       "interval_sec": 300.0,
       "price_col": "RRP"
     },
     {
       "filename": "nem_VIC1.feather",
-      "sha256": "e21d0d11d2f35cd1d8706e4a4acd3b236c2de8e8541c8dbfd286fde26b58fd56",
-      "rows": 113880,
+      "sha256": "3696c86ee9b20966bbe19815c81a44b4f69322dddd0aac8ce75c23e40688e6fe",
+      "rows": 122688,
       "region": "VIC1",
       "period_start_utc": "2025-05-31T14:05:00Z",
-      "period_end_utc": "2026-07-01T00:00:00Z",
+      "period_end_utc": "2026-07-31T14:00:00Z",
       "interval_sec": 300.0,
       "price_col": "RRP"
     },
     {
       "filename": "nem_TAS1.feather",
-      "sha256": "cc30c1effc80953f73b96400a47eeb5e2aae4d8c1d065e56031099ac70d64998",
-      "rows": 113880,
+      "sha256": "d6d0fb0408a80ab60222e8a9ae4f9f3185dea005b2bdcc20e9b8e3561741793f",
+      "rows": 122688,
       "region": "TAS1",
       "period_start_utc": "2025-05-31T14:05:00Z",
-      "period_end_utc": "2026-07-01T00:00:00Z",
+      "period_end_utc": "2026-07-31T14:00:00Z",
       "interval_sec": 300.0,
       "price_col": "RRP"
     }

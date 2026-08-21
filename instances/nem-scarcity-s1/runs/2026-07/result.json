@@ -1,0 +1,69 @@
+{
+  "N_elevated_comparison_zones": 0,
+  "N_total_comparison_zones": 4,
+  "baseline_utc_bounds": {
+    "end": "2026-06-30T23:59:59Z",
+    "start": "2025-07-01T00:00:00Z"
+  },
+  "evaluation_status": "EVALUATED",
+  "instance_id": "nem-scarcity-s1",
+  "label": "NULL",
+  "s_thresh_pct": 15.0,
+  "window": "2026-07",
+  "window_utc_bounds": {
+    "end": "2026-07-31T23:59:59Z",
+    "start": "2026-07-01T00:00:00Z"
+  },
+  "zone_metrics": {
+    "NSW1": {
+      "M1_pct": 4.836,
+      "R_val": 139.6382,
+      "completeness_pct": 98.6671,
+      "determinacy": "NOT_ELEVATED",
+      "exposure_lower_pct": 4.7715,
+      "exposure_upper_pct": 6.1044,
+      "is_companion": false,
+      "missing_fraction_pct": 1.3329
+    },
+    "QLD1": {
+      "M1_pct": 2.9742,
+      "R_val": 125.8776,
+      "completeness_pct": 98.6671,
+      "determinacy": "NOT_ELEVATED",
+      "exposure_lower_pct": 2.9346,
+      "exposure_upper_pct": 4.2675,
+      "is_companion": false,
+      "missing_fraction_pct": 1.3329
+    },
+    "SA1": {
+      "M1_pct": 9.5471,
+      "R_val": 166.5612,
+      "completeness_pct": 98.6671,
+      "determinacy": "NOT_ELEVATED",
+      "exposure_lower_pct": 9.4198,
+      "exposure_upper_pct": 10.7527,
+      "is_companion": false,
+      "missing_fraction_pct": 1.3329
+    },
+    "TAS1": {
+      "M1_pct": 7.4242,
+      "R_val": 130.24,
+      "completeness_pct": 98.6671,
+      "determinacy": "NOT_ELEVATED",
+      "exposure_lower_pct": 7.3253,
+      "exposure_upper_pct": 8.6582,
+      "is_companion": true,
+      "missing_fraction_pct": 1.3329
+    },
+    "VIC1": {
+      "M1_pct": 8.5254,
+      "R_val": 137.96,
+      "completeness_pct": 98.6671,
+      "determinacy": "NOT_ELEVATED",
+      "exposure_lower_pct": 8.4117,
+      "exposure_upper_pct": 9.7446,
+      "is_companion": false,
+      "missing_fraction_pct": 1.3329
+    }
+  }
+}
