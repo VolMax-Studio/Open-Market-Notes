@@ -154,4 +154,25 @@
 - **Measurable Impact:** The published July 2026 artifact was altered on disk with modified script hashes and sorted key formatting.
 - **Remediation:** Executed `git checkout` to restore canonical byte-identical versions of `VERDICT.json` (SHA `83f7ca73...`) and `run_window.py` (SHA `3d9ea127...`), ported all Coherent S-9 tests to execute strictly in isolated `/tmp` directories, and updated fuzzer harness to track exact Class II denominators.
 
+---
+
+### Failure Entry #040 — Gate Vocabulary Divergence from Ratified Classifier Specification
+- **Date / Event:** 2026-08-22 (Zero-Trust Gate Verification Development)
+- **Component:** `instances/nem-scarcity-s1/src/gate_verify.py`
+- **Root Cause (General Class):** Implementation Divergence from Domain Specification. `gate_verify.py` v1.0.0 implemented a synthetic verdict vocabulary (`HIGH_ELEVATION`, `ELEVATED`, `NULL`) instead of the closed partition vocabulary ratified in `C_CLASSIFIER_SCARCITY_PERSISTENCE` v1.4.0 §3 (`REGIONAL`, `ISOLATED`, `NULL`).
+- **Measurable Impact:** While the baseline July 2026 run returned `NULL` and was unaffected, adversarial tests and non-null multi-zone evaluations (such as Coherent S-9 emitting `ISOLATED`) failed Klasa A validation against an unratified label set.
+- **Remediation:** Corrected lines 160–168 in `gate_verify.py` via commit `0034161` to strictly enforce `{NULL, ISOLATED, REGIONAL}` per `C_CLASSIFIER` v1.4.0 §3.
+
+---
+
+### Failure Entry #041 — Successive Unstable Fuzzing Measurements Across Mutating Test Environments
+- **Date / Event:** 2026-08-22 (Monte Carlo Fuzzing Runs)
+- **Component:** `instances/nem-scarcity-s1/src/fuzz_gate_survival.py`
+- **Root Cause (General Class):** Measurement Drift & Unrecorded Test Rig States. Three successive leak counts (503 vs 60 vs 516 out of 10,000) were reported within the same session without documenting the divergent execution environments:
+  1. *Run 1 (503 / 5.03%, task-924):* Unseeded, pre-commit fuzzer script on unquantified denominator.
+  2. *Run 2 (60 / 0.60%, task-998):* Seed 42 executed while `run_window.py` and `VERDICT.json` had been modified in-place on disk.
+  3. *Run 3 (516 / 5.16% overall, 11.37% Class II, task-1058):* Seed 42 executed over pristine restored artifacts (SHA `83f7ca73...`) and specification-aligned `gate_verify.py`.
+- **Measurable Impact:** Provisory and uncalibrated leak counts were entered into repository documentation before environment stabilization and seed reproducibility were achieved.
+- **Remediation:** Formally withdrew counts 503 and 60 in favor of the fully reproducible Run 3 (516 total leaks, 515 on 4,530 resigned candidates = 11.37% Class II leak rate), and committed the reproducible corpus artifact `fuzz_leak_corpus_seed42_10k.json`.
+
 
