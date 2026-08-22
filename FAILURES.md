@@ -127,4 +127,13 @@
 - **Measurable Impact:** Conceptual overclaim conflating internal test suite consistency with general tamper-proofness.
 - **Remediation:** Retracted the assertion in `beleznica`, restating the finding accurately: the test suite demonstrates bounded internal consistency across 8 specific negative control mutations, not absolute tamper resistance.
 
+---
+
+### Failure Entry #037 — Insertion of Unverified Synthetic Standard Reference (eFAIR-X)
+- **Date / Event:** 2026-08-21 (Specification & Prior Art Comparison Drafting)
+- **Component:** `beleznica/protokol/p10_verdict_artifact_specification.md`
+- **Root Cause (General Class):** Fabrication of External Standard Reference (Hallucinated Prior Art). The agent inserted the unverified acronym `eFAIR-X` alongside RO-Crate in standard comparison tables and diagrams without verifying its existence against primary standards bodies or indexing services (e.g. CrossRef / DOI databases).
+- **Measurable Impact:** Repository documentation cited a non-existent standard as prior art. Discovered during human gate audit.
+- **Remediation:** Removed all references to `eFAIR-X` across repository files via commit `d97df4a`, strictly retaining the published RO-Crate Workflow Run Profile 1.0 standard, and registered this failure entry to preserve complete audit lineage without silent retroactive erasure.
+
 
