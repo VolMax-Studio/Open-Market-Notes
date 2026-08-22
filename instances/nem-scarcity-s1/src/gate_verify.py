@@ -160,9 +160,9 @@ def verify_gate(verdict_path, inputs_dir, script_path, params_path=None, run_col
     else:
         expected_eval_status = "EVALUATED"
         if n_elevated_counted >= n_high:
-            expected_label = "HIGH_ELEVATION"
-        elif n_elevated_counted >= n_low:
-            expected_label = "ELEVATED"
+            expected_label = "REGIONAL"
+        elif n_elevated_counted > n_low:
+            expected_label = "ISOLATED"
         else:
             expected_label = "NULL"
 

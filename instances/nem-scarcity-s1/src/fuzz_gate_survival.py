@@ -123,6 +123,7 @@ def run_fuzzing_experiment(N=10000, seed=42, output_corpus=None):
     print(f"P10 ZERO-TRUST GATE: MONTE CARLO MUTATION EXPERIMENT (N = {N:,}, SEED = {seed})")
     print("================================================================================")
 
+    resigned_candidates_tested = 0
     accepted_mutations = []
     rejection_distribution = {
         "GATE_FAIL_A": 0,
@@ -139,6 +140,8 @@ def run_fuzzing_experiment(N=10000, seed=42, output_corpus=None):
         for i in range(1, N + 1):
             m_type = random.choice(mutation_types)
             resign_flag = (random.random() > 0.5) if m_type != "crypto_fuzz" else False
+            if resign_flag:
+                resigned_candidates_tested += 1
             
             mutated_v = mutate_candidate(base_v, m_type, resign=resign_flag)
             
@@ -176,15 +179,18 @@ def run_fuzzing_experiment(N=10000, seed=42, output_corpus=None):
 
     total_time = time.time() - start_time
     survival_count = len(accepted_mutations)
-    survival_rate = (survival_count / N) * 100.0
+    survival_rate_total = (survival_count / N) * 100.0
+    survival_rate_resigned = (survival_count / resigned_candidates_tested * 100.0) if resigned_candidates_tested > 0 else 0.0
 
     print("\n================================================================================")
     print("MONTE CARLO MUTATION EXPERIMENT RESULTS:")
     print("================================================================================")
-    print(f"Total Mutations Tested (N): {N:,}")
-    print(f"Random Seed               : {seed}")
-    print(f"Total Accepted / Survived : {survival_count}")
-    print(f"Empirical Survival Rate   : {survival_rate:.4f}%\n")
+    print(f"Total Mutations Tested (N)       : {N:,}")
+    print(f"Random Seed                     : {seed}")
+    print(f"Total Resigned Candidates Tested: {resigned_candidates_tested:,} ({resigned_candidates_tested/N*100.0:.2f}% of N)")
+    print(f"Total Accepted / Survived       : {survival_count}")
+    print(f"Overall Survival Rate           : {survival_rate_total:.4f}% ({survival_count}/{N:,})")
+    print(f"Class II (Resigned) Leak Rate   : {survival_rate_resigned:.4f}% ({survival_count}/{resigned_candidates_tested:,})\n")
     print(f"Rejection Breakdown by Verification Tier:")
     print(f"  - Klasa A (Static Envelope & Math Integrity) : {rejection_distribution['GATE_FAIL_A']:6d} ({rejection_distribution['GATE_FAIL_A']/N*100.0:5.2f}%)")
     print(f"  - Klasa B (Evidence Binding & Spec Matching) : {rejection_distribution['GATE_FAIL_B']:6d} ({rejection_distribution['GATE_FAIL_B']/N*100.0:5.2f}%)")
@@ -198,8 +204,10 @@ def run_fuzzing_experiment(N=10000, seed=42, output_corpus=None):
             json.dump({
                 "seed": seed,
                 "N": N,
+                "resigned_candidates_tested": resigned_candidates_tested,
                 "survival_count": survival_count,
-                "survival_rate_pct": survival_rate,
+                "survival_rate_total_pct": survival_rate_total,
+                "survival_rate_resigned_pct": survival_rate_resigned,
                 "rejection_distribution": rejection_distribution,
                 "leak_samples": accepted_mutations
             }, f, indent=2)

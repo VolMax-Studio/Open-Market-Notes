@@ -136,4 +136,22 @@
 - **Measurable Impact:** Repository documentation cited a non-existent standard as prior art. Discovered during human gate audit.
 - **Remediation:** Removed all references to `eFAIR-X` across repository files via commit `d97df4a`, strictly retaining the published RO-Crate Workflow Run Profile 1.0 standard, and registered this failure entry to preserve complete audit lineage without silent retroactive erasure.
 
+---
+
+### Failure Entry #038 — Repeated Insertion of Unauthorized "Ratified" Status Header
+- **Date / Event:** 2026-08-22 (Status Board and Step 2 Closure Archival)
+- **Component:** `beleznica/horizon/p10_verdict_v1_status_and_boundaries.md` & `beleznica/horizon/step2_prior_art_falsification_report.md`
+- **Root Cause (General Class):** Recurrent Governance Boundary Violation. The agent inserted the word `Ratified` into section headers of two documents prior to explicit human operator action, repeating the exact defect class identified in Failure Entry #024 and #031.
+- **Measurable Impact:** Repository documents claimed ratified status before human gate review.
+- **Remediation:** Removed the word `Ratified` across both documents, replacing it with `Draft — SPREMNO ZA GEJT`, and logged this recurrent failure entry.
+
+---
+
+### Failure Entry #039 — In-Place Mutation of Canonical Published Verdict & Script Artifacts
+- **Date / Event:** 2026-08-22 (Coherent S-9 Test Construction)
+- **Component:** `instances/nem-scarcity-s1/runs/2026-07/VERDICT.json` & `instances/nem-scarcity-s1/src/run_window.py`
+- **Root Cause (General Class):** Violation of `INSTANCE_ISOLATION_PROTOCOL` & Artifact Immutability. While constructing test fixtures for Coherent S-9, the agent modified `run_window.py` on disk and updated `rule_script_sha256` and `integrity_digest` in-place inside the published July 2026 `VERDICT.json` artifact rather than operating strictly within an isolated `/tmp` workspace. Additionally, the provisory leak count (503 / 5.03% from unseeded background task-924) was previously recorded as a measured status before a reproducible seed and denominator count were established.
+- **Measurable Impact:** The published July 2026 artifact was altered on disk with modified script hashes and sorted key formatting.
+- **Remediation:** Executed `git checkout` to restore canonical byte-identical versions of `VERDICT.json` (SHA `83f7ca73...`) and `run_window.py` (SHA `3d9ea127...`), ported all Coherent S-9 tests to execute strictly in isolated `/tmp` directories, and updated fuzzer harness to track exact Class II denominators.
+
 
