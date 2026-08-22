@@ -24,11 +24,29 @@ def canonical_digest(d):
     canonical_str = json.dumps(copy_d, sort_keys=True, indent=2)
     return hashlib.sha256(canonical_str.encode('utf-8')).hexdigest()
 
-def verify_gate(verdict_path, inputs_dir, script_path, run_cold_reexecution=True):
+def parse_params_file(params_path):
+    if not os.path.exists(params_path):
+        raise GateVerificationError(f"GATE_FAIL_B: PARAMS_FILE_NOT_FOUND ({params_path})")
+    with open(params_path) as f:
+        content = f.read()
+    if '```json' in content:
+        start_idx = content.find('```json') + 7
+        end_idx = content.find('```', start_idx)
+        json_str = content[start_idx:end_idx].strip()
+    else:
+        json_str = content[content.find('{'):content.rfind('}')+1]
+    return json.loads(json_str)
+
+def verify_gate(verdict_path, inputs_dir, script_path, params_path=None, run_cold_reexecution=True):
+    if params_path is None:
+        instance_root = os.path.dirname(os.path.dirname(script_path))
+        params_path = os.path.join(instance_root, "PARAMS.md")
+
     print(f"=== P10 ZERO-TRUST GATE VERIFIER ===")
     print(f"Candidate: {verdict_path}")
     print(f"Evidence Store: {inputs_dir}")
-    print(f"Frozen Script: {script_path}\n")
+    print(f"Frozen Script: {script_path}")
+    print(f"Frozen Spec: {params_path}\n")
 
     if not os.path.exists(verdict_path):
         raise GateVerificationError("GATE_FAIL_A: VERDICT_FILE_NOT_FOUND")
@@ -65,7 +83,7 @@ def verify_gate(verdict_path, inputs_dir, script_path, run_cold_reexecution=True
     adm = v_data["admissibility"]
     rep = v_data["reproducibility"]
 
-    # Temporal Bounds Check
+    # Temporal Bounds Check against claim.window_bounds_utc
     window = claim.get("window", "")
     try:
         year, month = map(int, window.split('-'))
@@ -75,8 +93,10 @@ def verify_gate(verdict_path, inputs_dir, script_path, run_cold_reexecution=True
 
     expected_p_start = f"{year:04d}-{month:02d}-01T00:00:00Z"
     expected_p_end = f"{year:04d}-{month:02d}-{days_in_month:02d}T23:59:59Z"
-    if eb.get("period_start_utc") != expected_p_start or eb.get("period_end_utc") != expected_p_end:
-        raise GateVerificationError("GATE_FAIL_A: CLAIM_EVIDENCE_MISMATCH (temporal bounds mismatch window)")
+    
+    wb = claim.get("window_bounds_utc", {})
+    if wb.get("start") != expected_p_start or wb.get("end") != expected_p_end:
+        raise GateVerificationError("GATE_FAIL_A: CLAIM_EVIDENCE_MISMATCH (claim.window_bounds_utc mismatch window string)")
 
     # Interval Arithmetic
     expected_nominal = days_in_month * 288
@@ -92,7 +112,7 @@ def verify_gate(verdict_path, inputs_dir, script_path, run_cold_reexecution=True
     if round(float(eb.get("completeness_pct", 0.0)), 4) != expected_comp:
         raise GateVerificationError("GATE_FAIL_A: EVIDENCE_INTEGRITY_MISMATCH (completeness_pct arithmetic mismatch)")
 
-    # Rule Parameter Coherence
+    # Internal Parameter Coherence
     params = fr.get("parameters", {})
     s_thresh_pct = float(params.get("s_thresh_pct", 0.0))
     q_ref = float(params.get("q_ref", 0.0))
@@ -158,9 +178,24 @@ def verify_gate(verdict_path, inputs_dir, script_path, run_cold_reexecution=True
     print("  ✓ Klasa A Passed: Envelope is internally coherent, mathematically sound, and non-tampered.\n")
 
     # =========================================================================
-    # KLASA B: EVIDENCE BINDING (External Data Store & Hash Verification)
+    # KLASA B: EVIDENCE BINDING (External Spec, Data Store & Hash Verification)
     # =========================================================================
-    print("[KLASA B] Verifying Evidence Binding against Physical Telemetry...")
+    print("[KLASA B] Verifying Evidence Binding against Physical Telemetry & Frozen Spec...")
+
+    # Verify parameters against frozen PARAMS.md spec (BREAKS SELF-ATTESTATION LOOP)
+    frozen_spec = parse_params_file(params_path)
+    if float(frozen_spec.get("q_ref", 0.0)) != q_ref:
+        raise GateVerificationError(f"GATE_FAIL_B: FROZEN_SPEC_MISMATCH (q_ref spec {frozen_spec.get('q_ref')} != verdict {q_ref})")
+    if float(frozen_spec.get("k_multiplier", 0.0)) != k_mult:
+        raise GateVerificationError(f"GATE_FAIL_B: FROZEN_SPEC_MISMATCH (k_mult spec {frozen_spec.get('k_multiplier')} != verdict {k_mult})")
+    if float(frozen_spec.get("completeness_floor_pct", 0.0)) != comp_floor:
+        raise GateVerificationError(f"GATE_FAIL_B: FROZEN_SPEC_MISMATCH (completeness_floor spec {frozen_spec.get('completeness_floor_pct')} != verdict {comp_floor})")
+    if int(frozen_spec.get("n_low", 0)) != n_low:
+        raise GateVerificationError(f"GATE_FAIL_B: FROZEN_SPEC_MISMATCH (n_low spec {frozen_spec.get('n_low')} != verdict {n_low})")
+    if int(frozen_spec.get("n_high", 0)) != n_high:
+        raise GateVerificationError(f"GATE_FAIL_B: FROZEN_SPEC_MISMATCH (n_high spec {frozen_spec.get('n_high')} != verdict {n_high})")
+    if int(frozen_spec.get("N", 0)) != int(params.get("n_baseline_months", 0)):
+        raise GateVerificationError(f"GATE_FAIL_B: FROZEN_SPEC_MISMATCH (N baseline spec {frozen_spec.get('N')} != verdict {params.get('n_baseline_months')})")
 
     if not os.path.exists(inputs_dir):
         raise GateVerificationError("GATE_FAIL_B: INPUTS_STORE_NOT_FOUND")
@@ -183,6 +218,14 @@ def verify_gate(verdict_path, inputs_dir, script_path, run_cold_reexecution=True
         if actual_file_sha != claimed_file_sha:
             raise GateVerificationError(f"GATE_FAIL_B: TELEMETRY_CORRUPTION ({fn} hash mismatch: claimed {claimed_file_sha[:12]}, actual {actual_file_sha[:12]})")
 
+    # Check actual telemetry boundary cutoff in feather files
+    sample_file = os.path.join(inputs_dir, "nem_NSW1.feather")
+    df_sample = pd.read_feather(sample_file)
+    actual_max_time = pd.to_datetime(df_sample['SETTLEMENTDATE']).max()
+    actual_max_str = actual_max_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+    if eb.get("telemetry_period_end_utc") != actual_max_str:
+        raise GateVerificationError(f"GATE_FAIL_B: EVIDENCE_BOUNDARY_MISMATCH (telemetry_period_end_utc declared {eb.get('telemetry_period_end_utc')} != actual data max {actual_max_str})")
+
     # Verify manifest hash against VERDICT.json reference
     actual_manifest_sha = compute_sha256(manifest_path)
     if actual_manifest_sha != rep.get("inputs_manifest_sha256"):
@@ -195,7 +238,7 @@ def verify_gate(verdict_path, inputs_dir, script_path, run_cold_reexecution=True
     if actual_script_sha != fr.get("rule_script_sha256"):
         raise GateVerificationError(f"GATE_FAIL_B: FROZEN_RULE_HASH_MISMATCH (script hash {actual_script_sha[:12]} != verdict pointer {fr.get('rule_script_sha256')[:12]})")
 
-    print("  ✓ Klasa B Passed: Physical telemetry on disk matches MANIFEST.json and VERDICT.json anchors exactly.\n")
+    print("  ✓ Klasa B Passed: Physical telemetry and frozen spec PARAMS.md match VERDICT.json anchors exactly.\n")
 
     # =========================================================================
     # KLASA C: COLD RE-EXECUTION (Independent Sandbox Runtime & Output Agreement)
@@ -210,31 +253,23 @@ def verify_gate(verdict_path, inputs_dir, script_path, run_cold_reexecution=True
         # Create isolated temporary instance workspace
         temp_dir = tempfile.mkdtemp(prefix="p10_gate_sandbox_")
         try:
-            # Setup isolated instance structure in sandbox
             os.makedirs(os.path.join(temp_dir, "src"), exist_ok=True)
             os.makedirs(os.path.join(temp_dir, "inputs"), exist_ok=True)
             
             shutil.copy(script_path, os.path.join(temp_dir, "src", "run_window.py"))
-            
-            # Copy PARAMS.md
-            instance_root = os.path.dirname(os.path.dirname(script_path))
-            params_file = os.path.join(instance_root, "PARAMS.md")
-            shutil.copy(params_file, os.path.join(temp_dir, "PARAMS.md"))
+            shutil.copy(params_path, os.path.join(temp_dir, "PARAMS.md"))
 
-            # Symlink / Copy verified input files
             for f_entry in manifest_data.get("files", []):
                 fn = f_entry["filename"]
                 shutil.copy(os.path.join(inputs_dir, fn), os.path.join(temp_dir, "inputs", fn))
             shutil.copy(manifest_path, os.path.join(temp_dir, "inputs", "MANIFEST.json"))
 
-            # Execute cold evaluation run in isolated sandbox
             cmd = [sys.executable, os.path.join(temp_dir, "src", "run_window.py"), "--window", window, "--instance", temp_dir]
             proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             
             if proc.returncode != 0:
                 raise GateVerificationError(f"GATE_FAIL_C: REPRODUCTION_EXECUTION_ERROR ({proc.stderr.strip()})")
 
-            # Read regenerated result.json from sandbox
             sandbox_result_path = os.path.join(temp_dir, "runs", window, "result.json")
             if not os.path.exists(sandbox_result_path):
                 raise GateVerificationError("GATE_FAIL_C: REPRODUCTION_FAILED (sandbox result.json not generated)")
@@ -242,7 +277,6 @@ def verify_gate(verdict_path, inputs_dir, script_path, run_cold_reexecution=True
             with open(sandbox_result_path) as f:
                 reproduced_res = json.load(f)
 
-            # Output Agreement Verification: Compare reproduced metrics with declared metrics in VERDICT.json
             if reproduced_res.get("evaluation_status") != vd.get("evaluation_status"):
                 raise GateVerificationError("GATE_FAIL_C: OUTPUT_AGREEMENT_MISMATCH (evaluation_status)")
             if reproduced_res.get("label") != vd.get("label"):
@@ -273,16 +307,17 @@ def verify_gate(verdict_path, inputs_dir, script_path, run_cold_reexecution=True
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: gate_verify.py <VERDICT.json> <inputs_dir> <script_path> [--no-cold-run]")
+        print("Usage: gate_verify.py <VERDICT.json> <inputs_dir> <script_path> [params_path] [--no-cold-run]")
         sys.exit(1)
         
     v_file = sys.argv[1]
     in_dir = sys.argv[2]
     sc_file = sys.argv[3]
+    pr_file = sys.argv[4] if len(sys.argv) > 4 and not sys.argv[4].startswith("--") else None
     cold_run = "--no-cold-run" not in sys.argv
     
     try:
-        verify_gate(v_file, in_dir, sc_file, run_cold_reexecution=cold_run)
+        verify_gate(v_file, in_dir, sc_file, params_path=pr_file, run_cold_reexecution=cold_run)
         sys.exit(0)
     except GateVerificationError as e:
         print(f"\nGATE REJECTION: {e}")

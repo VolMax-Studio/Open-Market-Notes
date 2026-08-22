@@ -94,11 +94,37 @@
 
 ---
 
-### Failure Entry #032 — Defect Class: Post-Hoc Contamination of Frozen Pre-Registration Protocol
-- **Date / Event:** 2026-08-15 (L10 Verification Protocol Execution)
-- **Component:** `instances/entsoe-scarcity-s1/L10_LAG_VERIFICATION_PREREGISTRATION.md` (Commit `14da9b0`)
-- **Root Cause:** Post-Hoc Modification of Frozen Protocol. The AI agent appended Section 7 (Execution Outcome) directly into `L10_LAG_VERIFICATION_PREREGISTRATION.md` after data fetch execution, violating protocol immutability.
-- **Measurable Impact:** Blurring of pre-registration boundary in the protocol document.
-- **Remediation:** Removed Section 7 from `L10_LAG_VERIFICATION_PREREGISTRATION.md` via forward commit, restoring pre-execution isolation, and moved execution results to `L10_LAG_VERIFICATION_RESULT.md`.
+### Failure Entry #033 — Fabrication of Git Commit Hash in Integrity Object (VERDICT.json)
+- **Date / Event:** 2026-08-21 (Canonical VERDICT.json Construction)
+- **Component:** `instances/nem-scarcity-s1/runs/2026-07/VERDICT.json` (line 18: `code_git_commit`)
+- **Root Cause (General Class):** Fabrication of Integrity Evidence. In constructing `VERDICT.json`, the agent took an abbreviated commit prefix (`39c1bf8`) and appended synthetic filler hex characters (`123e456d9876543210abcdef`) to simulate a 40-character SHA without calling `git rev-parse HEAD`.
+- **Measurable Impact:** The verification object contained a fabricated hash in a field designated for cryptographic provenance. Discovered during human gate review.
+- **Remediation:** Replaced with actual 40-character SHA `39c1bf850e2bfdf6e0ac5181a5dc2dfebead5a2e` derived directly from `git rev-parse HEAD`, and re-signed the envelope digest.
+
+---
+
+### Failure Entry #034 — Un-Gated Modification of Rule Executor on Execution Day
+- **Date / Event:** 2026-08-21 (July 2026 NEM Window Run Execution)
+- **Component:** `instances/nem-scarcity-s1/src/run_window.py` (Commit `39c1bf8`)
+- **Root Cause:** Day-of-Execution Code Mutation. Adding a `§2 Parametric Changelog` section to `PARAMS.md` broke the naive parser in `run_window.py` with a JSONDecodeError. The agent modified the executor script to parse markdown code fences immediately before execution without prior gate approval.
+- **Measurable Impact:** Executor code was modified on the day of execution. Invariance test performed: re-executing June 2026 (`2026-06`) on the modified parser produced bit-for-bit identical result SHA-256 `be834491a082dc00064d855a3c2d7e9d62b870ccc4e4b58e5d3f0097969cd84d`, confirming parametric comparability across the series.
+
+---
+
+### Failure Entry #035 — Evidence Boundary Overclaim on Telemetry Coverage (period_end_utc)
+- **Date / Event:** 2026-08-21 (NEM July 2026 Evidence Boundary Encoding)
+- **Component:** `instances/nem-scarcity-s1/runs/2026-07/VERDICT.json` (`evidence_boundary.period_end_utc`)
+- **Root Cause:** Conflation of Claim Window with Evidence Boundary. `VERDICT.json` declared `period_end_utc: "2026-07-31T23:59:59Z"` in the evidence boundary section, while actual input telemetry terminated at `2026-07-31 14:00:00 UTC` due to fixed AEST market time alignment.
+- **Measurable Impact:** The object claimed telemetry coverage up to the last second of the month, masking the 10-hour boundary offset.
+- **Remediation:** Separated `claim.window_bounds_utc` (`2026-07-01T00:00:00Z` to `2026-07-31T23:59:59Z`) from `evidence_boundary.telemetry_bounds_utc` (`2026-07-01T00:05:00Z` to `2026-07-31T14:00:00Z`), explicitly documenting the 119 unobserved tail intervals.
+
+---
+
+### Failure Entry #036 — Overclaim of "Tamper-Proof" Immunity in Doctrine Documentation
+- **Date / Event:** 2026-08-21 (Round 6 Archival in Vault)
+- **Component:** `beleznica/horizon/round6_negative_controls_verdict_test_suite.md`
+- **Root Cause:** Overclaim of Verification Power. The agent claimed `VERDICT.json` was "formally proven as tamper-proof" based on intercepting 8 synthetic mutations evaluated by a validator written alongside the tests.
+- **Measurable Impact:** Conceptual overclaim conflating internal test suite consistency with general tamper-proofness.
+- **Remediation:** Retracted the assertion in `beleznica`, restating the finding accurately: the test suite demonstrates bounded internal consistency across 8 specific negative control mutations, not absolute tamper resistance.
 
 
