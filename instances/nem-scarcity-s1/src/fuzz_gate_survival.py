@@ -133,6 +133,10 @@ def run_fuzzing_experiment(N=10000, seed=42, output_corpus=None):
         "UNEXPECTED_ERROR": 0
     }
 
+    per_type_stats = {
+        m: {"total": 0, "resigned": 0, "leaks": 0} for m in mutation_types
+    }
+
     start_time = time.time()
     temp_dir = tempfile.mkdtemp(prefix="p10_fuzz_strict_")
     cand_file = os.path.join(temp_dir, "cand_verdict.json")
@@ -153,10 +157,12 @@ def run_fuzzing_experiment(N=10000, seed=42, output_corpus=None):
                 no_ops_discarded += 1
                 continue
 
+            per_type_stats[m_type]["total"] += 1
             # If valid mutation and resign_flag is True, re-sign
             if resign_flag:
                 mutated_v["integrity_digest"] = canonical_digest(mutated_v)
                 resigned_candidates_tested += 1
+                per_type_stats[m_type]["resigned"] += 1
 
             valid_tested += 1
             
@@ -165,6 +171,7 @@ def run_fuzzing_experiment(N=10000, seed=42, output_corpus=None):
 
             try:
                 verify_gate(cand_file, inputs_dir, script_path, params_path=params_path, run_cold_reexecution=True)
+                per_type_stats[m_type]["leaks"] += 1
                 accepted_mutations.append({
                     "test_index": valid_tested,
                     "draw_index": total_draws,
@@ -209,7 +216,21 @@ def run_fuzzing_experiment(N=10000, seed=42, output_corpus=None):
     print(f"Total Accepted / Survived (Leaks)   : {survival_count}")
     print(f"Overall Survival Rate (on N=10,000) : {survival_rate_total:.4f}% ({survival_count}/{N:,})")
     print(f"Class II (Resigned) Leak Rate       : {survival_rate_resigned:.4f}% ({survival_count}/{resigned_candidates_tested:,})\n")
-    print(f"Rejection Breakdown by Verification Tier:")
+    print("Per-Mutation-Type Breakdown (Class II Resigned Space & 95% CI):")
+    for m, st in per_type_stats.items():
+        res_n = st["resigned"]
+        lk = st["leaks"]
+        if res_n > 0:
+            if lk == 0:
+                ci_bound = (3.0 / res_n) * 100.0
+                rate_str = f"0.00% (< {ci_bound:.2f}% 95% CI)"
+            else:
+                rate_str = f"{(lk/res_n)*100.0:.2f}%"
+        else:
+            rate_str = "N/A (0 resigned)"
+        print(f"  - {m:20s}: Total={st['total']:5d} | Resigned={res_n:5d} | Leaks={lk:4d} | Class II Rate={rate_str}")
+
+    print(f"\nRejection Breakdown by Verification Tier:")
     print(f"  - Klasa A (Static Envelope & Math Integrity) : {rejection_distribution['GATE_FAIL_A']:6d} ({rejection_distribution['GATE_FAIL_A']/N*100.0:5.2f}%)")
     print(f"  - Klasa B (Evidence Binding & Spec Matching) : {rejection_distribution['GATE_FAIL_B']:6d} ({rejection_distribution['GATE_FAIL_B']/N*100.0:5.2f}%)")
     print(f"  - Klasa C (Cold Re-Execution Output Mismatch): {rejection_distribution['GATE_FAIL_C']:6d} ({rejection_distribution['GATE_FAIL_C']/N*100.0:5.2f}%)")
@@ -229,6 +250,7 @@ def run_fuzzing_experiment(N=10000, seed=42, output_corpus=None):
                 "survival_rate_total_pct": survival_rate_total,
                 "survival_rate_resigned_pct": survival_rate_resigned,
                 "rejection_distribution": rejection_distribution,
+                "per_type_stats": per_type_stats,
                 "leak_samples": accepted_mutations
             }, f, indent=2)
         print(f"Corpus of {survival_count} leak samples saved to: {output_corpus}")

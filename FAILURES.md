@@ -156,12 +156,14 @@
 
 ---
 
-### Failure Entry #040 — Gate Vocabulary Divergence from Ratified Classifier Specification
+### Failure Entry #040 — Gate Vocabulary & Threshold Divergence from Ratified Classifier Specification
 - **Date / Event:** 2026-08-22 (Zero-Trust Gate Verification Development)
 - **Component:** `instances/nem-scarcity-s1/src/gate_verify.py`
-- **Root Cause (General Class):** Implementation Divergence from Domain Specification. `gate_verify.py` v1.0.0 implemented a synthetic verdict vocabulary (`HIGH_ELEVATION`, `ELEVATED`, `NULL`) instead of the closed partition vocabulary ratified in `C_CLASSIFIER_SCARCITY_PERSISTENCE` v1.4.0 §3 (`REGIONAL`, `ISOLATED`, `NULL`).
-- **Measurable Impact:** While the baseline July 2026 run returned `NULL` and was unaffected, adversarial tests and non-null multi-zone evaluations (such as Coherent S-9 emitting `ISOLATED`) failed Klasa A validation against an unratified label set.
-- **Remediation:** Corrected lines 160–168 in `gate_verify.py` via commit `0034161` to strictly enforce `{NULL, ISOLATED, REGIONAL}` per `C_CLASSIFIER` v1.4.0 §3.
+- **Root Cause (General Class):** Implementation Divergence from Domain Specification. `gate_verify.py` v1.0.0 diverged from `C_CLASSIFIER_SCARCITY_PERSISTENCE` v1.4.0 §3 across two dimensions:
+  1. *Vocabulary Divergence:* Implemented synthetic labels (`HIGH_ELEVATION`, `ELEVATED`, `NULL`) instead of the ratified closed partition (`REGIONAL`, `ISOLATED`, `NULL`).
+  2. *Threshold Logic Divergence:* Implemented `n_elevated_counted >= n_low` for elevation instead of strict inequality `n_elevated_counted > n_low` (with $N_{\text{elevated}} \le N_{\text{low}}$ mapping to `NULL`). At the boundary point $N_{\text{elevated}} = N_{\text{low}} = 1$, `gate_verify.py` expected `ELEVATED` while the frozen script emitted `NULL`.
+- **Measurable Impact:** Adversarial test packages evaluating single-zone elevation and multi-zone classifications failed Klasa A validation due to mismatched partition boundaries and label names. (Baseline July 2026 run had $N_{\text{elevated}} = 0$ and was unaffected).
+- **Remediation:** Aligned lines 160–168 in `gate_verify.py` via commit `0034161` to strictly enforce `{NULL, ISOLATED, REGIONAL}` and $N_{\text{elevated}} > N_{\text{low}}$ per `C_CLASSIFIER` v1.4.0 §3.
 
 ---
 
