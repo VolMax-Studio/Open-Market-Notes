@@ -73,10 +73,11 @@
     "rule_script_sha256": "3d9ea127edc18ad9ad15315a9e0141495851dea57b9abf66f8d1ecf600c94e35",
     "rule_version": "v1.1.0-PROVISIONAL"
   },
-  "integrity_digest": "d1b77c55095cec9e4f54b9040841cf8227e325bf9084868d8f269c4a077156a9",
+  "integrity_digest": "6d7807970ab1fa500ecc3114d229ff6d47e4c19662d1a07a8b3bae61434028ad",
   "reproducibility": {
     "inputs_manifest_sha256": "e9b6ccb09f5800697e7defac9b736df99d2e8bf747252b5faf10a2104cedf2be",
-    "reproduce_recipe": "python3 src/run_window.py --window 2026-07"
+    "reproduce_recipe": "python3 src/run_window.py --window 2026-07",
+    "scope_limitations": "Class C sandbox execution verifies deterministic re-computation using the frozen script (SHA-256 bound in Class B). This establishes computational integrity of the declared pipeline, not independent third-party implementation reproduction."
   },
   "verdict": {
     "evaluation_status": "EVALUATED",
