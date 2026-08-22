@@ -293,7 +293,7 @@ def verify_gate(verdict_path, inputs_dir, script_path, params_path=None, run_col
                 if rep_zm["determinacy"] != declared_zm["status"]:
                     raise GateVerificationError(f"GATE_FAIL_C: OUTPUT_AGREEMENT_MISMATCH (zone {z} status declared {declared_zm['status']} != reproduced {rep_zm['determinacy']})")
 
-            print(f"  ✓ Klasa C Passed: Sandbox re-execution produced 100.00% exact bitwise Output Agreement with declared verdict.\n")
+            print(f"  ✓ Klasa C Passed: Declared fields agree with sandbox re-execution.\n")
 
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)
