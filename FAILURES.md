@@ -170,9 +170,9 @@
 - **Component:** `instances/nem-scarcity-s1/src/fuzz_gate_survival.py`
 - **Root Cause (General Class):** Measurement Drift & Unrecorded Test Rig States. Three successive leak counts (503 vs 60 vs 516 out of 10,000) were reported within the same session without documenting the divergent execution environments:
   1. *Run 1 (503 / 5.03%, task-924):* Unseeded, pre-commit fuzzer script on unquantified denominator.
-  2. *Run 2 (60 / 0.60%, task-998):* Seed 42 executed while `run_window.py` and `VERDICT.json` had been modified in-place on disk.
-  3. *Run 3 (516 / 5.16% overall, 11.37% Class II, task-1058):* Seed 42 executed over pristine restored artifacts (SHA `83f7ca73...`) and specification-aligned `gate_verify.py`.
-- **Measurable Impact:** Provisory and uncalibrated leak counts were entered into repository documentation before environment stabilization and seed reproducibility were achieved.
-- **Remediation:** Formally withdrew counts 503 and 60 in favor of the fully reproducible Run 3 (516 total leaks, 515 on 4,530 resigned candidates = 11.37% Class II leak rate), and committed the reproducible corpus artifact `fuzz_leak_corpus_seed42_10k.json`.
+  2. *Run 2 (60 / 0.60%, task-998):* Seed 42 executed during an intermediate test-rig session; root cause of divergence from Run 1 is undetermined / uncalibrated.
+  3. *Run 3 (516 total draws, task-1058):* Seed 42 executed over pristine restored artifacts, but included 4 no-op draws where generator drew base parameter values without altering object bytes.
+- **Measurable Impact:** Provisory and uncalibrated leak counts were entered into repository documentation before environment stabilization and strict no-op pre-filtering were achieved.
+- **Remediation:** Formally withdrew provisory counts 503 and 60, hardened the fuzzer to discard all 0-drift no-ops pre-test, and established calibrated measurement strictly over non-trivial mutation spaces.
 
 
