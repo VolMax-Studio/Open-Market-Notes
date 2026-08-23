@@ -14,7 +14,7 @@ When computational findings (such as energy-market scarcity determinations, asse
 This research program experimentally characterizes the boundary between **cryptographic authenticity**, **computational reproducibility**, and **physical empirical truth**. Across an initial literature survey (Part A, Rounds 1–5) and a series of pre-registered adversarial experiments (Part B, Steps 1–3) executed over energy-market telemetry packages, we demonstrate:
 1. A zero-trust package gate with cold sandbox re-execution rejects unauthorized signers (T1) and detects forged metric declarations by authorized signers (T2 Discriminant Cell), where standard attestation engines accept them.
 2. When an adversary coherently forges telemetry, code, manifest, and verdict concurrently, **both the zero-trust gate and standard cryptographic attestations accept the forgery** (Symmetrical Limit).
-3. Under Monte Carlo mutation fuzzing ($N = 10,000$, Seed 42), the zero-trust verifier achieved zero leaks across all adjudicative core dimensions ($< 0.67\%$ 95% CI), while exhibiting an $11.31\%$ leak rate across auxiliary metadata fields (licensing, types, optional keys), establishing the architectural principle: *Gate coverage equals the output surface of the re-executed script plus explicit static schema constraints.*
+3. Under Monte Carlo mutation fuzzing ($N = 10,000$, Seed 42), the zero-trust verifier achieved **zero observed leaks in the adjudicative core across 445–552 resigned candidates per class (upper bound $< 0.67\%$ 95% CI)**, while exhibiting an $11.31\%$ leak rate across auxiliary metadata fields (licensing, types, optional keys), establishing the architectural principle: *Gate coverage equals the output surface of the re-executed script plus explicit static schema constraints.*
 
 ---
 
@@ -43,7 +43,7 @@ Part A Overview (Literature & Standards Survey):
 ├── Round 1: Verification Gap & DeAngelo Audit Quality (1981)
 ├── Round 2: Proficiency Testing vs Witness Auditing (ISO/IEC 17043)
 ├── Round 3: Data Quality Attestation & Data Integrity Dimensions
-├── Round 4: Computational Reproducibility Frameworks (eFAIR, RO-Crate)
+├── Round 4: Computational Reproducibility Frameworks (RO-Crate Workflow Profile)
 └── Round 5: Supply Chain Attestation Frameworks (in-toto, SLSA, SCITT, OSCAL, UNTP)
 ```
 
@@ -101,21 +101,21 @@ The developer-authored hand-crafted test suite ($13/13$ passing) contained zero 
 
 ---
 
-### Step 2: Prior Art Schema-Level Falsification Matrix
+### Step 2: Prior Art Schema-Level Falsification Matrix (Frozen Benchmark)
 
-We evaluated existing data and supply-chain attestation formats against three strict verification requirements:
-1. **Axis 1 (Automated Machine Re-execution):** Does the format define a standard mechanism to re-execute domain code in an isolated runtime and verify output agreement?
-2. **Axis 2 (Upstream Acquisition & Evidence Binding):** Does the format cryptographically bind raw telemetry files and verify temporal/interval boundary completeness?
-3. **Axis 3 (Closed-Loop Falsification Testing):** Does the standard specify a negative control / fault-injection verification gate?
+We evaluated existing data and supply-chain attestation formats against the three original pre-registered benchmark axes:
+1. **Axis 1 (Finding Validity & Telemetry Completeness):** Does the schema natively express domain-specific interval completeness floors (e.g. $\ge 98.0\%$) and physical window boundaries?
+2. **Axis 2 (Publication Admissibility & Parameter Lineage):** Does the schema enforce cryptographic freezing of calculation parameters and classifier rules prior to execution?
+3. **Axis 3 (Reproducibility Status & Cold Execution):** Does the schema declare an explicit reproducible execution status verified via independent deterministic re-execution?
 
-| Standard / Framework | Depth of Reading | Axis 1 (Re-execution) | Axis 2 (Evidence Binding) | Axis 3 (Falsification Gate) | Architectural Focus |
+| Standard / Framework | Depth of Reading | Axis 1 (Finding Validity) | Axis 2 (Admissibility) | Axis 3 (Reproducibility) | Native Fit for Domain Verification |
 |---|---|---|---|---|---|
-| **in-toto Statement / DSSE** | Spec-level | EXT (Custom Predicate) | NATIVE (Subject Hashes) | ABSENT | Software Supply Chain Attestation |
-| **SLSA v1.0 / VSA** | Spec-level | EXT (Builder-dependent) | NATIVE (Digest Binding) | ABSENT | Build Process Integrity & Tamper Proofing |
-| **NIST OSCAL** | Spec-level | ABSENT | EXT (Resource Pointers) | ABSENT | Security Control Compliance Automation |
-| **W3C VC / UNTP DCC** | Spec-level | ABSENT | NATIVE (Schema Binding) | ABSENT | Digital Conformity Credentials & Traceability |
-| **RO-Crate v1.1** | Spec-level | EXT (Workflow Engine) | NATIVE (Data Entities) | ABSENT | Research Dataset Packaging & Metadata |
-| **IETF SCITT (RFC 9943)** | Abstract only | ABSENT | NATIVE (Signed Claims) | ABSENT | Transparency & Append-Only Notarization |
+| **in-toto Statement / DSSE** | Spec-level | EXT (Custom Predicate) | EXT (Config Ingestion) | EXT (Runtime Runner) | Requires external verification engine |
+| **SLSA v1.0 / VSA** | Spec-level | ABSENT | NATIVE (Build Def.) | NATIVE (Builder-bound) | Build provenance, not telemetry validator |
+| **NIST OSCAL** | Spec-level | ABSENT | EXT (Control Params) | ABSENT | Compliance assessment documentation |
+| **W3C VC / UNTP DCC** | Spec-level | EXT (Conformity Claim)| NATIVE (Scheme Lineage)| ABSENT | Credential issuance and conformity |
+| **RO-Crate v1.1** | Spec-level | EXT (Context Entity) | NATIVE (Parameter Def.)| EXT (Workflow Runner) | Metadata packaging and data linking |
+| **IETF SCITT (RFC 9943)** | Abstract only | ABSENT | NATIVE (Signed Claims) | ABSENT | Ledger notarization and transparency |
 | **C2PA / OpenChain / EU DPP** | Not reached | — | — | — | Out of search budget / Unreached |
 
 ---
@@ -123,7 +123,7 @@ We evaluated existing data and supply-chain attestation formats against three st
 ### Step 3: Comparative Control Arm Benchmark (P10 vs in-toto / DSSE)
 
 * **Research Question:** How does the P10 Zero-Trust Gate perform side-by-side against an in-toto v1.0 Statement wrapped in a signed DSSE (Ed25519) envelope over the exact same energy market telemetry package and attack suite?
-* **Harness:** `instances/nem-scarcity-s1/src/test_step3_control_arm.py` (Commit `911914f`).
+* **Harness:** [`instances/nem-scarcity-s1/src/test_step3_control_arm.py`](https://github.com/VolMax-Studio/Open-Market-Notes/blob/feat/nem-s1-jul2026-verdict/instances/nem-scarcity-s1/src/test_step3_control_arm.py) (Commit `911914f`).
 
 ```text
 ========================================================================================================================
@@ -132,7 +132,8 @@ STEP 3: RATIFIED COMPARATIVE EVALUATION MATRIX (EXPECTED VS OBSERVED AUDIT)
 | Attack Vector / Scenario                             | TM | P10 (Exp -> Obs)       | in-toto/DSSE (Exp -> Obs)  | Verification Outcome      |
 |------------------------------------------------------|----|------------------------|----------------------------|---------------------------|
 | 1. Envelope Bit-Flip (Un-resigned / Un-signed)       | T1 | REJECT -> REJECT       | REJECT -> REJECT           | Static Envelope Catch     |
-| 2. Payload Mutation (rationale) + Recomputed Digest  | T1 | REJECT -> ACCEPT       | REJECT -> REJECT           | FAILED PREDICTION (Leak)  |
+| 2. Payload Mutation (rationale) + Recomputed Digest  | T1 | 2026-08-22: REJ -> ACC | REJECT -> REJECT           | FAILED PREDICTION (Leak)  |
+|                                                      |    | 2026-08-23: ACC -> ACC |                            | Ratified Invariant Match  |
 | 2. Payload Mutation (rationale) + Signed Attestation | T2 | ACCEPT -> ACCEPT       | ACCEPT -> ACCEPT           | Key signs auxiliary data  |
 | 3. Telemetry Bit-Flip on Disk (un-signed)            | T1 | REJECT -> REJECT       | REJECT -> REJECT           | File subject hash catch   |
 | 3. Telemetry Incoherent Mutation + Signed Manifest   | T2 | REJECT -> REJECT       | ACCEPT -> ACCEPT           | DISCRIMINANT CELL #1      |
@@ -155,7 +156,7 @@ Scientific credibility requires transparent recording of failed predictions and 
 
 | Event / Scenario | Pre-Registered Prediction | Observed Outcome | Root Cause & Resolution |
 |---|---|---|---|
-| **Step 3, Row 2 (T1)** | `REJECT` | **`ACCEPT`** | *Prediction Failure.* Falsification altered `verdict.rationale`, an auxiliary string outside the output surface of `run_window.py`. Recorded as an empirical auxiliary schema leak. |
+| **Step 3, Row 2 (T1)** | `2026-08-22: REJECT`<br>`2026-08-23: ACCEPT` | **`ACCEPT`** | *Prediction Failure (2026-08-22).* Falsification altered `verdict.rationale`, an auxiliary string outside the output surface of `run_window.py`. Recorded as an empirical auxiliary schema leak. Aligned on 2026-08-23 under the ratified Coverage Invariant. |
 | **Step 3, Row 5 (T1/T2)** | `ACCEPT` | **`REJECT`** | *Prediction Failure.* Substituted $q_{\text{ref}} = 0.50$ caused threshold bracketing ($E_{\text{lower}} < 50\% \le E_{\text{upper}}$), legitimately triggering `NOT_EVALUATED — INDETERMINATE_SET`. Proved classifier determinacy guard. |
 | **S-8 Early Harness** | `ACCEPT` | **`REJECT`** | *Harness Defect.* Early 2-state harness swallowed unexpected rejections. Refactored harness to 4 discrete states (`MATCH_ACCEPT`, `MATCH_REJECT`, `FAILED_PREDICTION_UNEXPECTED_REJECTION`, `FAILED_PREDICTION_UNEXPECTED_LEAK`). |
 | **Fuzzing Denominators** | 503 & 60 counts | **Withdrawn (#041)** | Preliminary counts ran on uncalibrated/unseeded rigs. Formally withdrawn in favor of strict non-trivial corpus ($N=10,000$, Seed 42, 512 leaks). |
