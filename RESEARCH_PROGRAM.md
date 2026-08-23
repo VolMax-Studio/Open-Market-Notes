@@ -3,6 +3,7 @@
 > **Document Status:** Draft — SPREMNO ZA GEJT  
 > **Repository:** `Open-Market-Notes`  
 > **Branch:** `feat/nem-s1-jul2026-verdict`  
+> **DOI:** [10.5281/zenodo.22068170](https://doi.org/10.5281/zenodo.22068170) (Concept) | [10.5281/zenodo.22068171](https://doi.org/10.5281/zenodo.22068171) (v0.1.0)  
 > **Date:** 2026-08-23  
 
 ---
