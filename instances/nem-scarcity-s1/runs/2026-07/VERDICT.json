@@ -1,0 +1,88 @@
+{
+  "admissibility": {
+    "confidentiality_level": "UNRESTRICTED",
+    "publication_status": "PUBLIC_PERMITTED",
+    "source_license": "CC BY 4.0 AEMO"
+  },
+  "claim": {
+    "instance_id": "nem-scarcity-s1",
+    "instrument_id": "M1_SCARCITY_PERSISTENCE",
+    "target_metric": "price_scarcity_persistence",
+    "window": "2026-07",
+    "window_bounds_utc": {
+      "end": "2026-07-31T23:59:59Z",
+      "start": "2026-07-01T00:00:00Z"
+    }
+  },
+  "evidence_boundary": {
+    "completeness_floor_pct": 98.0,
+    "completeness_pct": 98.6671,
+    "missing_intervals_tail": 119,
+    "nominal_intervals": 8928,
+    "received_intervals": 8809,
+    "telemetry_period_end_utc": "2026-07-31T14:00:00Z",
+    "telemetry_period_start_utc": "2026-07-01T00:05:00Z"
+  },
+  "execution_and_metrics": {
+    "N_comparison_zones": 4,
+    "N_elevated": 0,
+    "evaluated_at_utc": "2026-08-21T17:49:53Z",
+    "zone_metrics": {
+      "NSW1": {
+        "exposure_lower_pct": 4.7715,
+        "exposure_upper_pct": 6.1044,
+        "m1_pct": 4.836,
+        "status": "NOT_ELEVATED"
+      },
+      "QLD1": {
+        "exposure_lower_pct": 2.9346,
+        "exposure_upper_pct": 4.2675,
+        "m1_pct": 2.9742,
+        "status": "NOT_ELEVATED"
+      },
+      "SA1": {
+        "exposure_lower_pct": 9.4198,
+        "exposure_upper_pct": 10.7527,
+        "m1_pct": 9.5471,
+        "status": "NOT_ELEVATED"
+      },
+      "TAS1": {
+        "exposure_lower_pct": 7.3253,
+        "exposure_upper_pct": 8.6582,
+        "m1_pct": 7.4242,
+        "status": "NOT_ELEVATED"
+      },
+      "VIC1": {
+        "exposure_lower_pct": 8.4117,
+        "exposure_upper_pct": 9.7446,
+        "m1_pct": 8.5254,
+        "status": "NOT_ELEVATED"
+      }
+    }
+  },
+  "frozen_rule": {
+    "code_git_commit": "39c1bf850e2bfdf6e0ac5181a5dc2dfebead5a2e",
+    "parameters": {
+      "k_mult": 1.5,
+      "n_baseline_months": 12,
+      "n_high": 3,
+      "n_low": 1,
+      "q_ref": 0.9,
+      "s_thresh_pct": 15.0
+    },
+    "rule_script_sha256": "3d9ea127edc18ad9ad15315a9e0141495851dea57b9abf66f8d1ecf600c94e35",
+    "rule_version": "v1.1.0-PROVISIONAL"
+  },
+  "integrity_digest": "6d7807970ab1fa500ecc3114d229ff6d47e4c19662d1a07a8b3bae61434028ad",
+  "reproducibility": {
+    "inputs_manifest_sha256": "e9b6ccb09f5800697e7defac9b736df99d2e8bf747252b5faf10a2104cedf2be",
+    "reproduce_recipe": "python3 src/run_window.py --window 2026-07",
+    "scope_limitations": "Class C sandbox execution verifies deterministic re-computation using the frozen script (SHA-256 bound in Class B). This establishes computational integrity of the declared pipeline, not independent third-party implementation reproduction."
+  },
+  "verdict": {
+    "evaluation_status": "EVALUATED",
+    "label": "NULL",
+    "rationale": "Completeness >= 98.0% and N_elevated (0) < n_low (1)"
+  },
+  "verdict_version": "1.0.0"
+}

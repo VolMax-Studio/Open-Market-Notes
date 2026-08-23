@@ -53,7 +53,12 @@ def execute_window_run(instance_dir, target_window):
 
     with open(params_path) as f:
         content = f.read()
-        json_str = content[content.find('{'):content.rfind('}')+1]
+        if '```json' in content:
+            start_idx = content.find('```json') + 7
+            end_idx = content.find('```', start_idx)
+            json_str = content[start_idx:end_idx].strip()
+        else:
+            json_str = content[content.find('{'):content.rfind('}')+1]
         params = json.loads(json_str)
 
     q_ref = float(params.get('q_ref', 0.90))

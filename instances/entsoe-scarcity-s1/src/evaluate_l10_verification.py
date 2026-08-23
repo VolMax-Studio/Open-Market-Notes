@@ -126,7 +126,66 @@ def evaluate_column_pair(df_base, df_fresh, zone, col_name, is_duplicate=False):
         "monthly_coverage_changes": monthly_cov_change
     }
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", ".."))
+
+PREREGISTERED_BASELINE_DIR = os.path.join(REPO_ROOT, "instances", "entsoe-scarcity-s1", "inputs")
+PREREGISTERED_FRESH_DIR_TARGETS = [
+    os.path.join(REPO_ROOT, "instances", "entsoe-scarcity-s1", "test_fresh_fetch"),
+    os.path.join(REPO_ROOT, "instances", "entsoe-scarcity-s1", "test_fresh_fetch", "processed")
+]
+BASELINE_SNAPSHOT_CUTOFF_UTC = "2026-08-09T00:00:00+00:00"
+
 def run_l10_evaluation(baseline_dir, fresh_dir, report_out_path=None):
+    # Strict validation check 1: Exact canonical path matching
+    norm_base = os.path.abspath(os.path.normpath(baseline_dir))
+    norm_fresh = os.path.abspath(os.path.normpath(fresh_dir))
+
+    if norm_base != os.path.abspath(PREREGISTERED_BASELINE_DIR):
+        print(f"FATAL ERROR: baseline_dir '{norm_base}' does not match pre-registered canonical path '{PREREGISTERED_BASELINE_DIR}'. Aborting.", file=sys.stderr)
+        sys.exit(1)
+
+    if norm_fresh not in [os.path.abspath(p) for p in PREREGISTERED_FRESH_DIR_TARGETS]:
+        print(f"FATAL ERROR: fresh_dir '{norm_fresh}' does not match pre-registered canonical path target. Allowed: {PREREGISTERED_FRESH_DIR_TARGETS}. Aborting.", file=sys.stderr)
+        sys.exit(1)
+
+    # Strict validation check 2: Data manifest lineage timestamp check (acquired_at_utc > 2026-08-09)
+    manifest_candidates = [
+        os.path.join(fresh_dir, "data_manifest.json"),
+        os.path.join(os.path.dirname(norm_fresh), "data_manifest.json")
+    ]
+    manifest_found = False
+    for mpath in manifest_candidates:
+        if os.path.exists(mpath):
+            manifest_found = True
+            with open(mpath) as mf:
+                mdata = json.load(mf)
+                acq_timestamps = []
+                if mdata.get("acquired_at_utc"):
+                    acq_timestamps.append(mdata.get("acquired_at_utc"))
+                for fitem in mdata.get("files", []):
+                    if isinstance(fitem, dict) and fitem.get("acquired_at_utc"):
+                        acq_timestamps.append(fitem.get("acquired_at_utc"))
+
+                if acq_timestamps:
+                    cutoff_dt = pd.to_datetime(BASELINE_SNAPSHOT_CUTOFF_UTC, utc=True)
+                    for acq_str in acq_timestamps:
+                        acq_dt = pd.to_datetime(acq_str, utc=True)
+                        if acq_dt <= cutoff_dt:
+                            print(f"FATAL ERROR: Manifest acquired_at_utc ({acq_str}) <= baseline cutoff ({BASELINE_SNAPSHOT_CUTOFF_UTC}). Lineage violated. Aborting.", file=sys.stderr)
+                            sys.exit(1)
+            break
+
+    # Strict validation check 3: Filesystem mtime fallback check
+    base_sample = os.path.join(baseline_dir, "imbalance_AT.feather")
+    fresh_sample = os.path.join(fresh_dir, "imbalance_AT.feather")
+    if os.path.exists(base_sample) and os.path.exists(fresh_sample):
+        base_mtime = os.path.getmtime(base_sample)
+        fresh_mtime = os.path.getmtime(fresh_sample)
+        if fresh_mtime <= base_mtime:
+            print(f"FATAL ERROR: Fresh fetch filesystem timestamp ({fresh_mtime}) <= baseline timestamp ({base_mtime}). Temporal monotonicity violated. Aborting.", file=sys.stderr)
+            sys.exit(1)
+
     results = {}
     overall_l10_sufficient = True
 

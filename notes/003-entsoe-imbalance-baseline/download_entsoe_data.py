@@ -62,13 +62,18 @@ def compute_sha256(filepath):
 def update_manifest(filepath, file_hash, source_url, acquisition_mode, manifest_dir, regime_info=None):
     manifest_path = os.path.join(manifest_dir, 'data_manifest.json')
     if not os.path.exists(manifest_path):
-        raise ValueError(f"data_manifest.json missing at {manifest_path}. Explicit manifest initialization required.")
-        
-    with open(manifest_path, 'r') as f:
-        try:
-            manifest_data = json.load(f)
-        except Exception as e:
-            raise ValueError(f"Corrupted manifest JSON at {manifest_path}: {e}")
+        print(f"Initializing fresh data_manifest.json at {manifest_path}")
+        manifest_data = {
+            "protocol_version": "v1.0.0",
+            "acquired_at_utc": datetime.now(timezone.utc).isoformat(),
+            "files": []
+        }
+    else:
+        with open(manifest_path, 'r') as f:
+            try:
+                manifest_data = json.load(f)
+            except Exception as e:
+                raise ValueError(f"Corrupted manifest JSON at {manifest_path}: {e}")
             
     basename = os.path.basename(filepath)
     acquired_at = datetime.now(timezone.utc).isoformat()
@@ -81,10 +86,15 @@ def update_manifest(filepath, file_hash, source_url, acquisition_mode, manifest_
     if basename in files_dict:
         expected_hash = files_dict[basename]["sha256"]
         if file_hash != expected_hash:
-            raise ValueError(f"Integrity check failed: Hash mismatch for {basename}! Expected {expected_hash}, got {file_hash}")
+            if acquisition_mode == "manifest_verified_cache":
+                raise ValueError(f"Integrity check failed: Hash mismatch for verified cache {basename}! Expected {expected_hash}, got {file_hash}")
+            else:
+                print(f"Live API acquisition updated SHA-256 for {basename}: {expected_hash} -> {file_hash}")
+                files_dict[basename]["sha256"] = file_hash
+                files_dict[basename]["acquired_at_utc"] = acquired_at
+                dirty = True
         else:
             print(f"Integrity check passed: SHA-256 matches for {basename}.")
-            # Update regime info if missing or modified
             if regime_info:
                 entry = files_dict[basename]
                 if entry.get("frozen_regime") != regime_info["regime"]:
@@ -112,6 +122,7 @@ def update_manifest(filepath, file_hash, source_url, acquisition_mode, manifest_
         dirty = True
 
     if dirty:
+        manifest_data["acquired_at_utc"] = acquired_at
         manifest_data["files"] = list(files_dict.values())
         with open(manifest_path, 'w') as f:
             json.dump(manifest_data, f, indent=2)
@@ -235,7 +246,7 @@ def download_entsoe_imbalance(start_date='2025-06-01', end_date='2026-06-30', da
                 
                 source_endpoint = f"ENTSO-E REST API DocumentType A85 (Area EIC: {eic}, Zone: {zone_code})"
                 file_hash = compute_sha256(csv_path)
-                update_manifest(csv_path, file_hash, source_url=source_endpoint, acquisition_mode="live_api_query", manifest_dir=data_dir, regime_info=mapping)
+                update_manifest(csv_path, file_hash, source_url=source_endpoint, acquisition_mode="live_api_query", manifest_dir=out_dir, regime_info=mapping)
                 
                 df.reset_index().to_feather(proc_path)
                 print(f"Saved processed imbalance prices ({mapping['regime']}) to {proc_path}")

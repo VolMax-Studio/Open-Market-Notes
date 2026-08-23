@@ -1,19 +1,19 @@
 {
   "protocol_version": "v1.0.0",
   "preregistration_commit": "3057a72",
-  "evaluator_commit": "41fa3d3a45b81940a84fc10201ead7df93a37b56",
-  "overall_l10_sufficient": true,
+  "evaluator_commit": "a1d1ee7a4bf8264ff88c83d831d699b43668ff70",
+  "overall_l10_sufficient": false,
   "scope_limitation_note": "n=1 empirical snapshot comparison over the July 2026 window between 2026-08-09 and 2026-08-15. A STABLE verdict demonstrates that L=10 publication lag was not breached for this specific window; multi-window stability across future runs is required before L=10 can transition from PROVISIONAL.",
   "zone_results": {
     "AT": {
       "is_single_pricing_both_snapshots": true,
       "columns": {
         "Short": {
-          "status": "COVERAGE_CHANGE",
+          "status": "STABLE",
           "N_price_revisions_archive": 0,
           "pct_price_revisions_archive": 0.0,
-          "N_coverage_changes_archive": 37919,
-          "pct_coverage_changes_archive": 92.7228,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
           "total_archive_intervals": 40895,
           "N_price_revisions_july": 0,
           "pct_price_revisions_july": 0.0,
@@ -22,22 +22,7 @@
           "total_july_intervals": 2968,
           "max_abs_drift_eur_mwh": 0.0,
           "monthly_price_revisions": {},
-          "monthly_coverage_changes": {
-            "2025-05": 8,
-            "2025-06": 2880,
-            "2025-07": 2976,
-            "2025-08": 2976,
-            "2025-09": 2880,
-            "2025-10": 2976,
-            "2025-11": 2880,
-            "2025-12": 2976,
-            "2026-01": 2976,
-            "2026-02": 2688,
-            "2026-03": 2976,
-            "2026-04": 2880,
-            "2026-05": 2975,
-            "2026-06": 2872
-          }
+          "monthly_coverage_changes": {}
         },
         "Long": {
           "status": "DUPLICATE_SERIES (Long == Short)",
@@ -59,11 +44,11 @@
       "is_single_pricing_both_snapshots": true,
       "columns": {
         "Short": {
-          "status": "COVERAGE_CHANGE",
+          "status": "STABLE",
           "N_price_revisions_archive": 0,
           "pct_price_revisions_archive": 0.0,
-          "N_coverage_changes_archive": 37919,
-          "pct_coverage_changes_archive": 92.7228,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
           "total_archive_intervals": 40895,
           "N_price_revisions_july": 0,
           "pct_price_revisions_july": 0.0,
@@ -72,22 +57,7 @@
           "total_july_intervals": 2968,
           "max_abs_drift_eur_mwh": 0.0,
           "monthly_price_revisions": {},
-          "monthly_coverage_changes": {
-            "2025-05": 8,
-            "2025-06": 2880,
-            "2025-07": 2976,
-            "2025-08": 2976,
-            "2025-09": 2880,
-            "2025-10": 2976,
-            "2025-11": 2880,
-            "2025-12": 2976,
-            "2026-01": 2976,
-            "2026-02": 2688,
-            "2026-03": 2976,
-            "2026-04": 2880,
-            "2026-05": 2975,
-            "2026-06": 2872
-          }
+          "monthly_coverage_changes": {}
         },
         "Long": {
           "status": "DUPLICATE_SERIES (Long == Short)",
@@ -109,11 +79,11 @@
       "is_single_pricing_both_snapshots": true,
       "columns": {
         "Short": {
-          "status": "COVERAGE_CHANGE",
+          "status": "STABLE",
           "N_price_revisions_archive": 0,
           "pct_price_revisions_archive": 0.0,
-          "N_coverage_changes_archive": 37870,
-          "pct_coverage_changes_archive": 92.7141,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
           "total_archive_intervals": 40846,
           "N_price_revisions_july": 0,
           "pct_price_revisions_july": 0.0,
@@ -122,22 +92,7 @@
           "total_july_intervals": 2968,
           "max_abs_drift_eur_mwh": 0.0,
           "monthly_price_revisions": {},
-          "monthly_coverage_changes": {
-            "2025-05": 8,
-            "2025-06": 2880,
-            "2025-07": 2973,
-            "2025-08": 2932,
-            "2025-09": 2880,
-            "2025-10": 2976,
-            "2025-11": 2880,
-            "2025-12": 2976,
-            "2026-01": 2976,
-            "2026-02": 2688,
-            "2026-03": 2976,
-            "2026-04": 2878,
-            "2026-05": 2975,
-            "2026-06": 2872
-          }
+          "monthly_coverage_changes": {}
         },
         "Long": {
           "status": "DUPLICATE_SERIES (Long == Short)",
@@ -159,11 +114,11 @@
       "is_single_pricing_both_snapshots": true,
       "columns": {
         "Short": {
-          "status": "COVERAGE_CHANGE",
+          "status": "STABLE",
           "N_price_revisions_archive": 0,
           "pct_price_revisions_archive": 0.0,
-          "N_coverage_changes_archive": 37869,
-          "pct_coverage_changes_archive": 92.7139,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
           "total_archive_intervals": 40845,
           "N_price_revisions_july": 0,
           "pct_price_revisions_july": 0.0,
@@ -172,22 +127,7 @@
           "total_july_intervals": 2968,
           "max_abs_drift_eur_mwh": 0.0,
           "monthly_price_revisions": {},
-          "monthly_coverage_changes": {
-            "2025-05": 8,
-            "2025-06": 2880,
-            "2025-07": 2972,
-            "2025-08": 2932,
-            "2025-09": 2880,
-            "2025-10": 2976,
-            "2025-11": 2880,
-            "2025-12": 2976,
-            "2026-01": 2976,
-            "2026-02": 2688,
-            "2026-03": 2976,
-            "2026-04": 2878,
-            "2026-05": 2975,
-            "2026-06": 2872
-          }
+          "monthly_coverage_changes": {}
         },
         "Long": {
           "status": "DUPLICATE_SERIES (Long == Short)",
@@ -209,66 +149,52 @@
       "is_single_pricing_both_snapshots": false,
       "columns": {
         "Short": {
-          "status": "COVERAGE_CHANGE",
-          "N_price_revisions_archive": 0,
-          "pct_price_revisions_archive": 0.0,
-          "N_coverage_changes_archive": 37919,
-          "pct_coverage_changes_archive": 92.7228,
+          "status": "PRICE_REVISION",
+          "N_price_revisions_archive": 701,
+          "pct_price_revisions_archive": 1.7141,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
           "total_archive_intervals": 40895,
-          "N_price_revisions_july": 0,
-          "pct_price_revisions_july": 0.0,
+          "N_price_revisions_july": 633,
+          "pct_price_revisions_july": 21.3275,
           "N_coverage_changes_july": 0,
           "pct_coverage_changes_july": 0.0,
           "total_july_intervals": 2968,
-          "max_abs_drift_eur_mwh": 0.0,
-          "monthly_price_revisions": {},
-          "monthly_coverage_changes": {
-            "2025-05": 8,
-            "2025-06": 2880,
-            "2025-07": 2976,
-            "2025-08": 2976,
-            "2025-09": 2880,
-            "2025-10": 2976,
-            "2025-11": 2880,
-            "2025-12": 2976,
-            "2026-01": 2976,
-            "2026-02": 2688,
-            "2026-03": 2976,
-            "2026-04": 2880,
-            "2026-05": 2975,
-            "2026-06": 2872
-          }
+          "max_abs_drift_eur_mwh": 453.31,
+          "monthly_price_revisions": {
+            "2025-08": 14,
+            "2025-11": 4,
+            "2025-12": 6,
+            "2026-01": 3,
+            "2026-02": 2,
+            "2026-06": 39,
+            "2026-07": 633
+          },
+          "monthly_coverage_changes": {}
         },
         "Long": {
-          "status": "COVERAGE_CHANGE",
-          "N_price_revisions_archive": 0,
-          "pct_price_revisions_archive": 0.0,
-          "N_coverage_changes_archive": 37919,
-          "pct_coverage_changes_archive": 92.7228,
+          "status": "PRICE_REVISION",
+          "N_price_revisions_archive": 700,
+          "pct_price_revisions_archive": 1.7117,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
           "total_archive_intervals": 40895,
-          "N_price_revisions_july": 0,
-          "pct_price_revisions_july": 0.0,
+          "N_price_revisions_july": 632,
+          "pct_price_revisions_july": 21.2938,
           "N_coverage_changes_july": 0,
           "pct_coverage_changes_july": 0.0,
           "total_july_intervals": 2968,
-          "max_abs_drift_eur_mwh": 0.0,
-          "monthly_price_revisions": {},
-          "monthly_coverage_changes": {
-            "2025-05": 8,
-            "2025-06": 2880,
-            "2025-07": 2976,
-            "2025-08": 2976,
-            "2025-09": 2880,
-            "2025-10": 2976,
-            "2025-11": 2880,
-            "2025-12": 2976,
-            "2026-01": 2976,
-            "2026-02": 2688,
-            "2026-03": 2976,
-            "2026-04": 2880,
-            "2026-05": 2975,
-            "2026-06": 2872
-          }
+          "max_abs_drift_eur_mwh": 506.41,
+          "monthly_price_revisions": {
+            "2025-08": 14,
+            "2025-11": 4,
+            "2025-12": 6,
+            "2026-01": 3,
+            "2026-02": 2,
+            "2026-06": 39,
+            "2026-07": 632
+          },
+          "monthly_coverage_changes": {}
         }
       }
     },
@@ -276,11 +202,11 @@
       "is_single_pricing_both_snapshots": false,
       "columns": {
         "Short": {
-          "status": "COVERAGE_CHANGE",
+          "status": "STABLE",
           "N_price_revisions_archive": 0,
           "pct_price_revisions_archive": 0.0,
-          "N_coverage_changes_archive": 37919,
-          "pct_coverage_changes_archive": 92.7228,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
           "total_archive_intervals": 40895,
           "N_price_revisions_july": 0,
           "pct_price_revisions_july": 0.0,
@@ -289,29 +215,14 @@
           "total_july_intervals": 2968,
           "max_abs_drift_eur_mwh": 0.0,
           "monthly_price_revisions": {},
-          "monthly_coverage_changes": {
-            "2025-05": 8,
-            "2025-06": 2880,
-            "2025-07": 2976,
-            "2025-08": 2976,
-            "2025-09": 2880,
-            "2025-10": 2976,
-            "2025-11": 2880,
-            "2025-12": 2976,
-            "2026-01": 2976,
-            "2026-02": 2688,
-            "2026-03": 2976,
-            "2026-04": 2880,
-            "2026-05": 2975,
-            "2026-06": 2872
-          }
+          "monthly_coverage_changes": {}
         },
         "Long": {
-          "status": "COVERAGE_CHANGE",
+          "status": "STABLE",
           "N_price_revisions_archive": 0,
           "pct_price_revisions_archive": 0.0,
-          "N_coverage_changes_archive": 37919,
-          "pct_coverage_changes_archive": 92.7228,
+          "N_coverage_changes_archive": 0,
+          "pct_coverage_changes_archive": 0.0,
           "total_archive_intervals": 40895,
           "N_price_revisions_july": 0,
           "pct_price_revisions_july": 0.0,
@@ -320,22 +231,7 @@
           "total_july_intervals": 2968,
           "max_abs_drift_eur_mwh": 0.0,
           "monthly_price_revisions": {},
-          "monthly_coverage_changes": {
-            "2025-05": 8,
-            "2025-06": 2880,
-            "2025-07": 2976,
-            "2025-08": 2976,
-            "2025-09": 2880,
-            "2025-10": 2976,
-            "2025-11": 2880,
-            "2025-12": 2976,
-            "2026-01": 2976,
-            "2026-02": 2688,
-            "2026-03": 2976,
-            "2026-04": 2880,
-            "2026-05": 2975,
-            "2026-06": 2872
-          }
+          "monthly_coverage_changes": {}
         }
       }
     }

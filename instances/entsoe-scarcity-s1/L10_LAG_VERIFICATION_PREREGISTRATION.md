@@ -71,3 +71,4 @@ Per-column evaluation outcomes are classified using the following non-exclusive 
 ## 6. Mandate 9 Zero Secret Leakage Control
 
 All automated fetching and comparison scripts MUST strictly enforce Mandate 9. No ENTSO-E API tokens or request credentials shall be printed or logged in standard output.
+
