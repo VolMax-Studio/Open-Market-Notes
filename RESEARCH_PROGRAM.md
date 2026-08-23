@@ -111,7 +111,7 @@ We evaluated existing data and supply-chain attestation formats against the thre
 | Standard / Framework | Depth of Reading | Axis 1 (Finding Validity) | Axis 2 (Admissibility) | Axis 3 (Reproducibility) | Native Fit for Domain Verification |
 |---|---|---|---|---|---|
 | **in-toto Statement / DSSE** | Spec-level | EXT (Custom Predicate) | EXT (Config Ingestion) | EXT (Runtime Runner) | Requires external verification engine |
-| **SLSA v1.0 / VSA** | Spec-level | ABSENT | NATIVE (Build Def.) | NATIVE (Builder-bound) | Build provenance, not telemetry validator |
+| **SLSA v1.0 / VSA** | Spec-level | ABSENT | NATIVE (Build Def.) | ABSENT (Dropped in v1.0) | Build provenance, not telemetry validator |
 | **NIST OSCAL** | Spec-level | ABSENT | EXT (Control Params) | ABSENT | Compliance assessment documentation |
 | **W3C VC / UNTP DCC** | Spec-level | EXT (Conformity Claim)| NATIVE (Scheme Lineage)| ABSENT | Credential issuance and conformity |
 | **RO-Crate v1.1** | Spec-level | EXT (Context Entity) | NATIVE (Parameter Def.)| EXT (Workflow Runner) | Metadata packaging and data linking |
