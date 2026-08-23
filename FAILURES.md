@@ -176,6 +176,13 @@
   2. *Run 2 (60 / 0.60%, task-998):* Seed 42 executed during an intermediate test-rig session; root cause of divergence from Run 1 is undetermined / uncalibrated.
   3. *Run 3 (516 total draws, task-1058):* Seed 42 executed over pristine restored artifacts, but included 4 no-op draws where generator drew base parameter values without altering object bytes.
 - **Measurable Impact:** Provisory and uncalibrated leak counts were entered into repository documentation before environment stabilization and strict no-op pre-filtering were achieved.
-- **Remediation:** Formally withdrew provisory counts 503 and 60, hardened the fuzzer to discard all 0-drift no-ops pre-test, and established calibrated measurement strictly over non-trivial mutation spaces.
+---
+
+### Failure Entry #042 — Transient In-Place Series Log Overwrite during Standalone Execution
+- **Date / Event:** 2026-08-23 (ENTSO-E Scarcity Window Inspection)
+- **Component:** `instances/entsoe-scarcity-s1/runs/SERIES_LOG.json`
+- **Root Cause (General Class):** Direct Execution Side-Effect on Canonical Tracking Files. Running `run_window.py` on `entsoe-scarcity-s1` directly without a temporary run instance directory appended to the local `SERIES_LOG.json`.
+- **Measurable Impact:** Local working tree had an uncommitted modification to `SERIES_LOG.json`.
+- **Remediation:** Executed `git checkout` to cleanly restore the canonical state prior to `git push`. Verified byte-level parity (`310b04aa...`) between `origin/main` and local disk.
 
 
