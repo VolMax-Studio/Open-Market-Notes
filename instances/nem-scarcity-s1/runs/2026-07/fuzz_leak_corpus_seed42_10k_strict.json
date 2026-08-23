@@ -13,6 +13,58 @@
     "GATE_FAIL_C": 750,
     "UNEXPECTED_ERROR": 0
   },
+  "per_type_stats": {
+    "delete_key": {
+      "total": 1018,
+      "resigned": 536,
+      "leaks": 55
+    },
+    "type_mutation": {
+      "total": 992,
+      "resigned": 501,
+      "leaks": 190
+    },
+    "arithmetic_drift": {
+      "total": 1034,
+      "resigned": 468,
+      "leaks": 0
+    },
+    "temporal_drift": {
+      "total": 993,
+      "resigned": 500,
+      "leaks": 0
+    },
+    "rule_drift": {
+      "total": 1005,
+      "resigned": 516,
+      "leaks": 0
+    },
+    "verdict_inversion": {
+      "total": 995,
+      "resigned": 502,
+      "leaks": 0
+    },
+    "metric_fuzz": {
+      "total": 965,
+      "resigned": 445,
+      "leaks": 0
+    },
+    "admissibility_fuzz": {
+      "total": 1042,
+      "resigned": 552,
+      "leaks": 267
+    },
+    "crypto_fuzz": {
+      "total": 982,
+      "resigned": 0,
+      "leaks": 0
+    },
+    "recipe_fuzz": {
+      "total": 974,
+      "resigned": 508,
+      "leaks": 0
+    }
+  },
   "leak_samples": [
     {
       "test_index": 4,
