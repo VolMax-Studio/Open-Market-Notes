@@ -3,6 +3,15 @@
 
 ---
 
+## Research
+
+Independent verification of evidence-bound computational claims — what a self-contained package can prove about a result, and where that proof stops.
+
+* **Master Document:** [`RESEARCH_PROGRAM.md`](RESEARCH_PROGRAM.md)
+* **Permanent DOI:** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22068170.svg)](https://doi.org/10.5281/zenodo.22068170) (`10.5281/zenodo.22068170`, v0.1.0 draft)
+
+---
+
 ## The Philosophy of Open Market Notes
 
 In energy analytics, projections are cheap and easy to bend. Most market outlooks and duration models start with the charts, then define the metrics that fit the desired narrative. 
