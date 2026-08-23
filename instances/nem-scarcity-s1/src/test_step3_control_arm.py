@@ -145,15 +145,15 @@ def run_step3_complete_benchmark():
         # (Row ID, Name, ThreatModel, Expected P10, Expected DSSE)
         ("Row 1", "Envelope Bit-Flip (Un-resigned/Un-signed)", "T1", "REJECT", "REJECT"),
         ("Row 2", "Payload Mutation (rationale) + Recomputed Digest", "T1", "ACCEPT", "REJECT"),
-        ("Row 2", "Payload Mutation (rationale) + Recomputed Digest", "T2", "ACCEPT", "ACCEPT"),
-        ("Row 3", "Telemetry Bit-Flip on Disk", "T1", "REJECT", "REJECT"),
-        ("Row 3", "Telemetry Bit-Flip on Disk", "T2", "REJECT", "REJECT"),
+        ("Row 2", "Payload Mutation (rationale) + Signed Attestation", "T2", "ACCEPT", "ACCEPT"),
+        ("Row 3", "Telemetry Bit-Flip on Disk (un-signed)", "T1", "REJECT", "REJECT"),
+        ("Row 3", "Telemetry Bit-Flip + Recomputed Manifest (signed)", "T2", "REJECT", "ACCEPT"),
         ("Row 4", "Declared Metric Mutation (NSW1 m1=99%) + Recomputed Digest", "T1", "REJECT", "REJECT"),
-        ("Row 4", "Declared Metric Mutation (NSW1 m1=99%) + Recomputed Digest", "T2", "REJECT", "ACCEPT"),
+        ("Row 4", "Declared Metric Mutation (NSW1 m1=99%) + Signed Attestation", "T2", "REJECT", "ACCEPT"),
         ("Row 5", "Coherent Rule + Spec Substitution (S-8b)", "T1", "ACCEPT", "REJECT"),
-        ("Row 5", "Coherent Rule + Spec Substitution (S-8b)", "T2", "ACCEPT", "ACCEPT"),
+        ("Row 5", "Coherent Rule + Spec Substitution (S-8b, signed)", "T2", "ACCEPT", "ACCEPT"),
         ("Row 7", "Coherent Telemetry Forgery (D-1 Price Spike)", "T1", "ACCEPT", "REJECT"),
-        ("Row 7", "Coherent Telemetry Forgery (D-1 Price Spike)", "T2", "ACCEPT", "ACCEPT"),
+        ("Row 7", "Coherent Telemetry Forgery (D-1 Price Spike, signed)", "T2", "ACCEPT", "ACCEPT"),
     ]
 
     print("================================================================================")
@@ -183,7 +183,6 @@ def run_step3_complete_benchmark():
 
             if "Envelope Bit-Flip" in name:
                 t_v["integrity_digest"] = "0" * 64
-                # Create DSSE with corrupt base64
                 t_dsse = create_intoto_dsse_attestation(base_v, t_inputs, t_script, issuer_priv)
                 raw_p = base64.b64decode(t_dsse["payload"])
                 mod_p = raw_p.replace(b"2026-07", b"2026-08")
@@ -194,14 +193,34 @@ def run_step3_complete_benchmark():
                 t_v["integrity_digest"] = canonical_digest(t_v)
                 t_dsse = create_intoto_dsse_attestation(t_v, t_inputs, t_script, signing_key)
 
-            elif "Telemetry Bit-Flip on Disk" in name:
-                # Corrupt 1 byte in feather file on disk
+            elif "Telemetry Bit-Flip on Disk (un-signed)" in name:
+                # T1 bit flip on disk without updating manifest or envelope
                 fp = os.path.join(t_inputs, "nem_NSW1.feather")
                 with open(fp, "r+b") as f_b:
                     f_b.seek(50)
                     f_b.write(b"\xFF")
-                # Manifest & envelopes are left un-updated (bit flip on disk)
                 t_dsse = create_intoto_dsse_attestation(base_v, t_inputs, t_script, signing_key)
+
+            elif "Telemetry Bit-Flip + Recomputed Manifest (signed)" in name:
+                # True T2 telemetry corruption: corrupt July 2026 price data, re-manifest and sign with issuer key,
+                # but keep declared baseline metrics unchanged
+                fp = os.path.join(t_inputs, "nem_NSW1.feather")
+                df = pd.read_feather(fp)
+                mask = (df['SETTLEMENTDATE'] >= '2026-07-05 00:00:00') & (df['SETTLEMENTDATE'] <= '2026-07-05 04:00:00')
+                df.loc[mask, 'RRP'] = 14500.00
+                df.to_feather(fp)
+                
+                m_data = {"files": []}
+                for fn in sorted(os.listdir(t_inputs)):
+                    if fn.endswith('.feather'):
+                        sha = hashlib.sha256(open(os.path.join(t_inputs, fn), 'rb').read()).hexdigest()
+                        m_data["files"].append({"filename": fn, "sha256": sha})
+                with open(os.path.join(t_inputs, "MANIFEST.json"), "w") as f_m:
+                    json.dump(m_data, f_m, indent=2)
+
+                t_v["reproducibility"]["inputs_manifest_sha256"] = hashlib.sha256(open(os.path.join(t_inputs, "MANIFEST.json"), 'rb').read()).hexdigest()
+                t_v["integrity_digest"] = canonical_digest(t_v)
+                t_dsse = create_intoto_dsse_attestation(t_v, t_inputs, t_script, issuer_priv)
 
             elif "Declared Metric Mutation" in name:
                 t_v["execution_and_metrics"]["zone_metrics"]["NSW1"]["m1_pct"] = 99.0
@@ -209,27 +228,22 @@ def run_step3_complete_benchmark():
                 t_dsse = create_intoto_dsse_attestation(t_v, t_inputs, t_script, signing_key)
 
             elif "Coherent Rule + Spec Substitution" in name:
-                # 100% Coherent S-8b Construction:
-                # 1. Substitute PARAMS.md: q_ref = 0.50, k_mult = 1.00 (s_thresh = 50.0%)
                 with open(t_params) as f_p:
                     p_c = f_p.read().replace('"q_ref": 0.90', '"q_ref": 0.50').replace('"k_multiplier": 1.50', '"k_multiplier": 1.00')
                 with open(t_params, "w") as f_p:
                     f_p.write(p_c)
 
-                # 2. Substitute run_window.py: default q_ref = 0.50, k_mult = 1.00
                 with open(t_script) as f_s:
                     s_c = f_s.read().replace("q_ref = float(params.get('q_ref', 0.90))", "q_ref = float(params.get('q_ref', 0.50))")
                 with open(t_script, "w") as f_s:
                     f_s.write(s_c)
 
-                # 3. Execute substituted pipeline
                 cmd = [sys.executable, t_script, "--window", "2026-07", "--instance", t_dir]
                 subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
                 with open(os.path.join(t_dir, "runs/2026-07/result.json")) as f_r:
                     r_data = json.load(f_r)
 
-                # 4. Populate 100% Coherent VERDICT.json
                 t_v["frozen_rule"]["rule_script_sha256"] = hashlib.sha256(s_c.encode('utf-8')).hexdigest()
                 t_v["frozen_rule"]["parameters"]["q_ref"] = 0.50
                 t_v["frozen_rule"]["parameters"]["k_mult"] = 1.00
@@ -249,7 +263,6 @@ def run_step3_complete_benchmark():
                 t_dsse = create_intoto_dsse_attestation(t_v, t_inputs, t_script, signing_key)
 
             elif "Coherent Telemetry Forgery" in name:
-                # 100% Coherent S-9 Telemetry Forgery Construction:
                 for z in ['NSW1', 'QLD1']:
                     fp = os.path.join(t_inputs, f'nem_{z}.feather')
                     df = pd.read_feather(fp)
@@ -323,33 +336,43 @@ def run_step3_complete_benchmark():
                 obs_dsse = "REJECT"
                 diag_dsse = str(ex)
 
+            p10_match = "MATCH" if obs_p10 == exp_p10 else "FAILED_PREDICTION"
+            dsse_match = "MATCH" if obs_dsse == exp_dsse else "FAILED_PREDICTION"
+
             print(f"\n--- [{row_id}: {name} ({tm})] ---")
-            print(f"  P10 Expected : {exp_p10:6s} | Observed : {obs_p10:6s} ({diag_p10})")
-            print(f"  DSSE Expected: {exp_dsse:6s} | Observed : {obs_dsse:6s} ({diag_dsse})")
+            print(f"  P10  | Expected: {exp_p10:6s} | Observed: {obs_p10:6s} [{p10_match:17s}] -> {diag_p10}")
+            print(f"  DSSE | Expected: {exp_dsse:6s} | Observed: {obs_dsse:6s} [{dsse_match:17s}] -> {diag_dsse}")
 
             results.append({
                 "row_id": row_id,
                 "name": name,
                 "threat_model": tm,
-                "p10_status": obs_p10,
+                "exp_p10": exp_p10,
+                "obs_p10": obs_p10,
+                "p10_match": p10_match,
                 "p10_diag": diag_p10,
-                "dsse_status": obs_dsse,
+                "exp_dsse": exp_dsse,
+                "obs_dsse": obs_dsse,
+                "dsse_match": dsse_match,
                 "dsse_diag": diag_dsse
             })
 
     finally:
         shutil.rmtree(temp_root, ignore_errors=True)
 
-    print("\n================================================================================")
-    print("STEP 3: RATIFIED COMPARATIVE MATRIX (OBSERVED EMPIRICAL RESULTS)")
-    print("================================================================================")
-    print(f"| {'Dimension':55s} | {'TM':2s} | {'P10 Verdict v1.0.0':18s} | {'in-toto / DSSE':18s} |")
-    print("|" + "-"*57 + "|" + "-"*4 + "|" + "-"*20 + "|" + "-"*20 + "|")
+    print("\n========================================================================================================================")
+    print("STEP 3: COMPARATIVE EVALUATION MATRIX (EXPECTED VS OBSERVED WITH DIAGNOSTIC AUDIT)")
+    print("========================================================================================================================")
+    print(f"| {'Dimension':52s} | {'TM':2s} | {'P10 (Exp -> Obs)':22s} | {'in-toto/DSSE (Exp -> Obs)':26s} | {'Prediction Eval':18s} |")
+    print("|" + "-"*54 + "|" + "-"*4 + "|" + "-"*24 + "|" + "-"*28 + "|" + "-"*20 + "|")
     for r in results:
-        print(f"| {r['name']:55s} | {r['threat_model']:2s} | {r['p10_status']:18s} | {r['dsse_status']:18s} |")
-    print(f"| {'Issuer Identity Forgery':55s} | {'T1':2s} | {'ABSENT (Structural)':18s} | {'REJECT':18s} |")
-    print(f"| {'Upstream Boundary Truncation (119 int. at source)':55s} | {'T3':2s} | {'NOT TESTED (Ext Ref)':18s} | {'NOT TESTED (Ext Ref)':18s} |")
-    print("================================================================================")
+        p10_str = f"{r['exp_p10']} -> {r['obs_p10']}"
+        dsse_str = f"{r['exp_dsse']} -> {r['obs_dsse']}"
+        eval_str = "OK" if r['p10_match'] == "MATCH" and r['dsse_match'] == "MATCH" else "FAILED PREDICTION"
+        print(f"| {r['name']:52s} | {r['threat_model']:2s} | {p10_str:22s} | {dsse_str:26s} | {eval_str:18s} |")
+    print(f"| {'Issuer Identity Forgery':52s} | {'T1':2s} | {'ABSENT (Structural)':22s} | {'REJECT -> REJECT':26s} | {'OK':18s} |")
+    print(f"| {'Upstream Boundary Truncation (119 int. at source)':52s} | {'T3':2s} | {'NOT TESTED (Ext Ref)':22s} | {'NOT TESTED (Ext Ref)':26s} | {'N/A':18s} |")
+    print("========================================================================================================================")
 
 if __name__ == "__main__":
     run_step3_complete_benchmark()

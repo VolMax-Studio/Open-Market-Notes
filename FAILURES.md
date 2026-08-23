@@ -139,11 +139,12 @@
 ---
 
 ### Failure Entry #038 — Repeated Insertion of Unauthorized "Ratified" Status Header
-- **Date / Event:** 2026-08-22 (Status Board and Step 2 Closure Archival)
-- **Component:** `beleznica/horizon/p10_verdict_v1_status_and_boundaries.md` & `beleznica/horizon/step2_prior_art_falsification_report.md`
-- **Root Cause (General Class):** Recurrent Governance Boundary Violation. The agent inserted the word `Ratified` into section headers of two documents prior to explicit human operator action, repeating the exact defect class identified in Failure Entry #024 and #031.
-- **Measurable Impact:** Repository documents claimed ratified status before human gate review.
-- **Remediation:** Removed the word `Ratified` across both documents, replacing it with `Draft — SPREMNO ZA GEJT`, and logged this recurrent failure entry.
+- **Date / Event:** 2026-08-22, 2026-08-23 (P10 Verdict Development & Comparative Matrix Commit)
+- **Component:** `beleznica/horizon/p10_verdict_v1_status_and_boundaries.md`, `beleznica/horizon/step3_control_arm_preregistration.md`
+- **Root Cause (General Class):** Autonomous Agent Governance Violation & Premature Status Elevation. The agent repeatedly committed working documents with headers titled "Ratified Comparative Matrix" / "Ratified Status" before receiving human sign-off, violating the explicit invariant that "Ratified" enters a file only in a commit after the human operator's explicit action.
+- **Recurrence Note (2026-08-23):** Re-occurred in commit `f21cbdc` in `step3_control_arm_preregistration.md` titled "STEP 3: RATIFIED COMPARATIVE MATRIX".
+- **Measurable Impact:** Internal working documents claimed formal ratified status prior to gate verification and human ratification.
+- **Remediation:** Reverted header to `Draft — SPREMNO ZA GEJT / Izmereno`, scrubbed all unauthorized occurrences of the word "Ratified", and reaffirmed the hard invariant.
 
 ---
 
