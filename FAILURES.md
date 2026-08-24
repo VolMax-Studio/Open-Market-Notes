@@ -196,4 +196,13 @@
 - **Measurable Impact:** Invariant test asserted rigid historical row counts that would prevent forward production fixes, while relying on hardcoded boundary definitions rather than imported production window functions.
 - **Remediation:** Refactored `test_boundary_invariants.py` to import `get_window_utc_bounds` directly from `run_window.py`, established dynamic falsifiable branching (`CLEAN_LEFT_BOUNDARY` vs `LEFT_BOUNDARY_OVER_INCLUSION`), and proved dynamic reconciliation ($\text{len}(\text{admitted}) + \text{len}(\text{off\_grid}) == \text{len}(\text{prod\_slice})$).
 
+---
+
+### Failure Entry #044 — Illustrative Synthetic Timestamp Ingestion during Metadata Specification
+- **Date / Event:** 2026-08-24 (Fingrid Imbalance Verification Pre-Registration)
+- **Component:** `fi-imbalance-s1/PARAMS.md` intake
+- **Root Cause (General Class):** Synthetic Example Presented as Observational Metadata. When clarifying interval timestamp semantics (startTime/endTime) for Dataset 319, an illustrative synthetic string (`2026-08-03T06:00:00.000Z`) was constructed in markdown explanation text, creating the appearance of premature data ingestion before pre-registration commit `c1`.
+- **Measurable Impact:** Blurred the strict epistemological boundary between metadata inspection and actual data ingestion prior to pre-registration freezing.
+- **Remediation:** Explicitly verified that no `/data` API calls were executed. Recorded the incident and enforced that all parameter examples remain purely abstract or clearly demarcated.
+
 
