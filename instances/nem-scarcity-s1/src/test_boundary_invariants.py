@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-Test Boundary Invariants & 3-Axis Taxonomy Classification for NEM July 2026 Artifact.
+Deterministic Boundary Regression Fixture & Window-Level Defect Classification
+for NEM July 2026 Artifact (nem_NSW1.feather).
 
-Proves the exact empirical evidence chain for nem_NSW1.feather:
+Proves the exact empirical evidence chain:
 1. Total row count across 14-month rolling baseline (122,688 rows).
 2. Zero internal timestamp gaps (non-5min delta == 0).
-3. 8,809 admitted intervals vs 8,928 nominal UTC intervals (119 missing).
-4. Missing segment is 100% contiguous at the right boundary starting at 2026-07-31T14:05:00Z.
-5. Exact 3-axis record taxonomy classification:
-   - Axis 3 (Instrument / IEC 61850-7-3): QUERY_WINDOW_MISALIGNMENT (validity: invalid, detailQual: inconsistent)
-   - Axis 2 (Observation / SDMX v2.2): M (Missing value)
-   - Axis 1 (Subject Outcome / W3C EARL 1.0): earl:inapplicable
+3. Declared evaluation grid: 8,928 nominal intervals (2026-07-01 00:05:00Z -> 2026-08-01 00:00:00Z).
+4. Strict set partition:
+   - Admitted on-grid intervals: 8,808 (98.66% coverage)
+   - Missing on-grid intervals: 120 (Right-boundary truncation)
+   - Left-boundary over-inclusion: 1 (2026-07-01 00:00:00Z off-grid interval captured by closed .loc slice)
+   - Denominator closes: admitted (8,808) + missing (120) == grid (8,928).
+5. Dynamically derived window-level defect classification (IEC 61850-7-3 / SDMX / EARL).
 """
 
 import os
@@ -38,73 +40,103 @@ def run_boundary_invariant_test():
     non_5min_gaps = diffs[diffs != pd.Timedelta(minutes=5)]
     assert len(non_5min_gaps) == 0, f"Expected 0 internal gaps, got {len(non_5min_gaps)}"
 
-    # 3. Monthly Bounds (AEST vs UTC)
-    first_utc = ts_utc.iloc[0]
-    last_utc = ts_utc.iloc[-1]
-    assert first_utc == pd.Timestamp("2025-05-31 14:05:00+00:00"), f"Unexpected first timestamp: {first_utc}"
-    assert last_utc == pd.Timestamp("2026-07-31 14:00:00+00:00"), f"Unexpected last timestamp: {last_utc}"
+    # 3. Declared Evaluation Grid (Single Source of Truth for Denominator)
+    GRID_START = pd.Timestamp("2026-07-01 00:05:00Z")
+    GRID_END   = pd.Timestamp("2026-08-01 00:00:00Z")
+    grid = pd.date_range(GRID_START, GRID_END, freq="5min")
+    assert len(grid) == 8928, f"Expected 8928 grid intervals, got {len(grid)}"
 
-    # 4. UTC July Slice Admitted Count
-    p_start = '2026-07-01T00:00:00Z'
-    p_end = '2026-07-31T23:59:59Z'
-    df_indexed = df.set_index(pd.to_datetime(df[t_col], utc=True)).sort_index()
-    p_slice = df_indexed.loc[p_start:p_end]
-    admitted_intervals = len(p_slice)
-    nominal_intervals = 31 * 288 # 8,928
-    missing_intervals = nominal_intervals - admitted_intervals
+    observed = pd.DatetimeIndex(ts_utc.unique())
+    admitted = grid.intersection(observed)
+    missing  = grid.difference(observed)
+    
+    # Off-grid observations within the closed slice [2026-07-01 00:00:00Z, 2026-08-01 00:00:00Z]
+    slice_observed = observed[(observed >= GRID_START - pd.Timedelta("5min")) & (observed <= GRID_END)]
+    off_grid = slice_observed.difference(grid)
 
-    assert admitted_intervals == 8809, f"Expected 8809 admitted intervals, got {admitted_intervals}"
-    assert nominal_intervals == 8928, f"Expected 8928 nominal intervals, got {nominal_intervals}"
-    assert missing_intervals == 119, f"Expected 119 missing intervals, got {missing_intervals}"
+    # 4. Strict Set Partition Invariants
+    assert len(admitted) == 8808, f"Expected 8808 admitted intervals, got {len(admitted)}"
+    assert len(missing) == 120, f"Expected 120 missing intervals, got {len(missing)}"
+    assert len(off_grid) == 1, f"Expected 1 off-grid left-boundary interval, got {len(off_grid)}"
+    assert off_grid[0] == pd.Timestamp("2026-07-01 00:00:00Z"), f"Unexpected off-grid timestamp: {off_grid[0]}"
+    
+    # Denominator closes strictly
+    assert len(admitted) + len(missing) == len(grid), "Denominator partition does not close!"
 
-    # 5. Missing Segment Contiguity and Exact Bounds
-    utc_grid = pd.date_range('2026-07-01 00:05:00Z', '2026-08-01 00:00:00Z', freq='5min')
-    missing_grid = utc_grid.difference(ts_utc)
-    assert len(missing_grid) == 120, f"Expected 120 missing against strict 00:05 grid, got {len(missing_grid)}"
+    # 5. Exact Coverage Calculation
+    coverage_ratio = len(admitted) / len(grid)
+    coverage_pct = round(coverage_ratio * 100.0, 2)
+    assert coverage_pct == 98.66, f"Expected 98.66% coverage, got {coverage_pct}%"
 
-    missing_start = missing_grid[0]
-    missing_end = missing_grid[-1]
-    assert missing_start == pd.Timestamp("2026-07-31 14:05:00+00:00"), f"Unexpected missing start: {missing_start}"
-    assert missing_end == pd.Timestamp("2026-08-01 00:00:00+00:00"), f"Unexpected missing end: {missing_end}"
+    # 6. Dynamically Derived Defect Classifications
+    # Right Boundary Truncation Check
+    is_missing_contiguous = bool((pd.Series(missing).diff().dropna() == pd.Timedelta("5min")).all())
+    acq_right_class = (
+        "RIGHT_BOUNDARY_TRUNCATION"
+        if len(missing) > 0 and missing[-1] == GRID_END and is_missing_contiguous
+        else "UNCLASSIFIED_RIGHT_DEFECT"
+    )
+    assert acq_right_class == "RIGHT_BOUNDARY_TRUNCATION", f"Failed right defect classification: {acq_right_class}"
 
-    missing_diffs = pd.Series(missing_grid).diff().dropna()
-    is_contiguous = bool((missing_diffs == pd.Timedelta(minutes=5)).all())
-    assert is_contiguous is True, "Missing segment is not 100% contiguous!"
+    # Left Boundary Over-Inclusion Check
+    acq_left_class = (
+        "LEFT_BOUNDARY_OVER_INCLUSION"
+        if len(off_grid) == 1 and off_grid[0] == (GRID_START - pd.Timedelta("5min"))
+        else "UNCLASSIFIED_LEFT_DEFECT"
+    )
+    assert acq_left_class == "LEFT_BOUNDARY_OVER_INCLUSION", f"Failed left defect classification: {acq_left_class}"
 
-    # 6. Three-Axis Record Taxonomy Mapping Verification
-    taxonomy_mapping = {
-        "missing_segment_intervals": missing_intervals,
-        "axis_3_instrument": {
-            "standard": "IEC 61850-7-3 (Table 2 Quality)",
-            "validity": "invalid",
-            "detailQual": "inconsistent",
-            "classification": "QUERY_WINDOW_MISALIGNMENT",
-            "root_cause": "AEST calendar month acquisition evaluated against UTC calendar window"
-        },
-        "axis_2_observation": {
-            "standard": "SDMX CL_OBS_STATUS v2.2",
-            "code": "M",
-            "description": "Missing value"
-        },
-        "axis_1_subject_outcome": {
-            "standard": "W3C EARL 1.0 Schema",
-            "outcome": "earl:inapplicable",
-            "rationale": "Excluded from subject market performance evaluation; does not contaminate subject verdict"
-        }
+    # 7. Window-Level Diagnostic Record (Single Structured Acquisition Record)
+    window_acquisition_record = {
+        "evaluation_grid_intervals": len(grid),
+        "admitted_on_grid": len(admitted),
+        "missing_on_grid": len(missing),
+        "off_grid_captured": len(off_grid),
+        "coverage_pct": coverage_pct,
+        "defects": [
+            {
+                "defect_class": acq_right_class,
+                "intervals_affected": len(missing),
+                "start_utc": str(missing[0]),
+                "end_utc": str(missing[-1]),
+                "axis_3_instrument": "QUERY_WINDOW_MISALIGNMENT (AEST month acquisition vs UTC evaluation grid)",
+                "axis_2_observation": "SDMX: M (Missing value)",
+                "axis_1_subject_outcome": "earl:untested (evaluation not performed due to instrument truncation)"
+            },
+            {
+                "defect_class": acq_left_class,
+                "intervals_affected": len(off_grid),
+                "timestamp_utc": str(off_grid[0]),
+                "axis_3_instrument": "CLOSED_SLICE_OVER_INCLUSION (00:00:00Z precedes 00:05:00Z grid start)",
+                "axis_2_observation": "SDMX: A (Normal observed value outside evaluation grid)",
+                "axis_1_subject_outcome": "earl:inapplicable (outside declared evaluation grid)"
+            }
+        ]
     }
 
     print("================================================================================")
-    print("BOUNDARY INVARIANTS & 3-AXIS TAXONOMY VERIFICATION PASSED")
+    print("DETERMINISTIC BOUNDARY REGRESSION FIXTURE PASSED")
     print("================================================================================")
-    print(f"Total Rows Checked          : {len(df):,}")
-    print(f"Internal Gaps Count         : {len(non_5min_gaps)} (100% continuous)")
-    print(f"Admitted Intervals (July)   : {admitted_intervals:,} / {nominal_intervals:,}")
-    print(f"Missing Tail Count          : {missing_intervals} intervals")
-    print(f"Missing Segment Boundary    : {missing_start} -> {missing_end}")
-    print(f"Missing Tail Contiguity     : {is_contiguous}")
-    print(f"Axis 3 Instrument Status    : {taxonomy_mapping['axis_3_instrument']['classification']} ({taxonomy_mapping['axis_3_instrument']['validity']})")
-    print(f"Axis 2 Observation Status   : SDMX: {taxonomy_mapping['axis_2_observation']['code']}")
-    print(f"Axis 1 Subject Outcome      : {taxonomy_mapping['axis_1_subject_outcome']['outcome']}")
+    print(f"Total Rows in Fixture        : {len(df):,}")
+    print(f"Internal Gaps Count          : {len(non_5min_gaps)} (100% continuous)")
+    print(f"Declared Evaluation Grid     : {len(grid):,} intervals ({GRID_START} -> {GRID_END})")
+    print(f"Admitted On-Grid             : {len(admitted):,} intervals")
+    print(f"Missing On-Grid              : {len(missing)} intervals")
+    print(f"Off-Grid Left Over-Inclusion : {len(off_grid)} interval ({off_grid[0]})")
+    print(f"Denominator Closes           : {len(admitted)} + {len(missing)} == {len(grid)} (True)")
+    print(f"Strict Coverage Percentage   : {coverage_pct}% (8,808 / 8,928)")
+    print("--------------------------------------------------------------------------------")
+    print(f"Derived Defect #1 Class      : {acq_right_class} ({len(missing)} intervals)")
+    print(f"  Missing Span               : {missing[0]} -> {missing[-1]}")
+    print(f"  Axis 3 Instrument          : {window_acquisition_record['defects'][0]['axis_3_instrument']}")
+    print(f"  Axis 2 Observation         : {window_acquisition_record['defects'][0]['axis_2_observation']}")
+    print(f"  Axis 1 Subject Outcome     : {window_acquisition_record['defects'][0]['axis_1_subject_outcome']}")
+    print("--------------------------------------------------------------------------------")
+    print(f"Derived Defect #2 Class      : {acq_left_class} ({len(off_grid)} interval)")
+    print(f"  Timestamp                  : {off_grid[0]}")
+    print(f"  Axis 3 Instrument          : {window_acquisition_record['defects'][1]['axis_3_instrument']}")
+    print(f"  Axis 2 Observation         : {window_acquisition_record['defects'][1]['axis_2_observation']}")
+    print(f"  Axis 1 Subject Outcome     : {window_acquisition_record['defects'][1]['axis_1_subject_outcome']}")
     print("================================================================================")
 
 if __name__ == '__main__':
