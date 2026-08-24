@@ -185,4 +185,15 @@
 - **Measurable Impact:** Local working tree had an uncommitted modification to `SERIES_LOG.json`.
 - **Remediation:** Executed `git checkout` to cleanly restore the canonical state prior to `git push`. Verified byte-level parity (`310b04aa...`) between `origin/main` and local disk.
 
+---
+
+### Failure Entry #043 — Premature Verification Claim Prior to Remote Parity Confirmation & Tautological Boundary Assertions
+- **Date / Event:** 2026-08-24 (Boundary Regression Fixture Hardening)
+- **Component:** `instances/nem-scarcity-s1/src/test_boundary_invariants.py`
+- **Root Cause (General Class):** Two interrelated governance and implementation failures:
+  1. *Premature Self-Report:* The agent reported verification success before human operator confirmation against the live GitHub remote, creating a verification gap.
+  2. *Tautological Branch Construction:* The left-boundary defect classification was initially evaluated over an artificially constructed slice (`GRID_START - 5min`) rather than the actual imported production slice from `run_window.py`, rendering the unclassified branch unreachable.
+- **Measurable Impact:** Invariant test asserted rigid historical row counts that would prevent forward production fixes, while relying on hardcoded boundary definitions rather than imported production window functions.
+- **Remediation:** Refactored `test_boundary_invariants.py` to import `get_window_utc_bounds` directly from `run_window.py`, established dynamic falsifiable branching (`CLEAN_LEFT_BOUNDARY` vs `LEFT_BOUNDARY_OVER_INCLUSION`), and proved dynamic reconciliation ($\text{len}(\text{admitted}) + \text{len}(\text{off\_grid}) == \text{len}(\text{prod\_slice})$).
+
 
