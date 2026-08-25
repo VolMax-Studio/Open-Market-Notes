@@ -47,9 +47,13 @@ def run_boundary_invariant_test():
     assert len(non_5min_gaps) == 0, f"Expected 0 internal gaps, got {len(non_5min_gaps)}"
 
     # 3. Dynamic Production Slicing via imported get_window_utc_bounds
-    bounds_tuple = get_window_utc_bounds('2026-07')
-    p_start_prod = bounds_tuple[0]  # Primary window UTC start
-    p_end_prod   = bounds_tuple[1]  # Primary window UTC end
+    raw_bounds = get_window_utc_bounds('2026-07')
+    assert len(raw_bounds) == 5, f"Expected 5-tuple from get_window_utc_bounds, got {len(raw_bounds)}"
+    p_start_prod = raw_bounds[0]
+    p_end_prod   = raw_bounds[1]
+    assert p_start_prod == "2026-07-01T00:00:00Z", f"Unexpected production start bound: {p_start_prod}"
+    assert p_end_prod == "2026-07-31T23:59:59Z", f"Unexpected production end bound: {p_end_prod}"
+
     df_indexed = df.set_index(pd.to_datetime(df[t_col], utc=True)).sort_index()
     prod_slice = df_indexed.loc[p_start_prod:p_end_prod]
     prod_admitted_count = len(prod_slice)
