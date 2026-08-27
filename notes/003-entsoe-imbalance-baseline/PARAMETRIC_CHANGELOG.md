@@ -35,3 +35,22 @@
   4. €250 extreme scarcity metrics and daily BESS M2 metrics are 100% unaffected. €100 mean durations shifted by $-0.1\text{ min}$ in BE (76.0m $\rightarrow$ 75.9m) and NL (67.4m $\rightarrow$ 67.3m). Maximum event duration in BE remained exactly 1,545 minutes ($25.75\text{ hours}$).
   5. Remediated baseline result hash under strict timestamp gap termination: `a10c0aae107b52147e98bb269c44a3fac6d9656c7b70af5b398352545a03635c`.
 - **Status:** Pending Ratification (Pre-Merge on `feature/omn-003-preregistration-draft`)
+
+---
+
+## Entry #003: Normative UTC Time Contract, Interval Beginning Invariant, and License Register Alignment (2026-08-27)
+
+- **Scope:** Note #003 ENTSO-E Imbalance Baseline (`PARAMS.md`, `download_entsoe_data.py`)
+- **Version Bump:** `v3.1.0` $\rightarrow$ `v3.2.0`
+- **Audit Findings:**
+  1. **Omission of Normative Time Contract in Prior Versions:** Prior versions (`v3.0.0`, `v3.1.0`) stated the calendar range as "1 June 2025 – 30 June 2026" without normatively defining the timezone domain, sampling step, or timestamp boundary invariants.
+  2. **Ratified Time Invariants:**
+     - **Timezone Domain:** Strict **`UTC`** (`timestamp_tz: UTC`).
+     - **Timestamp Convention:** **`interval_beginning`** (timestamps index the beginning of each 15-minute MTU: `00:00:00` through `23:45:00`).
+     - **Derived Invariant Formula:**
+       $$\text{Nominal Intervals} = N_{\text{days}} \times 96 = 395 \times 96 = \mathbf{37,920 \text{ MTUs}}$$
+       guaranteeing zero DST discontinuities ($96\text{ MTUs/day}$ identically for all 395 days).
+  3. **Licensing Register Pin:** Formally bound licensing metadata to `L-04` (Terms of Use 29/03/2023 Article 2.5) and `L-08` (List of Data 18/10/2023 Item #27 [Article 17.1.g / 17.2.f], CC BY 4.0), pinned against commit `9eac856` of `VolMax-Studio/P10-Verification-Method`.
+  4. **Epistemic Disclosure on July 2026 Run:** The July 2026 probe run executed on 2026-08-09 was performed under a draft contract that lacked a normative timezone and timestamp convention. This contract amendment does not retroactively pre-register that run; historical July results retain exploratory status until re-executed under this ratified specification.
+  5. **Archival of Pre-Existing Untracked Fetch Artefacts:** Untracked legacy data files (`instances/entsoe-scarcity-s1/test_fresh_fetch/`, dated 15 August 2026, containing `imbalance_*_202506_202607.csv`) were moved out of the working tree to external escrow (`sources_raw_escrow/untracked_legacy_test_fresh_fetch_20260815/`) to guarantee that all specification rules and chunking mechanics are written and verified without un-ratified data artifacts in the working tree.
+- **Status:** Pending Ratification (Pre-Merge on `fix/entsoe-note003-contract-boundary`)
