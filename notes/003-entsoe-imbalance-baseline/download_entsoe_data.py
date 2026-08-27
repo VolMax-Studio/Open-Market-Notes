@@ -198,8 +198,7 @@ def fetch_zone_monthly_chunks(client, zone_code, start_dt, end_dt):
         monthly_dfs.append(chunk_df)
         current_month_start = next_month_start
         
-    full_df = pd.concat(monthly_dfs)
-    full_df = full_df[~full_df.index.duplicated(keep='first')].sort_index()
+    full_df = pd.concat(monthly_dfs).sort_index()
     return full_df
 
 def verify_time_invariants(df, zone_code, tc):
@@ -220,25 +219,27 @@ def verify_time_invariants(df, zone_code, tc):
         
     dup_count = int(df.index.duplicated().sum())
     if dup_count > 0:
-        raise ValueError(f"Duplicate invariant violation for {zone_code}: {dup_count} duplicate timestamps found!")
+        raise ValueError(f"Duplicate invariant violation for {zone_code}: {dup_count} duplicate timestamps found across monthly chunks!")
         
     diffs = df.index.to_series().diff().iloc[1:]
     diff_counts = diffs.value_counts()
     expected_step = pd.Timedelta(minutes=tc["sampling_step_minutes"])
     
-    print(f"\n[{zone_code}] Index Step Counts:\n{diff_counts}")
+    print(f"\n[{zone_code}] Index Step Counts (Pre-Deduplication):\n{diff_counts}")
+    print(f"[{zone_code}] Duplicate Count: {dup_count}")
     print(f"[{zone_code}] Total MTU count: {len(df)} (Expected nominal: {tc['nominal_intervals']})")
     print(f"[{zone_code}] Start MTU: {df.index[0]} | End MTU: {df.index[-1]}")
     
     if len(diff_counts) != 1 or diff_counts.index[0] != expected_step:
         raise ValueError(f"Continuity invariant violation for {zone_code}: non-uniform step detected: {diff_counts}")
 
-def check_mandate8_completeness(df, zone_code, tc):
+def check_mandate8_completeness(df, zone_code, start_dt, end_dt, step_minutes=15):
     """
     Mandate 8 Telemetry Completeness & Boundary Verification Guard.
     Enforces minimum row count (>=98.0% ceiling of expected 15-min intervals) and timestamp gap limits (<=90 min).
     """
-    expected_intervals = tc["nominal_intervals"]
+    days = (end_dt - start_dt).days
+    expected_intervals = days * (24 * 60 // step_minutes)
     min_required_intervals = math.ceil(expected_intervals * 0.98)
     
     actual_rows = len(df)
@@ -253,6 +254,7 @@ def check_mandate8_completeness(df, zone_code, tc):
     gaps = dt_series.to_series().diff()
     max_gap = gaps.max()
     
+    # [POST-HOC EMPIRICAL CALIBRATION] Threshold of 90 minutes calibrated to DK_1/DK_2 historical baseline gaps
     if max_gap > pd.Timedelta(minutes=90):
         raise ValueError(
             f"[MANDATE 8 ABORT] {zone_code} timestamp continuity breach: Maximum gap {max_gap} exceeds 90-minute threshold limit."
@@ -336,7 +338,7 @@ def download_entsoe_imbalance(params_file=DEFAULT_PARAMS_PATH, data_dir='.', out
                     
                 df = fetch_zone_monthly_chunks(client, zone_code, start_dt, end_dt)
                 
-                check_mandate8_completeness(df, zone_code, tc)
+                check_mandate8_completeness(df, zone_code, start_dt, end_dt)
                 verify_time_invariants(df, zone_code, tc)
                 mapping = analyze_regime_classification(df, zone_code)
                 
@@ -365,9 +367,10 @@ def download_entsoe_imbalance(params_file=DEFAULT_PARAMS_PATH, data_dir='.', out
             except Exception as e:
                 raise ValueError(f"Corrupted manifest JSON at {manifest_path}: {e}")
             
-        csv_files = glob.glob(os.path.join(raw_dir, "imbalance_*.csv"))
+        raw_csv_pattern = os.path.join(raw_dir, f"imbalance_*_{s_tag}_{e_tag}.csv")
+        csv_files = glob.glob(raw_csv_pattern)
         if not csv_files:
-            raise ValueError(f"ENTSOE_API_KEY required for live pre-registered API ingestion. No raw cache files found in {raw_dir}.")
+            raise ValueError(f"No raw cache files found matching pattern {raw_csv_pattern} in {raw_dir}.")
             
         files_list = manifest_data.get("files", [])
         manifest_files_dict = {item["file_name"]: item for item in files_list if isinstance(item, dict) and "file_name" in item}
@@ -388,7 +391,7 @@ def download_entsoe_imbalance(params_file=DEFAULT_PARAMS_PATH, data_dir='.', out
             entry = manifest_files_dict[basename]
             df = pd.read_csv(csv_file, index_col=0, parse_dates=True)
             
-            check_mandate8_completeness(df, zone_code, start_stamp, end_stamp)
+            check_mandate8_completeness(df, zone_code, start_dt, end_dt)
             mapping = analyze_regime_classification(df, zone_code)
             
             update_manifest(csv_file, file_hash, source_url=entry.get("source_url", ""), acquisition_mode="manifest_verified_cache", manifest_dir=data_dir, regime_info=mapping)
