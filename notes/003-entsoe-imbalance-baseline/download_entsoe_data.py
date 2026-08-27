@@ -233,10 +233,10 @@ def verify_time_invariants(df, zone_code, tc):
     if len(diff_counts) != 1 or diff_counts.index[0] != expected_step:
         raise ValueError(f"Continuity invariant violation for {zone_code}: non-uniform step detected: {diff_counts}")
 
-def check_mandate8_completeness(df, zone_code, start_dt, end_dt, step_minutes=15):
+def check_mandate8_completeness(df, zone_code, start_dt, end_dt, step_minutes):
     """
     Mandate 8 Telemetry Completeness & Boundary Verification Guard.
-    Enforces minimum row count (>=98.0% ceiling of expected 15-min intervals) and timestamp gap limits (<=90 min).
+    Enforces minimum row count (>=98.0% ceiling of expected intervals) and timestamp gap limits (<=90 min).
     """
     days = (end_dt - start_dt).days
     expected_intervals = days * (24 * 60 // step_minutes)
@@ -338,7 +338,7 @@ def download_entsoe_imbalance(params_file=DEFAULT_PARAMS_PATH, data_dir='.', out
                     
                 df = fetch_zone_monthly_chunks(client, zone_code, start_dt, end_dt)
                 
-                check_mandate8_completeness(df, zone_code, start_dt, end_dt)
+                check_mandate8_completeness(df, zone_code, start_dt, end_dt, tc["sampling_step_minutes"])
                 verify_time_invariants(df, zone_code, tc)
                 mapping = analyze_regime_classification(df, zone_code)
                 
@@ -391,7 +391,7 @@ def download_entsoe_imbalance(params_file=DEFAULT_PARAMS_PATH, data_dir='.', out
             entry = manifest_files_dict[basename]
             df = pd.read_csv(csv_file, index_col=0, parse_dates=True)
             
-            check_mandate8_completeness(df, zone_code, start_dt, end_dt)
+            check_mandate8_completeness(df, zone_code, start_dt, end_dt, tc["sampling_step_minutes"])
             mapping = analyze_regime_classification(df, zone_code)
             
             update_manifest(csv_file, file_hash, source_url=entry.get("source_url", ""), acquisition_mode="manifest_verified_cache", manifest_dir=data_dir, regime_info=mapping)
