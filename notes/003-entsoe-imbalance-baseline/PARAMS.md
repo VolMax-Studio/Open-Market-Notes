@@ -1,9 +1,34 @@
+---
+# Parameter Ledger Metadata & Licensing Anchors
+license:
+  source_repo: "https://github.com/VolMax-Studio/P10-Verification-Method"
+  source_repo_commit: "9eac8561c231c5eceea3a8e8b6662e1673e9e1e2"
+  source_register: "L-04, L-08"
+  clause: "ENTSO-E ToU Article 2.5"
+  list_version: "18/10/2023"
+  list_sha256: "b21717e8a5a41b9b8544db730d11c2a717abc9b07f89704437a89332b708ff9a"
+  data_item: 27
+  regulation_article: "17.1.g / 17.2.f"
+time_contract:
+  timezone: "UTC"
+  timestamp_convention: "interval_beginning"
+  sampling_step_seconds: 900
+  sampling_step_minutes: 15
+  window_bounds: "[start, end)"
+  window_start_utc: "2025-06-01T00:00:00Z"
+  window_end_utc: "2026-07-01T00:00:00Z"
+  total_days: 395
+  intervals_per_day: 96
+  nominal_intervals: 37920  # verification check: derived from (window_end_utc - window_start_utc).days * 96
+---
+
 # VolMax Open Market Note #003: Operational Parameters & Data Rules
 
-> **Version:** 3.1.0  
+> **Version:** 3.2.0  
 > **Status:** Frozen Baseline Specification  
 > **Target Dataset:** ENTSO-E Transparency Platform Imbalance Prices (17.1.g / 17.2.f)  
-> **Analysis Period:** 1 June 2025 – 30 June 2026 (13 Months / 395 Days)
+> **Licensing Anchor:** CC BY 4.0 (ENTSO-E ToU Article 2.5 / Open Data Item #27 [Article 17.1.g / 17.2.f])  
+> **Analysis Period:** 1 June 2025 00:00:00Z – 30 June 2026 23:45:00Z (13 Months / 395 Days / 37,920 MTUs)
 
 ---
 
@@ -30,6 +55,18 @@
 
 2. **Provenance & Auditing:**
    - All extracted raw XML payloads and Feather datasets must be hashed (SHA-256) and cataloged in `data_manifest.json`.
+
+3. **Time Contract & Interval Invariants:**
+   - **Timezone Domain:** Strict **`UTC`** (`timestamp_tz: UTC`).
+   - **Timestamp Convention:** **`interval_beginning`** (each 15-minute MTU is indexed by its starting timestamp: `00:00:00` through `23:45:00`).
+   - **Baseline Ingestion Bounds:**
+     - $\text{Start MTU} = \text{2025-06-01 00:00:00Z}$
+     - $\text{End MTU} = \text{2026-06-30 23:45:00Z}$ (covering the half-open temporal span $[\text{2025-06-01T00:00:00Z}, \text{2026-07-01T00:00:00Z})$).
+   - **Nominal Interval Invariant Formula:**
+     $$\text{Total Days} = 395 \text{ calendar days}$$
+     $$\text{MTUs per Day} = 24 \text{ hours} \times 4 \text{ MTUs/hour} = 96 \text{ MTUs/day}$$
+     $$\text{Nominal Intervals} = N_{\text{days}} \times 96 = 395 \times 96 = \mathbf{37,920 \text{ MTUs}}$$
+   - **Zero DST Discontinuity:** In strict UTC, every calendar day comprises exactly $96$ MTUs, ensuring mathematical invariance across daylight saving transitions (October 2025 and March 2026).
 
 ---
 

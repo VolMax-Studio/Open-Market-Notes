@@ -6,13 +6,13 @@ import glob
 import re
 import math
 import argparse
+import yaml
 import pandas as pd
 from datetime import datetime, timezone
 
-# ENTSO-E API requires an API key passed strictly via ENTSOE_API_KEY environment variable.
-# Scope: Europe/Brussels calendar time
-
-MARKET_TZ = 'Europe/Brussels'
+# Scope: Strict UTC domain per PARAMS.md time_contract specification
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_PARAMS_PATH = os.path.join(SCRIPT_DIR, "PARAMS.md")
 
 ZONES = {
     'NL': '10YNL----------L',
@@ -31,6 +31,49 @@ FROZEN_REGIMES = {
     'DK_2': 'SINGLE_PRICING',
     'AT': 'SINGLE_PRICING'
 }
+
+def load_params_time_contract(params_path=DEFAULT_PARAMS_PATH):
+    """
+    Strictly loads and mathematically validates the time_contract and license
+    metadata from PARAMS.md frontmatter.
+    """
+    if not os.path.exists(params_path):
+        raise FileNotFoundError(f"PARAMS file not found: {params_path}")
+    with open(params_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    if content.startswith("---"):
+        parts = content.split("---", 2)
+        if len(parts) >= 3:
+            meta = yaml.safe_load(parts[1])
+            if meta and "time_contract" in meta:
+                tc = meta["time_contract"]
+                req_keys = [
+                    "timezone", "timestamp_convention", "sampling_step_seconds",
+                    "sampling_step_minutes", "window_start_utc", "window_end_utc",
+                    "total_days", "intervals_per_day", "nominal_intervals"
+                ]
+                for k in req_keys:
+                    if k not in tc or tc[k] is None:
+                        raise KeyError(f"Missing required time_contract key '{k}' in {params_path}")
+                
+                # Derive and verify invariant formulas
+                start_dt = pd.Timestamp(tc["window_start_utc"])
+                end_dt = pd.Timestamp(tc["window_end_utc"])
+                derived_days = (end_dt - start_dt).days
+                if derived_days != tc["total_days"]:
+                    raise ValueError(f"Time contract invariant mismatch: calculated total_days={derived_days} != total_days={tc['total_days']}")
+                
+                step_min = tc["sampling_step_minutes"]
+                intervals_per_day = 24 * 60 // step_min
+                if intervals_per_day != tc["intervals_per_day"]:
+                    raise ValueError(f"Time contract invariant mismatch: calculated intervals_per_day={intervals_per_day} != intervals_per_day={tc['intervals_per_day']}")
+                    
+                derived_nominal = derived_days * intervals_per_day
+                if derived_nominal != tc["nominal_intervals"]:
+                    raise ValueError(f"Time contract invariant mismatch: calculated nominal_intervals={derived_nominal} != nominal_intervals={tc['nominal_intervals']}")
+                
+                return tc, meta.get("license", {})
+    raise KeyError(f"Missing structured 'time_contract' frontmatter in {params_path}")
 
 def sanitize_token_url(text_or_error):
     """
@@ -127,17 +170,75 @@ def update_manifest(filepath, file_hash, source_url, acquisition_mode, manifest_
         with open(manifest_path, 'w') as f:
             json.dump(manifest_data, f, indent=2)
 
-def check_mandate8_completeness(df, zone_code, start_stamp, end_stamp):
+def fetch_zone_monthly_chunks(client, zone_code, start_dt, end_dt):
+    """
+    Fetches imbalance prices in month-by-month chunks in UTC domain.
+    Eliminates entsoe-py's @year_limited yearly split boundary truncation.
+    """
+    current_month_start = start_dt
+    monthly_dfs = []
+    
+    while current_month_start < end_dt:
+        if current_month_start.month == 12:
+            next_month_start = pd.Timestamp(year=current_month_start.year + 1, month=1, day=1, tz='UTC')
+        else:
+            next_month_start = pd.Timestamp(year=current_month_start.year, month=current_month_start.month + 1, day=1, tz='UTC')
+        
+        current_chunk_end = min(next_month_start, end_dt)
+        query_end = current_chunk_end - pd.Timedelta(minutes=15)
+        
+        print(f"  Fetching chunk [{zone_code}]: {current_month_start.strftime('%Y-%m-%d %H:%M')} -> {query_end.strftime('%Y-%m-%d %H:%M')} UTC")
+        chunk_df = client.query_imbalance_prices(country_code=zone_code, start=current_month_start, end=query_end)
+        
+        if chunk_df.index.tz is None:
+            chunk_df.index = chunk_df.index.tz_localize('UTC')
+        else:
+            chunk_df.index = chunk_df.index.tz_convert('UTC')
+            
+        monthly_dfs.append(chunk_df)
+        current_month_start = next_month_start
+        
+    full_df = pd.concat(monthly_dfs)
+    full_df = full_df[~full_df.index.duplicated(keep='first')].sort_index()
+    return full_df
+
+def verify_time_invariants(df, zone_code, tc):
+    """
+    Strict verification of contract invariants:
+    1. Continuity: exact 00:15:00 steps
+    2. Boundaries: exactly [start_mtu, end_mtu]
+    3. Length: exactly nominal_intervals
+    4. Duplicates: exactly 0
+    """
+    expected_start = pd.Timestamp(tc["window_start_utc"])
+    expected_end = pd.Timestamp(tc["window_end_utc"]) - pd.Timedelta(minutes=tc["sampling_step_minutes"])
+    
+    if df.index[0] != expected_start:
+        raise ValueError(f"Boundary invariant violation for {zone_code}: start timestamp {df.index[0]} != {expected_start}")
+    if df.index[-1] != expected_end:
+        raise ValueError(f"Boundary invariant violation for {zone_code}: end timestamp {df.index[-1]} != {expected_end}")
+        
+    dup_count = int(df.index.duplicated().sum())
+    if dup_count > 0:
+        raise ValueError(f"Duplicate invariant violation for {zone_code}: {dup_count} duplicate timestamps found!")
+        
+    diffs = df.index.to_series().diff().iloc[1:]
+    diff_counts = diffs.value_counts()
+    expected_step = pd.Timedelta(minutes=tc["sampling_step_minutes"])
+    
+    print(f"\n[{zone_code}] Index Step Counts:\n{diff_counts}")
+    print(f"[{zone_code}] Total MTU count: {len(df)} (Expected nominal: {tc['nominal_intervals']})")
+    print(f"[{zone_code}] Start MTU: {df.index[0]} | End MTU: {df.index[-1]}")
+    
+    if len(diff_counts) != 1 or diff_counts.index[0] != expected_step:
+        raise ValueError(f"Continuity invariant violation for {zone_code}: non-uniform step detected: {diff_counts}")
+
+def check_mandate8_completeness(df, zone_code, tc):
     """
     Mandate 8 Telemetry Completeness & Boundary Verification Guard.
     Enforces minimum row count (>=98.0% ceiling of expected 15-min intervals) and timestamp gap limits (<=90 min).
-    Uses DST-aware timestamp range calculation.
     """
-    start_dt = pd.Timestamp(start_stamp, tz=MARKET_TZ)
-    end_dt = pd.Timestamp(end_stamp, tz=MARKET_TZ)
-    
-    expected_range = pd.date_range(start_dt, end_dt, freq='15min')
-    expected_intervals = len(expected_range)
+    expected_intervals = tc["nominal_intervals"]
     min_required_intervals = math.ceil(expected_intervals * 0.98)
     
     actual_rows = len(df)
@@ -152,7 +253,6 @@ def check_mandate8_completeness(df, zone_code, start_stamp, end_stamp):
     gaps = dt_series.to_series().diff()
     max_gap = gaps.max()
     
-    # [POST-HOC EMPIRICAL CALIBRATION] Threshold of 90 minutes calibrated to DK_1/DK_2 historical baseline gaps
     if max_gap > pd.Timedelta(minutes=90):
         raise ValueError(
             f"[MANDATE 8 ABORT] {zone_code} timestamp continuity breach: Maximum gap {max_gap} exceeds 90-minute threshold limit."
@@ -202,19 +302,20 @@ def analyze_regime_classification(df, zone_code):
         col_name = 'Short' if 'Short' in cols else cols[0]
         return {'M1_shortage_col': col_name, 'M2_surplus_col': col_name, 'regime': frozen}
 
-def download_entsoe_imbalance(start_date='2025-06-01', end_date='2026-06-30', data_dir='.', out_dir='.', allow_overwrite=False, api_key=None):
+def download_entsoe_imbalance(params_file=DEFAULT_PARAMS_PATH, data_dir='.', out_dir='.', allow_overwrite=False, api_key=None):
     raw_dir = os.path.join(out_dir, 'raw_cache')
     proc_dir = os.path.join(out_dir, 'processed')
     os.makedirs(raw_dir, exist_ok=True)
     os.makedirs(proc_dir, exist_ok=True)
 
+    tc, lic_meta = load_params_time_contract(params_file)
     api_key = api_key or os.environ.get('ENTSOE_API_KEY')
     
-    start_stamp = f"{start_date} 00:00:00"
-    end_stamp = f"{end_date} 23:45:00"
+    start_dt = pd.Timestamp(tc["window_start_utc"])
+    end_dt = pd.Timestamp(tc["window_end_utc"])
     
-    s_tag = start_date.replace('-', '')[:6]
-    e_tag = end_date.replace('-', '')[:6]
+    s_tag = start_dt.strftime('%Y%m')
+    e_tag = (end_dt - pd.Timedelta(days=1)).strftime('%Y%m')
     
     if api_key:
         try:
@@ -224,21 +325,19 @@ def download_entsoe_imbalance(start_date='2025-06-01', end_date='2026-06-30', da
             sanitized = sanitize_token_url(e)
             raise ValueError(f"Failed to instantiate EntsoePandasClient: {sanitized}") from None
             
-        start = pd.Timestamp(start_stamp, tz=MARKET_TZ)
-        end = pd.Timestamp(end_stamp, tz=MARKET_TZ)
-        
         for zone_code, eic in ZONES.items():
             print(f"\n==========================================")
-            print(f"FETCHING ENTSO-E IMBALANCE PRICES FOR {zone_code} ({MARKET_TZ})")
+            print(f"FETCHING ENTSO-E IMBALANCE PRICES FOR {zone_code} (UTC Domain: {tc['window_start_utc']} -> {tc['window_end_utc']})")
             print(f"==========================================")
             try:
                 proc_path = os.path.join(proc_dir, f"imbalance_{zone_code}.feather")
                 if os.path.exists(proc_path) and not allow_overwrite:
                     raise ValueError(f"Overwrite Guard: Refusing to overwrite existing feather cache at {proc_path}. Pass --allow-overwrite or use a separate --out-dir.")
                     
-                df = client.query_imbalance_prices(country_code=zone_code, start=start, end=end)
+                df = fetch_zone_monthly_chunks(client, zone_code, start_dt, end_dt)
                 
-                check_mandate8_completeness(df, zone_code, start_stamp, end_stamp)
+                check_mandate8_completeness(df, zone_code, tc)
+                verify_time_invariants(df, zone_code, tc)
                 mapping = analyze_regime_classification(df, zone_code)
                 
                 csv_path = os.path.join(raw_dir, f"imbalance_{zone_code}_{s_tag}_{e_tag}.csv")
