@@ -22,7 +22,7 @@ time_contract:
   nominal_intervals: 37920  # verification check: derived from (window_end_utc - window_start_utc).days * 96
 quality_contract:
   min_completeness_ratio: 0.98
-  max_telemetry_gap_minutes: 90
+  max_telemetry_gap_minutes: 90 # [POST-HOC EMPIRICAL CALIBRATION] Calibrated to maximum observed historical gap in DK_1/DK_2 (10 Aug 2025). No external normative/regulatory source established.
 ---
 
 # VolMax Open Market Note #003: Operational Parameters & Data Rules

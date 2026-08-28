@@ -54,3 +54,21 @@
   4. **Epistemic Disclosure on July 2026 Run:** The July 2026 probe run executed on 2026-08-09 was performed under a draft contract that lacked a normative timezone and timestamp convention. This contract amendment does not retroactively pre-register that run; historical July results retain exploratory status until re-executed under this ratified specification.
   5. **Archival of Pre-Existing Untracked Fetch Artefacts:** Untracked legacy data files (`instances/entsoe-scarcity-s1/test_fresh_fetch/`, dated 15 August 2026, containing `imbalance_*_202506_202607.csv`) were moved out of the working tree to external escrow (`sources_raw_escrow/untracked_legacy_test_fresh_fetch_20260815/`) to guarantee that all specification rules and chunking mechanics are written and verified without un-ratified data artifacts in the working tree.
 - **Status:** Pending Ratification (Pre-Merge on `fix/entsoe-note003-contract-boundary`)
+
+---
+
+## Entry #004: Quality Contract Parametrization, Post-Hoc Calibration Disclosure, and Gap Resolution (2026-08-28)
+
+- **Scope:** Note #003 ENTSO-E Imbalance Baseline (`PARAMS.md`, `PARAMETRIC_CHANGELOG.md`, `download_entsoe_data.py`)
+- **Audit & Governance Findings:**
+  1. **Post-Hoc Empirical Calibration Disclosure for 90-Minute Gap Limit:**
+     - The parameter `max_telemetry_gap_minutes: 90` is **formally recorded as a post-hoc empirical baseline calibration**, fitted directly to the maximum observed telemetry outage in historical Danish TSO data (`DK_1` and `DK_2` on 10 August 2025: 6 consecutive 15-minute intervals = 90 minutes).
+     - **Negative Epistemic Finding:** No external regulatory rule, standard, or ENTSO-E market code has been established for a 90-minute threshold. It is recorded strictly as an empirical baseline parameter representing historical telemetry dropouts in DK bidding zones.
+     - **Verification Operator:** Evaluated as strict greater-than (`diffs.max() > max_telemetry_gap_minutes`). Observed 90-minute historical gaps satisfy $\le 90\text{ min}$ and pass; any future gap $> 90\text{ min}$ triggers an immediate Mandate 8 violation.
+  2. **Three-Axis Taxonomy Verification:**
+     - `QUERY_WINDOW_MISALIGNMENT`: Formally enforced at every monthly chunk junction across all zones during live and offline ingestion. Any non-contiguous step at a month boundary causes an immediate abort.
+     - `TELEMETRY_GAP`: All interior steps $> 15\text{ min}$ within monthly chunks are logged with timestamp and duration, subject to Mandate 8 quality limits ($\ge 98.0\%$ completeness, $\le 90\text{ min}$ max gap).
+  3. **Empirical Resolution of Danish Gap Count (55 $\rightarrow$ 53):**
+     - Verification of the full 13-month dataset confirms that `2026-05-31 22:00:00 UTC` is present in both `DK_1` (108.32 €/MWh) and `DK_2` (151.02 €/MWh).
+     - The resolution of the month-boundary acquisition artifact reduced the total Danish gap count from 55 (27 in `DK_1`, 28 in `DK_2`) to **53** (26 in `DK_1`, 27 in `DK_2`), proving that the two missing intervals were acquisition defects rather than grid events.
+- **Status:** Pending Ratification (Pre-Merge on `fix/entsoe-note003-contract-boundary`)
