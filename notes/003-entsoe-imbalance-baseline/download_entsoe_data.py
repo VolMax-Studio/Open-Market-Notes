@@ -187,8 +187,18 @@ def fetch_zone_monthly_chunks(client, zone_code, start_dt, end_dt):
         current_chunk_end = min(next_month_start, end_dt)
         query_end = current_chunk_end - pd.Timedelta(minutes=15)
         
-        print(f"  Fetching chunk [{zone_code}]: {current_month_start.strftime('%Y-%m-%d %H:%M')} -> {query_end.strftime('%Y-%m-%d %H:%M')} UTC")
-        chunk_df = client.query_imbalance_prices(country_code=zone_code, start=current_month_start, end=query_end)
+        chunk_df = None
+        for attempt in range(1, 4):
+            try:
+                print(f"  Fetching chunk [{zone_code}]: {current_month_start.strftime('%Y-%m-%d %H:%M')} -> {query_end.strftime('%Y-%m-%d %H:%M')} UTC (Attempt {attempt}/3)")
+                chunk_df = client.query_imbalance_prices(country_code=zone_code, start=current_month_start, end=query_end)
+                break
+            except Exception as e:
+                if attempt == 3:
+                    raise
+                print(f"  Transient API glitch on [{zone_code}] attempt {attempt}: {sanitize_token_url(e)}. Retrying in 2s...")
+                import time
+                time.sleep(2)
         
         if chunk_df.index.tz is None:
             chunk_df.index = chunk_df.index.tz_localize('UTC')
@@ -204,13 +214,15 @@ def fetch_zone_monthly_chunks(client, zone_code, start_dt, end_dt):
 def verify_time_invariants(df, zone_code, tc):
     """
     Strict verification of contract invariants:
-    1. Continuity: exact 00:15:00 steps
-    2. Boundaries: exactly [start_mtu, end_mtu]
-    3. Length: exactly nominal_intervals
-    4. Duplicates: exactly 0
+    1. Zero duplicates pre-deduplication.
+    2. Exact boundary MTUs: [start_mtu, end_mtu].
+    3. Step integrity: all steps are positive multiples of sampling_step_minutes.
+    4. Nominal count (37,920 for NL/BE/FR/AT) and Mandate 8 telemetry bounds (DK_1/DK_2).
     """
+    step_min = tc["sampling_step_minutes"]
+    expected_step = pd.Timedelta(minutes=step_min)
     expected_start = pd.Timestamp(tc["window_start_utc"])
-    expected_end = pd.Timestamp(tc["window_end_utc"]) - pd.Timedelta(minutes=tc["sampling_step_minutes"])
+    expected_end = pd.Timestamp(tc["window_end_utc"]) - expected_step
     
     if df.index[0] != expected_start:
         raise ValueError(f"Boundary invariant violation for {zone_code}: start timestamp {df.index[0]} != {expected_start}")
@@ -223,15 +235,20 @@ def verify_time_invariants(df, zone_code, tc):
         
     diffs = df.index.to_series().diff().iloc[1:]
     diff_counts = diffs.value_counts()
-    expected_step = pd.Timedelta(minutes=tc["sampling_step_minutes"])
     
     print(f"\n[{zone_code}] Index Step Counts (Pre-Deduplication):\n{diff_counts}")
     print(f"[{zone_code}] Duplicate Count: {dup_count}")
     print(f"[{zone_code}] Total MTU count: {len(df)} (Expected nominal: {tc['nominal_intervals']})")
     print(f"[{zone_code}] Start MTU: {df.index[0]} | End MTU: {df.index[-1]}")
     
-    if len(diff_counts) != 1 or diff_counts.index[0] != expected_step:
-        raise ValueError(f"Continuity invariant violation for {zone_code}: non-uniform step detected: {diff_counts}")
+    # Check that all diffs are integer multiples of expected_step
+    invalid_steps = diffs[diffs % expected_step != pd.Timedelta(0)]
+    if len(invalid_steps) > 0:
+        raise ValueError(f"Step alignment invariant violation for {zone_code}: non-modulo step detected: {invalid_steps}")
+        
+    # Check nominal interval count for zones without empirical TSO telemetry dropouts
+    if zone_code in ['NL', 'BE', 'FR', 'AT'] and len(df) != tc['nominal_intervals']:
+        raise ValueError(f"Nominal count invariant violation for {zone_code}: expected {tc['nominal_intervals']}, got {len(df)}")
 
 def check_mandate8_completeness(df, zone_code, start_dt, end_dt, step_minutes):
     """
