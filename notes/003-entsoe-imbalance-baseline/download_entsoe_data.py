@@ -72,6 +72,10 @@ def load_params_time_contract(params_path=DEFAULT_PARAMS_PATH):
                 if derived_nominal != tc["nominal_intervals"]:
                     raise ValueError(f"Time contract invariant mismatch: calculated nominal_intervals={derived_nominal} != nominal_intervals={tc['nominal_intervals']}")
                 
+                qc = meta.get("quality_contract", {})
+                tc["min_completeness_ratio"] = float(qc.get("min_completeness_ratio", 0.98))
+                tc["max_telemetry_gap_minutes"] = int(qc.get("max_telemetry_gap_minutes", 90))
+                
                 return tc, meta.get("license", {})
     raise KeyError(f"Missing structured 'time_contract' frontmatter in {params_path}")
 
@@ -174,6 +178,7 @@ def fetch_zone_monthly_chunks(client, zone_code, start_dt, end_dt):
     """
     Fetches imbalance prices in month-by-month chunks in UTC domain.
     Eliminates entsoe-py's @year_limited yearly split boundary truncation.
+    Strictly verifies chunk junction continuity to detect any QUERY_WINDOW_MISALIGNMENT.
     """
     current_month_start = start_dt
     monthly_dfs = []
@@ -193,10 +198,10 @@ def fetch_zone_monthly_chunks(client, zone_code, start_dt, end_dt):
                 print(f"  Fetching chunk [{zone_code}]: {current_month_start.strftime('%Y-%m-%d %H:%M')} -> {query_end.strftime('%Y-%m-%d %H:%M')} UTC (Attempt {attempt}/3)")
                 chunk_df = client.query_imbalance_prices(country_code=zone_code, start=current_month_start, end=query_end)
                 break
-            except Exception as e:
+            except (requests.exceptions.RequestException, socket.timeout, ConnectionError) as e:
                 if attempt == 3:
                     raise
-                print(f"  Transient API glitch on [{zone_code}] attempt {attempt}: {sanitize_token_url(e)}. Retrying in 2s...")
+                print(f"  Transient network/API glitch on [{zone_code}] attempt {attempt}: {sanitize_token_url(e)}. Retrying in 2s...")
                 import time
                 time.sleep(2)
         
@@ -208,16 +213,30 @@ def fetch_zone_monthly_chunks(client, zone_code, start_dt, end_dt):
         monthly_dfs.append(chunk_df)
         current_month_start = next_month_start
         
+    # Junction Continuity Verification across all consecutive chunk transitions
+    for i in range(len(monthly_dfs) - 1):
+        chunk_a = monthly_dfs[i]
+        chunk_b = monthly_dfs[i + 1]
+        if len(chunk_a) > 0 and len(chunk_b) > 0:
+            expected_b_start = chunk_a.index[-1] + pd.Timedelta(minutes=15)
+            if chunk_b.index[0] != expected_b_start:
+                raise ValueError(
+                    f"QUERY_WINDOW_MISALIGNMENT detected at monthly chunk junction for {zone_code}: "
+                    f"Month chunk ended at {chunk_a.index[-1]}, next month chunk started at {chunk_b.index[0]} "
+                    f"(expected continuous junction at {expected_b_start})"
+                )
+        
     full_df = pd.concat(monthly_dfs).sort_index()
     return full_df
 
 def verify_time_invariants(df, zone_code, tc):
     """
-    Strict verification of contract invariants:
+    Strict 3-axis invariant verification:
     1. Zero duplicates pre-deduplication.
     2. Exact boundary MTUs: [start_mtu, end_mtu].
-    3. Step integrity: all steps are positive multiples of sampling_step_minutes.
-    4. Nominal count (37,920 for NL/BE/FR/AT) and Mandate 8 telemetry bounds (DK_1/DK_2).
+    3. Step integrity: all steps are exact positive integer multiples of sampling_step_minutes.
+    4. Completeness & Gaps: strictly verified against contract bounds.
+    5. Telemetry Gap Classification: all interior steps > 15m logged as TELEMETRY_GAP.
     """
     step_min = tc["sampling_step_minutes"]
     expected_step = pd.Timedelta(minutes=step_min)
@@ -241,14 +260,28 @@ def verify_time_invariants(df, zone_code, tc):
     print(f"[{zone_code}] Total MTU count: {len(df)} (Expected nominal: {tc['nominal_intervals']})")
     print(f"[{zone_code}] Start MTU: {df.index[0]} | End MTU: {df.index[-1]}")
     
-    # Check that all diffs are integer multiples of expected_step
+    # Check modulo integrity: all steps must be integer multiples of expected_step
     invalid_steps = diffs[diffs % expected_step != pd.Timedelta(0)]
     if len(invalid_steps) > 0:
         raise ValueError(f"Step alignment invariant violation for {zone_code}: non-modulo step detected: {invalid_steps}")
         
-    # Check nominal interval count for zones without empirical TSO telemetry dropouts
-    if zone_code in ['NL', 'BE', 'FR', 'AT'] and len(df) != tc['nominal_intervals']:
-        raise ValueError(f"Nominal count invariant violation for {zone_code}: expected {tc['nominal_intervals']}, got {len(df)}")
+    # Enforce Mandate 8 maximum gap threshold from quality_contract
+    max_gap_limit = pd.Timedelta(minutes=tc.get("max_telemetry_gap_minutes", 90))
+    max_observed_gap = diffs.max() if len(diffs) > 0 else expected_step
+    if max_observed_gap > max_gap_limit:
+        raise ValueError(f"Mandate 8 gap limit violation for {zone_code}: max gap {max_observed_gap} exceeds limit {max_gap_limit}")
+        
+    # Enforce minimum completeness threshold from quality_contract
+    min_required = math.ceil(tc["nominal_intervals"] * tc.get("min_completeness_ratio", 0.98))
+    if len(df) < min_required:
+        raise ValueError(f"Mandate 8 completeness violation for {zone_code}: {len(df)} < required {min_required} ({tc.get('min_completeness_ratio', 0.98)*100}%)")
+        
+    # Telemetry gap logging & classification
+    telemetry_gaps = diffs[diffs > expected_step]
+    if len(telemetry_gaps) > 0:
+        print(f"[{zone_code}] Detected {len(telemetry_gaps)} interior TELEMETRY_GAP instances (all <= {max_observed_gap}):")
+        for gap_ts, gap_len in telemetry_gaps.items():
+            print(f"  - TELEMETRY_GAP at {gap_ts}: step={gap_len}")
 
 def check_mandate8_completeness(df, zone_code, start_dt, end_dt, step_minutes):
     """

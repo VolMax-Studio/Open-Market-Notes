@@ -20,6 +20,9 @@ time_contract:
   total_days: 395
   intervals_per_day: 96
   nominal_intervals: 37920  # verification check: derived from (window_end_utc - window_start_utc).days * 96
+quality_contract:
+  min_completeness_ratio: 0.98
+  max_telemetry_gap_minutes: 90
 ---
 
 # VolMax Open Market Note #003: Operational Parameters & Data Rules
