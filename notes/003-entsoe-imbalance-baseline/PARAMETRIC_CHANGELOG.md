@@ -66,9 +66,10 @@
      - **Negative Epistemic Finding:** No external regulatory rule, standard, or ENTSO-E market code has been established for a 90-minute threshold. It is recorded strictly as an empirical baseline parameter representing historical telemetry dropouts in DK bidding zones.
      - **Verification Operator:** Evaluated as strict greater-than (`diffs.max() > max_telemetry_gap_minutes`). Observed 90-minute historical gaps satisfy $\le 90\text{ min}$ and pass; any future gap $> 90\text{ min}$ triggers an immediate Mandate 8 violation.
   2. **Three-Axis Taxonomy Verification:**
-     - `QUERY_WINDOW_MISALIGNMENT`: Formally enforced at every monthly chunk junction across all zones during live and offline ingestion. Any non-contiguous step at a month boundary causes an immediate abort.
+     - `QUERY_WINDOW_MISALIGNMENT`: Formally enforced at every monthly chunk junction during live API ingestion (`fetch_zone_monthly_chunks`). Any non-contiguous step at a month boundary causes an immediate abort. (Offline manifest ingestion verifies single concatenated files where chunk boundaries are already joined).
      - `TELEMETRY_GAP`: All interior steps $> 15\text{ min}$ within monthly chunks are logged with timestamp and duration, subject to Mandate 8 quality limits ($\ge 98.0\%$ completeness, $\le 90\text{ min}$ max gap).
-  3. **Empirical Resolution of Danish Gap Count (55 $\rightarrow$ 53):**
+  3. **Empirical Resolution of Danish Gap Count (55 $\rightarrow$ 53) & Synchronous Energinet Outage:**
      - Verification of the full 13-month dataset confirms that `2026-05-31 22:00:00 UTC` is present in both `DK_1` (108.32 €/MWh) and `DK_2` (151.02 €/MWh).
      - The resolution of the month-boundary acquisition artifact reduced the total Danish gap count from 55 (27 in `DK_1`, 28 in `DK_2`) to **53** (26 in `DK_1`, 27 in `DK_2`), proving that the two missing intervals were acquisition defects rather than grid events.
+     - **Synchronous TSO-Level Incident Finding:** Analysis of the remaining 53 gaps reveals that 22 gap intervals in `DK_1` and 22 in `DK_2` occurred on 10 August 2025 with identical start timestamps and identical gap durations (`00:30`, `01:30`, `01:15`, etc.). These 44 recorded gap instances reflect a **single synchronous Energinet telemetry outage incident (~22 hours)** spanning both Danish bidding zones, rather than 44 independent grid events.
 - **Status:** Pending Ratification (Pre-Merge on `fix/entsoe-note003-contract-boundary`)
