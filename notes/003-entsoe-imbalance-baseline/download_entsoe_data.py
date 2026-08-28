@@ -417,10 +417,11 @@ def download_entsoe_imbalance(params_file=DEFAULT_PARAMS_PATH, data_dir='.', out
             except Exception as e:
                 raise ValueError(f"Corrupted manifest JSON at {manifest_path}: {e}")
             
-        raw_csv_pattern = os.path.join(raw_dir, f"imbalance_*_{s_tag}_{e_tag}.csv")
+        input_raw_dir = os.path.join(data_dir, 'raw_cache') if os.path.exists(os.path.join(data_dir, 'raw_cache')) else data_dir
+        raw_csv_pattern = os.path.join(input_raw_dir, f"imbalance_*_{s_tag}_{e_tag}.csv")
         csv_files = glob.glob(raw_csv_pattern)
         if not csv_files:
-            raise ValueError(f"No raw cache files found matching pattern {raw_csv_pattern} in {raw_dir}.")
+            raise ValueError(f"No raw cache files found matching pattern {raw_csv_pattern} in {input_raw_dir}.")
             
         files_list = manifest_data.get("files", [])
         manifest_files_dict = {item["file_name"]: item for item in files_list if isinstance(item, dict) and "file_name" in item}
@@ -442,9 +443,10 @@ def download_entsoe_imbalance(params_file=DEFAULT_PARAMS_PATH, data_dir='.', out
             df = pd.read_csv(csv_file, index_col=0, parse_dates=True)
             
             check_mandate8_completeness(df, zone_code, start_dt, end_dt, tc["sampling_step_minutes"])
+            verify_time_invariants(df, zone_code, tc)
             mapping = analyze_regime_classification(df, zone_code)
             
-            update_manifest(csv_file, file_hash, source_url=entry.get("source_url", ""), acquisition_mode="manifest_verified_cache", manifest_dir=data_dir, regime_info=mapping)
+            update_manifest(csv_file, file_hash, source_url=entry.get("source_url", ""), acquisition_mode="manifest_verified_cache", manifest_dir=out_dir, regime_info=mapping)
             
             proc_path = os.path.join(proc_dir, f"imbalance_{zone_code}.feather")
             if not os.path.exists(proc_path):
@@ -458,20 +460,20 @@ def download_entsoe_imbalance(params_file=DEFAULT_PARAMS_PATH, data_dir='.', out
 
 def main():
     parser = argparse.ArgumentParser(description="ENTSO-E Imbalance Telemetry Downloader & Provenance Manager")
-    parser.add_argument('--start-date', type=str, default='2025-06-01', help='Start date (YYYY-MM-DD)')
-    parser.add_argument('--end-date', type=str, default='2026-06-30', help='End date (YYYY-MM-DD)')
+    parser.add_argument('--params-file', type=str, default=DEFAULT_PARAMS_PATH, help='Path to PARAMS.md parameter contract')
     parser.add_argument('--data-dir', type=str, default='.', help='Input data and manifest directory')
     parser.add_argument('--out-dir', type=str, default='.', help='Output cache directory')
     parser.add_argument('--allow-overwrite', action='store_true', help='Allow overwriting existing feather files in output directory')
+    parser.add_argument('--api-key', type=str, default=None, help='ENTSO-E API security token')
     args = parser.parse_args()
     
     try:
         download_entsoe_imbalance(
-            start_date=args.start_date,
-            end_date=args.end_date,
+            params_file=args.params_file,
             data_dir=args.data_dir,
             out_dir=args.out_dir,
-            allow_overwrite=args.allow_overwrite
+            allow_overwrite=args.allow_overwrite,
+            api_key=args.api_key
         )
     except Exception as e:
         sanitized = sanitize_token_url(e)
