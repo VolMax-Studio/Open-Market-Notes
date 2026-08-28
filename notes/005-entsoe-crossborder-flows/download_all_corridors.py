@@ -127,7 +127,7 @@ def download_dataset():
     with open(manifest_path, "w") as f:
         json.dump({
             "source": "ENTSO-E Transparency Platform (A11 Physical Flow & A09 Final Transfer Capacity)",
-            "license": "CC BY 4.0 (ENTSO-E ToU Item #27)",
+            "license": "CC BY 4.0 (ENTSO-E Terms of Use Article 2.5, Open Data List Item #18: Physical flows 12.1.g)",
             "download_timestamp": datetime.utcnow().isoformat() + "Z",
             "file_hashes": manifest_hashes
         }, f, indent=2)
