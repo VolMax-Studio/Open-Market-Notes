@@ -12,6 +12,10 @@ tools/
 **/data/**/*.feather
 **/data/**/*.zip
 **/data/**/*.parquet
+**/data/**/*.xml
+**/data/**/*.XML
+**/data/raw_xml/
+**/data/raw_xml_*/
 
 # Python temporary files
 __pycache__/

@@ -4,7 +4,7 @@ Open Market Note #005 — ENTSO-E Cross-Border Physical Flows
 L0/L1 Dry-Run API Data Ingestion Script
 
 Fetches physical flow data between key European bidding zones via ENTSO-E TP RESTful API.
-License: CC BY 4.0 (ENTSO-E ToU Item #27)
+License: CC BY 4.0 (ENTSO-E Terms of Use Article 2.5, Open Data List Item #18: Physical flows 12.1.g)
 """
 
 import os
