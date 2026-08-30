@@ -66,3 +66,29 @@ Executed on 2026-08-30 against the live Energi Data Service API:
 
 ### Formal Verdict Statement
 > *Svih 44 intervala odsutnih na ENTSO-E TP-u 10.08.2025 prisutni su u Energinet `ImbalancePrice` sa nenultim vrednostima, u obe cenovne zone. 88/88 CONFIRMED. Gde je gubitak nastao ovim testom nije utvrđeno.*
+
+---
+
+## 4. Deterministic Reproduction & Execution Trace
+
+### Literal Execution Output (`python3 src/run_audit.py`)
+```text
+=== 1. LOADING NOTE #003 DK_1 BASELINE ===
+Target missing synchronous timestamps (2025-08-10): 44
+
+=== 2. FETCHING ENERGINET EDS ImbalancePrice ===
+Total records returned by Energinet EDS: 192
+
+=== 3. EVALUATING 88 LOOKUPS AGAINST FROZEN DECISION RULE ===
+Detailed lookup table saved to: .../instances/energinet-cross-source-probe/data/energinet_lookup_results.csv
+
+=== AGGREGATE SUMMARY ===
+CONFIRMED      : 88 / 88
+NOT_CONFIRMED  :  0 / 88
+NULL_VALUED    :  0 / 88
+UNRESOLVED     :  0 / 88
+```
+
+### Checksums & Byte-for-Byte Invariants
+* `results.json`: `2b7e45e6f1b35ef1572b75a57bc9fb3fea017fa4a5d1dda85ec0c67d2608b3ba`
+* `data/energinet_lookup_results.csv`: `fca6456566d89732feedb72367bfee8101f2184400425c52c6f11717b077b196`
