@@ -1,0 +1,12 @@
+{
+  "instance": "energinet-cross-source-probe",
+  "target_date": "2025-08-10",
+  "total_lookups": 88,
+  "counts": {
+    "CONFIRMED": 88,
+    "NOT_CONFIRMED": 0,
+    "NULL_VALUED": 0,
+    "UNRESOLVED": 0
+  },
+  "verdict_ratio": "88/88 CONFIRMED"
+}
