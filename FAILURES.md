@@ -222,4 +222,14 @@
 - **Measurable Impact:** Incomplete instance wrapper and non-portable runner scripts were published to the public `main` branch.
 - **Remediation:** Registered this failure entry in `FAILURES.md`. Remediated the instance on branch `feat/p10-template-and-eclipse-remediation` with full P10 template compliance, `reproduce.py`, and verified execution before proposing public merge.
 
+---
+
+### Failure Entry #047 — Falsification of Per-Record Publication Timestamp Hypothesis in Energi Data Service
+- **Date / Event:** 2026-08-30 (Energi Data Service ImbalancePrice Discovery)
+- **Component:** Energi Data Service API schema (`/meta/dataset/ImbalancePrice`)
+- **Root Cause (General Class):** Premise Falsification — Assumption of Per-Record Publication Timestamp in Open Settlement Data. Investigated whether Energi Data Service (EDS) exposed per-interval publication or ingestion timestamps (`Created`, `PublishedAt`, `RevisionTime`, `LoadedAt`) to isolate the publication timing of the 99 imbalance price records present on Energinet but missing on ENTSO-E.
+- **Measurable Impact:** Primary metadata query (`https://api.energidataservice.dk/meta/dataset/ImbalancePrice`, response SHA-256: `318a990712567d960b3494332f8089ddd2a69a8223668f4fc4d504905622c916`) confirmed that zero per-record publication timestamps exist across all 18 schema columns. Only interval keys (`TimeUTC`, `TimeDK`) and a dataset-wide timestamp (`lastDataUpdate`) are maintained.
+- **Remediation:** Formally closed Candidate Hypothesis B as falsified under pre-frozen decision rules without pulling or contaminating target data. Documented the discovery of EDS pricing error suspension semantics (*"If null, the price is temporarily suspended due to a pricing error. Price will be publish the following working day."*) to serve as the basis for future multi-pull revision detection experiments.
+
+
 
