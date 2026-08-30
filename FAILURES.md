@@ -213,3 +213,13 @@
 - **Measurable Impact:** Public code repository contained an execution runner tied strictly to the author's local workstation filesystem.
 - **Remediation:** Hardened `run_audit.py` and `reproduce.py` across instances and `_TEMPLATE` to strictly read from `os.environ["ENTSOE_API_KEY"]` with clear configuration instructions and explicit error exit codes.
 
+---
+
+### Failure Entry #046 — Instance Merged to main Prior to P10 Pre-Publish Checklist (PG1–PG9) Execution
+- **Date / Event:** 2026-08-30 (P10 Verification Gate Review)
+- **Component:** Branch lifecycle, PR #89, and `instances/fr-be-de-eclipse-coupling-probe/` on `main`.
+- **Root Cause (General Class):** Premature Publication & Gate Sequencing Inversion. Pull Request #89 was merged to `main` before completing the full 9-point P10 Pre-Publish Checklist (`PREPUBLISH_CHECKLIST.md` PG1–PG9), releasing code to the public default branch that had not completed external portability checks (`reproduce.py`), canonical template alignment, or operational status verification.
+- **Measurable Impact:** Incomplete instance wrapper and non-portable runner scripts were published to the public `main` branch.
+- **Remediation:** Registered this failure entry in `FAILURES.md`. Remediated the instance on branch `feat/p10-template-and-eclipse-remediation` with full P10 template compliance, `reproduce.py`, and verified execution before proposing public merge.
+
+
