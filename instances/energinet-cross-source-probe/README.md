@@ -20,7 +20,7 @@ instances/energinet-cross-source-probe/
 
 ---
 
-## 1. Legal and Attribution (L0)
+## 1. Legal and Mandatory Attribution (L0)
 
 * **Source:** Energinet Energi Data Service (EDS)
 * **Dataset:** `ImbalancePrice` (Dataset ID: 160)
@@ -30,9 +30,11 @@ instances/energinet-cross-source-probe/
 
 ---
 
-## 2. Methodology & Decision Rules
+## 2. Methodology & Invariants
 
-Each of the 44 synchronous missing timestamps on 2025-08-10 is queried across both price areas `(TimeUTC, PriceArea)`:
+* **Target Set Derivation:** The set of 44 missing timestamps was identified from `imbalance_DK_1.feather` across the nominal grid `2025-08-10 00:00:00` to `2025-08-10 23:45:00` UTC; applicability to DK_2 is inherited from the 100% synchronous dropout proof established in Entry #004 (`set(missing_DK1) == set(missing_DK2)`).
+* **API Formatting Note:** Initial trial query using seconds notation (`yyyy-MM-ddTHH:mm:ss`) returned HTTP 400 as EDS strictly expects `yyyy-MM-ddTHH:mm`; production execution called `start=2025-08-10T00:00&end=2025-08-11T00:00`.
+* **Decision Rules:** Each of the 44 synchronous missing timestamps is evaluated across both price areas `(TimeUTC, PriceArea)`:
 
 | Energinet `ImbalancePrice` Condition | Verdict |
 | :--- | :--- |
@@ -62,5 +64,5 @@ Executed on 2026-08-30 against the live Energi Data Service API:
 }
 ```
 
-### Key Finding
-All 88 lookups returned valid, non-null settlement prices from Energinet (`88 / 88 CONFIRMED`). The data dropout on 2025-08-10 was localized to the ENTSO-E Transparency Platform ingestion/aggregation layer; the Danish national balancing settlement repository remained complete.
+### Formal Verdict Statement
+> *Svih 44 intervala odsutnih na ENTSO-E TP-u 10.08.2025 prisutni su u Energinet `ImbalancePrice` sa nenultim vrednostima, u obe cenovne zone. 88/88 CONFIRMED. Gde je gubitak nastao ovim testom nije utvrđeno.*
