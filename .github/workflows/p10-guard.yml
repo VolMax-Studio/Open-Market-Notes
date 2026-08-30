@@ -27,11 +27,18 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Verify Protected Governance Paths (§7.1)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=== P10 GOVERNANCE & CI PROTECTED PATHS GUARD ==="
+          python3 scripts/p10_state.py --verify-repo --base-ref origin/main
+
       - name: Run P10 State Guard across instances
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "=== P10 STATE GUARD CI RUNNER ==="
+          echo "=== P10 STATE GUARD INSTANCE RUNNER ==="
           FAIL=0
           for state_file in $(find instances -name "STATE.json" -not -path "instances/_TEMPLATE/*"); do
             inst_dir=$(dirname "$state_file")

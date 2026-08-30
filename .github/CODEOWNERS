@@ -1,0 +1,5 @@
+# Critical Governance and CI Guard Paths
+# Modifications require review and cryptographic signoff from the repository owner.
+.github/workflows/ @VolMax-Studio
+governance/HUMAN_KEYS/ @VolMax-Studio
+scripts/p10_state.py @VolMax-Studio
