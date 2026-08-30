@@ -17,9 +17,18 @@ INSTANCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(INSTANCE_DIR, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 
-# Read API key safely
-key_path = os.path.expanduser("~/Documents/Kljucevi/apientso.txt")
-api_key = open(key_path).read().strip()
+# Read API key from environment variable (with local fallback if present)
+api_key = os.environ.get("ENTSOE_API_KEY")
+if not api_key:
+    key_path = os.path.expanduser("~/Documents/Kljucevi/apientso.txt")
+    if os.path.exists(key_path):
+        api_key = open(key_path).read().strip()
+
+if not api_key:
+    raise RuntimeError(
+        "ENTSO-E API security token not found. Set the ENTSOE_API_KEY environment variable:\n"
+        "  export ENTSOE_API_KEY=\"<your-entsoe-token>\""
+    )
 
 DATES = {
     "Date_A_2026-08-12": {
@@ -232,7 +241,7 @@ df_lookups.to_csv(os.path.join(DATA_DIR, "coupling_lookups.csv"), index=False)
 results = {
     "instance": "instances/fr-be-de-eclipse-coupling-probe",
     "preregistration_commit": "e8d267c",
-    "status": "SPREMNO ZA GEJT",
+    "status": "RATIFIED 2026-08-30",
     "target_set": {
         "total_retrieved_points": 576,
         "total_lookups": len(all_lookups),

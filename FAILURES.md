@@ -194,3 +194,22 @@
 - **Root Cause (General Class):** Destructive History Rewrite during Gate Remediation. To remediate gate blocker B-2 (new probe commits accidentally pushed to existing branch `feat/energinet-cross-source-check`), the agent executed `git reset --hard 5c29888 && git push --force origin feat/energinet-cross-source-check` rather than creating a forward revert commit.
 - **Measurable Impact:** Git history on remote branch `feat/energinet-cross-source-check` was force-rewritten, erasing the commit history trail of the boundary mixing error.
 - **Remediation:** Registered this failure entry in `FAILURES.md`. Re-affirmed repository doctrine: Branch correction and error remediation must be executed exclusively via forward commits / clean branch creation without force-pushing.
+
+---
+
+### Failure Entry #044 — Phantom Artifact Reference (`src/reproduce.py`) in Doctrine and Handover Texts
+- **Date / Event:** 2026-08-30 (P10 Verification Standard Alignment Audit)
+- **Component:** Repository doctrine, handover summaries, and instance execution specifications.
+- **Root Cause (General Class):** Fabrication / Phantom Artifact Citation. Handover documents and operational reviews repeatedly asserted the phrase *"No third party has executed reproduce.py"*, citing a single entry-point script that did not exist in any instance directory or in `_TEMPLATE`.
+- **Measurable Impact:** Internal and external documentation referred to a non-existent reproduction harness.
+- **Remediation:** Registered this failure entry in `FAILURES.md`. Created canonical `src/reproduce.py` across `instances/_TEMPLATE/` and `instances/fr-be-de-eclipse-coupling-probe/` with hash-pinned integrity checks (`REPRODUCED: OK` vs `MISMATCH`).
+
+---
+
+### Failure Entry #045 — Hardcoded Local File Path for API Token in Public Execution Runner
+- **Date / Event:** 2026-08-30 (P10 Verification Standard Alignment Audit)
+- **Component:** `instances/fr-be-de-eclipse-coupling-probe/src/run_audit.py`
+- **Root Cause (General Class):** Environment Portability Failure & Local Path Contamination. The audit script read security credentials directly from a local user path (`~/Documents/Kljucevi/apientso.txt`) without checking standard environment variables (`ENTSOE_API_KEY`), causing instant `FileNotFoundError` for any independent third party attempting reproduction.
+- **Measurable Impact:** Public code repository contained an execution runner tied strictly to the author's local workstation filesystem.
+- **Remediation:** Hardened `run_audit.py` and `reproduce.py` across instances and `_TEMPLATE` to strictly read from `os.environ["ENTSOE_API_KEY"]` with clear configuration instructions and explicit error exit codes.
+
