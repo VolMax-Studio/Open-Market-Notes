@@ -1,0 +1,150 @@
+{
+  "schema": "p10-state/0.1",
+  "instance": "instances/<instance-name>",
+  "doctrine_pin": {
+    "repo": "VolMax-Studio/P10-Verification-Method",
+    "commit": "<pinned-commit-sha>",
+    "files": {
+      "TEMPLATE.md": "<sha256>",
+      "DESIGN_PRINCIPLES.md": "<sha256>",
+      "PREPUBLISH_CHECKLIST.md": "<sha256>",
+      "CC-BY-4.0-legalcode.txt": "<sha256>"
+    }
+  },
+  "phases": {
+    "PREREGISTRATION": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": null,
+      "evidence": {
+        "artifact": "PREREGISTRATION.md",
+        "sha256": null,
+        "freeze_commit": null
+      }
+    },
+    "TARGET_SET": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": "PREREGISTRATION",
+      "evidence": {
+        "artifact": "PREREGISTRATION.md",
+        "target_count": null
+      }
+    },
+    "DATA_MANIFEST": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": "TARGET_SET",
+      "evidence": {
+        "artifact": "data_manifest.json"
+      }
+    },
+    "EXECUTION": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": "DATA_MANIFEST",
+      "evidence": {
+        "reproduce_script": "src/reproduce.py",
+        "results_artifact": "results.json"
+      }
+    },
+    "RESULTS": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": "EXECUTION",
+      "evidence": {
+        "artifact": "results.json"
+      }
+    },
+    "VERDICT": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": "RESULTS",
+      "evidence": {
+        "artifact": "README.md"
+      }
+    },
+    "PG1": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": "VERDICT",
+      "evidence": {
+        "log_artifact": "PG_LOG.md"
+      }
+    },
+    "PG2": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": "PG1",
+      "evidence": {
+        "log_artifact": "PG_LOG.md"
+      }
+    },
+    "PG3": {
+      "declared": "NOT_STARTED",
+      "class": "HUMAN",
+      "prerequisite": "PG2",
+      "evidence": {
+        "decision_artifact": "PG_LOG.md",
+        "decision_commit": null,
+        "signature": "required"
+      }
+    },
+    "PG4": {
+      "declared": "NOT_STARTED",
+      "class": "HUMAN",
+      "prerequisite": "PG3",
+      "evidence": {
+        "decision_artifact": "PG_LOG.md",
+        "decision_commit": null,
+        "signature": "required"
+      }
+    },
+    "PG5": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": "PG4",
+      "evidence": {
+        "license_artifact": "../../LICENSE",
+        "notice_artifact": "../../NOTICE.md",
+        "log_artifact": "PG_LOG.md"
+      }
+    },
+    "PG6": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": "PG5",
+      "evidence": {
+        "log_artifact": "PG_LOG.md"
+      }
+    },
+    "PG7": {
+      "declared": "NOT_STARTED",
+      "class": "MECHANICAL",
+      "prerequisite": "PG6",
+      "evidence": {
+        "log_artifact": "PG_LOG.md"
+      }
+    },
+    "PG8": {
+      "declared": "NOT_STARTED",
+      "class": "HUMAN",
+      "prerequisite": "PG7",
+      "evidence": {
+        "decision_artifact": "PG_LOG.md",
+        "decision_commit": null,
+        "signature": "required"
+      }
+    },
+    "PG9": {
+      "declared": "NOT_STARTED",
+      "class": "HUMAN",
+      "prerequisite": "PG8",
+      "evidence": {
+        "decision_artifact": "PG_LOG.md",
+        "decision_commit": null,
+        "signature": "required"
+      }
+    }
+  }
+}
