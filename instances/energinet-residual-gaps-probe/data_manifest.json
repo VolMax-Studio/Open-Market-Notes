@@ -1,0 +1,17 @@
+{
+  "retrieved_at_utc": "2026-08-30T09:29:23.403162+00:00",
+  "attribution": "Source: Energinet (www.energidataservice.dk)",
+  "chunks": [
+    {
+      "endpoint": "https://api.energidataservice.dk/dataset/ImbalancePrice?start=2025-07-07T00:00&end=2025-07-12T00:00&limit=2000",
+      "response_sha256": "26631c0504b41a3f616ef69012f3940a4883c42932127b078b989fafd4ac1b35",
+      "record_count": 960
+    },
+    {
+      "endpoint": "https://api.energidataservice.dk/dataset/ImbalancePrice?start=2026-04-30T00:00&end=2026-05-01T00:00&limit=2000",
+      "response_sha256": "aa1e329f15d19dab791871c222be747bc6cd69c3af3918b4c6aeafc349cabc83",
+      "record_count": 192
+    }
+  ],
+  "total_records": 1152
+}
