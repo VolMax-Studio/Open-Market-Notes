@@ -7,6 +7,7 @@ on the ENTSO-E Transparency Platform exist in Energinet's Energi Data Service.
 
 import os
 import json
+import hashlib
 import requests
 import pandas as pd
 
@@ -35,6 +36,19 @@ def run():
     r.raise_for_status()
     eds_data = r.json().get('records', [])
     print(f"Total records returned by Energinet EDS: {len(eds_data)}")
+
+    # Write data manifest with SHA-256 of raw bytes
+    manifest = {
+        "endpoint": url,
+        "retrieved_at_utc": pd.Timestamp.utcnow().isoformat(),
+        "response_sha256": hashlib.sha256(r.content).hexdigest(),
+        "record_count": len(eds_data),
+        "attribution": "Source: Energinet (www.energidataservice.dk)"
+    }
+    manifest_path = os.path.join(INSTANCE_DIR, "data_manifest.json")
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2)
+    print(f"Data manifest written to: {manifest_path}")
 
     eds_lookup = {}
     for rec in eds_data:
