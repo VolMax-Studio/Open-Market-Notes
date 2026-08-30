@@ -1,0 +1,79 @@
+{
+  "derived_from": {
+    "DK_1": {
+      "path": "notes/003-entsoe-imbalance-baseline/data/processed/imbalance_DK_1.feather",
+      "sha256": "fea6acbd0174ace9f6c76db26fa21217204b10ca76a9bf282ceae5d1c4d174e1"
+    },
+    "DK_2": {
+      "path": "notes/003-entsoe-imbalance-baseline/data/processed/imbalance_DK_2.feather",
+      "sha256": "8082f184e09624502c83088c78489b5d0947b09e611eda06e65ac712dae762c0"
+    }
+  },
+  "window_utc": [
+    "2025-06-01T00:00:00",
+    "2026-06-30T22:00:00"
+  ],
+  "excluded": {
+    "2025-08-10": "Covered by energinet-cross-source-probe (44 synchronous timestamps)",
+    "2026-05-31T22:00:00": "Known entsoe-py @year_limited boundary drop at year junction (Entry #003 / PR #539)",
+    "2026-06-30T22:00:00": "Observation window right edge boundary instant"
+  },
+  "total_lookups": 11,
+  "lookups": [
+    {
+      "zone": "DK_1",
+      "PriceArea": "DK1",
+      "TimeUTC": "2025-07-07T17:45:00"
+    },
+    {
+      "zone": "DK_2",
+      "PriceArea": "DK2",
+      "TimeUTC": "2025-07-07T17:45:00"
+    },
+    {
+      "zone": "DK_1",
+      "PriceArea": "DK1",
+      "TimeUTC": "2025-07-07T19:15:00"
+    },
+    {
+      "zone": "DK_2",
+      "PriceArea": "DK2",
+      "TimeUTC": "2025-07-07T19:15:00"
+    },
+    {
+      "zone": "DK_1",
+      "PriceArea": "DK1",
+      "TimeUTC": "2025-07-08T08:45:00"
+    },
+    {
+      "zone": "DK_2",
+      "PriceArea": "DK2",
+      "TimeUTC": "2025-07-08T08:45:00"
+    },
+    {
+      "zone": "DK_2",
+      "PriceArea": "DK2",
+      "TimeUTC": "2025-07-11T09:45:00"
+    },
+    {
+      "zone": "DK_1",
+      "PriceArea": "DK1",
+      "TimeUTC": "2026-04-30T15:15:00"
+    },
+    {
+      "zone": "DK_2",
+      "PriceArea": "DK2",
+      "TimeUTC": "2026-04-30T15:15:00"
+    },
+    {
+      "zone": "DK_1",
+      "PriceArea": "DK1",
+      "TimeUTC": "2026-04-30T15:30:00"
+    },
+    {
+      "zone": "DK_2",
+      "PriceArea": "DK2",
+      "TimeUTC": "2026-04-30T15:30:00"
+    }
+  ]
+}
