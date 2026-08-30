@@ -13,6 +13,7 @@ import re
 import hashlib
 import subprocess
 import argparse
+import tempfile
 from datetime import datetime, timezone
 import urllib.request
 import urllib.error
@@ -61,7 +62,7 @@ class DoctrineParser:
     def verify_and_parse(self):
         log_diag(f"Verifying doctrine pin strictly against {self.repo} @ {self.commit}...")
         for filename, expected_sha in self.files_pin.items():
-            # J-3 Fix: Source is strictly the pinned remote commit
+            # Source is strictly the pinned remote commit
             raw_url = f"https://raw.githubusercontent.com/{self.repo}/{self.commit}/{filename}"
             content = fetch_url(raw_url, self.github_token)
 
@@ -268,9 +269,9 @@ class P10StateGuard:
         return True
 
     def _eval_data_manifest(self, pinfo: dict) -> bool:
-        # J-2 Fix: Server-side temporal ordering predicate P1–P3
+        # K-1 & K-2 Fixes: Server-side temporal ordering predicate P1–P3 (Fails Closed)
         # P1: A workflow run exists for freeze commit C
-        # P2: T_freeze = run.run_started_at from GitHub Actions API
+        # P2: T_freeze = min(run.run_started_at) across all Actions runs for C (GitHub server-side)
         # P3: for every entry in data_manifest.json: entry.retrieved_at_utc > T_freeze
         # P4: 64-hex sha256 and integer status_code
         # P5: No raw response bodies in repository
@@ -281,39 +282,73 @@ class P10StateGuard:
             return False
 
         prereg_info = self.state.get("phases", {}).get("PREREGISTRATION", {})
-        freeze_commit = prereq_commit = prereg_info.get("evidence", {}).get("freeze_commit")
+        freeze_commit = prereg_info.get("evidence", {}).get("freeze_commit")
         if not freeze_commit:
-            self.block("DATA_MANIFEST", "PREREGISTRATION freeze_commit is missing for temporal ordering check")
+            self.block("DATA_MANIFEST", "PREREGISTRATION freeze_commit missing for temporal ordering check")
             return False
 
-        # Query GitHub Actions API for the freeze commit's run_started_at
-        t_freeze_dt = None
+        # Query GitHub Actions API for all runs for this freeze commit
         repo_owner_name = "VolMax-Studio/Open-Market-Notes"
         runs_url = f"https://api.github.com/repos/{repo_owner_name}/actions/runs?head_sha={freeze_commit}"
 
         try:
-            runs_data = json.loads(fetch_url(runs_url, self.github_token).decode("utf-8"))
+            runs_raw = fetch_url(runs_url, self.github_token)
+            runs_data = json.loads(runs_raw.decode("utf-8"))
             workflow_runs = runs_data.get("workflow_runs", [])
-            if workflow_runs:
-                # Extract run_started_at
-                run_started_at_str = workflow_runs[0].get("run_started_at")
-                if run_started_at_str:
-                    t_freeze_dt = datetime.fromisoformat(run_started_at_str.replace("Z", "+00:00"))
-                    log_diag(f"  Server-side T_freeze from GitHub Actions run: {t_freeze_dt.isoformat()}")
         except Exception as e:
-            log_diag(f"Warning: Could not query GitHub Actions runs for {freeze_commit} ({e})")
+            # K-1: Fail Closed on API or network failure
+            self.block("DATA_MANIFEST", f"Fail closed: Failed to query GitHub Actions runs for freeze commit {freeze_commit} ({e})")
+            return False
+
+        if not workflow_runs:
+            # K-1: Fail Closed if no server-side run exists
+            self.block("DATA_MANIFEST", f"Fail closed: Zero GitHub Actions workflow runs found for freeze commit {freeze_commit}")
+            return False
+
+        started_timestamps = []
+        for wr in workflow_runs:
+            st = wr.get("run_started_at")
+            if st:
+                try:
+                    started_timestamps.append(datetime.fromisoformat(st.replace("Z", "+00:00")))
+                except Exception:
+                    pass
+
+        if not started_timestamps:
+            self.block("DATA_MANIFEST", f"Fail closed: No valid run_started_at found in Actions runs for {freeze_commit}")
+            return False
+
+        # K-2: T_freeze is the earliest (min) run started at
+        t_freeze_dt = min(started_timestamps)
+        log_diag(f"  Established server-side T_freeze = {t_freeze_dt.isoformat()} (earliest of {len(started_timestamps)} runs)")
 
         try:
             m = json.load(open(manifest_path))
+            # Verify top-level manifest timestamp
             manifest_time_str = m.get("retrieved_at_utc")
-            if manifest_time_str and t_freeze_dt:
-                m_dt = datetime.fromisoformat(manifest_time_str.replace("Z", "+00:00"))
-                if m_dt <= t_freeze_dt:
-                    self.block("DATA_MANIFEST", f"Ordering violation: data manifest retrieved_at ({m_dt}) <= freeze run ({t_freeze_dt})")
-                    return False
+            if not manifest_time_str:
+                self.block("DATA_MANIFEST", "Missing retrieved_at_utc in data_manifest.json")
+                return False
+
+            m_dt = datetime.fromisoformat(manifest_time_str.replace("Z", "+00:00"))
+            if m_dt <= t_freeze_dt:
+                self.block("DATA_MANIFEST", f"Temporal ordering violation: data_manifest.json retrieved_at_utc ({m_dt.isoformat()}) <= T_freeze ({t_freeze_dt.isoformat()})")
+                return False
 
             reqs = m.get("requests", {})
+            if not reqs:
+                self.block("DATA_MANIFEST", "Zero requests recorded in data_manifest.json")
+                return False
+
+            # K-2: Verify per-entry timestamps, sha256 digests, and integer status_codes
             for req_key, req_val in reqs.items():
+                entry_time_str = req_val.get("retrieved_at_utc")
+                if entry_time_str:
+                    e_dt = datetime.fromisoformat(entry_time_str.replace("Z", "+00:00"))
+                    if e_dt <= t_freeze_dt:
+                        self.block("DATA_MANIFEST", f"Temporal ordering violation for {req_key}: {e_dt.isoformat()} <= T_freeze ({t_freeze_dt.isoformat()})")
+                        return False
+
                 sha = req_val.get("response_sha256")
                 status = req_val.get("status_code")
                 if not sha or len(sha) != 64 or not all(c in "0123456789abcdefABCDEF" for c in sha):
@@ -468,8 +503,67 @@ class P10StateGuard:
     def _eval_pg9(self, pinfo: dict) -> bool:
         return self._eval_human_phase("PG9", pinfo)
 
+    def _verify_crypto_signature(self, commit_sha: str, allowed_signers_path: str, keys_asc_path: str) -> bool:
+        """
+        K-3: Verifies that commit_sha carries a valid cryptographic signature specifically
+        belonging to a key / principal in the specified registry files (not arbitrary keyring keys).
+        """
+        # 1. Try OpenPGP
+        if keys_asc_path and os.path.exists(keys_asc_path):
+            try:
+                # Extract allowed fingerprints from keys_asc
+                res = subprocess.run(["gpg", "--with-colons", "--show-keys", keys_asc_path], capture_output=True, text=True)
+                allowed_fprs = set()
+                for line in res.stdout.splitlines():
+                    parts = line.split(":")
+                    if len(parts) > 9 and parts[0] == "fpr":
+                        allowed_fprs.add(parts[9].strip().upper())
+
+                if allowed_fprs:
+                    with tempfile.TemporaryDirectory() as gnupg_home:
+                        env = os.environ.copy()
+                        env["GNUPGHOME"] = gnupg_home
+                        subprocess.run(["gpg", "--import", keys_asc_path], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        verify_out = subprocess.check_output(
+                            ["git", "verify-commit", "--raw", commit_sha],
+                            cwd=REPO_ROOT, env=env, stderr=subprocess.STDOUT, text=True
+                        )
+                        # Extract VALIDSIG <fingerprint>
+                        validsigs = re.findall(r"\[GNUPG:\]\s+VALIDSIG\s+([0-9A-Fa-f]+)", verify_out)
+                        for vs in validsigs:
+                            if vs.upper() in allowed_fprs:
+                                log_diag(f"  Verified OpenPGP signature for {commit_sha} by fingerprint {vs.upper()}")
+                                return True
+            except Exception as e:
+                log_diag(f"OpenPGP verification error for {commit_sha}: {e}")
+
+        # 2. Try SSH Signature
+        if allowed_signers_path and os.path.exists(allowed_signers_path):
+            try:
+                verify_ssh = subprocess.run(
+                    ["git", "-c", f"gpg.ssh.allowedSignersFile={allowed_signers_path}", "-c", "gpg.format=ssh", "verify-commit", commit_sha],
+                    cwd=REPO_ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+                if verify_ssh.returncode == 0:
+                    # Parse principal from allowed_signers
+                    allowed_principals = []
+                    for line in open(allowed_signers_path):
+                        line = line.strip()
+                        if line and not line.startswith("#"):
+                            allowed_principals.append(line.split()[0])
+
+                    stderr = verify_ssh.stderr
+                    if "Good \"git\" signature" in stderr:
+                        for princ in allowed_principals:
+                            if f"Good \"git\" signature for {princ}" in stderr:
+                                log_diag(f"  Verified SSH signature for {commit_sha} by principal {princ}")
+                                return True
+            except Exception as e:
+                log_diag(f"SSH verification error for {commit_sha}: {e}")
+
+        return False
+
     def _eval_human_phase(self, phase: str, pinfo: dict) -> bool:
-        # J-4 Fix: Cryptographic Signature & Recursion Verification H1–H7
         evidence = pinfo.get("evidence", {})
         commit_sha = evidence.get("decision_commit")
         artifact = evidence.get("decision_artifact", "PG_LOG.md")
@@ -510,45 +604,51 @@ class P10StateGuard:
             self.block(phase, "HUMAN_KEYS registry not initialized in governance/HUMAN_KEYS/")
             return False
 
-        sig_verified = False
-        # Try OpenPGP verification
-        if os.path.exists(keys_asc):
-            try:
-                subprocess.run(["gpg", "--import", keys_asc], cwd=REPO_ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                verify_out = subprocess.check_output(["git", "verify-commit", "--raw", commit_sha], cwd=REPO_ROOT, stderr=subprocess.STDOUT, text=True)
-                if "GOODSIG" in verify_out or "VALIDSIG" in verify_out:
-                    sig_verified = True
-            except Exception:
-                pass
-
-        # Try SSH signature verification
-        if not sig_verified and os.path.exists(allowed_signers):
-            try:
-                verify_ssh = subprocess.run(
-                    ["git", "-c", f"gpg.ssh.allowedSignersFile={allowed_signers}", "-c", "gpg.format=ssh", "verify-commit", commit_sha],
-                    cwd=REPO_ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-                )
-                if verify_ssh.returncode == 0 and "Good" in verify_ssh.stderr:
-                    sig_verified = True
-            except Exception:
-                pass
-
-        if not sig_verified:
-            self.block(phase, f"Commit {commit_sha} does not carry a valid cryptographic signature from HUMAN_KEYS registry")
+        if not self._verify_crypto_signature(commit_sha, allowed_signers, keys_asc):
+            self.block(phase, f"Commit {commit_sha} does not carry a verified cryptographic signature matching a key in HUMAN_KEYS registry")
             return False
 
-        # §3.1 Recursion check: If commit modified governance/HUMAN_KEYS/, verify signer against parent commit registry
+        # K-4 Fix: §3.1 Recursion check: If commit modified governance/HUMAN_KEYS/, verify signer against parent commit registry
         if any(f.strip().startswith("governance/HUMAN_KEYS/") for f in files_changed):
-            log_diag(f"Commit {commit_sha} modified HUMAN_KEYS. Applying §3.1 recursion verification against parent commit...")
-            try:
-                parent_allowed = subprocess.check_output(
-                    ["git", "show", f"{commit_sha}~1:governance/HUMAN_KEYS/allowed_signers"],
-                    cwd=REPO_ROOT
+            log_diag(f"Commit {commit_sha} modified HUMAN_KEYS. Applying §3.1 recursion verification against parent commit {commit_sha}~1...")
+            with tempfile.TemporaryDirectory() as tmpdir:
+                parent_allowed = os.path.join(tmpdir, "allowed_signers")
+                parent_keys = os.path.join(tmpdir, "keys.asc")
+                has_parent_registry = False
+
+                try:
+                    p_allowed_content = subprocess.check_output(
+                        ["git", "show", f"{commit_sha}~1:governance/HUMAN_KEYS/allowed_signers"],
+                        cwd=REPO_ROOT, stderr=subprocess.DEVNULL
+                    )
+                    open(parent_allowed, "wb").write(p_allowed_content)
+                    has_parent_registry = True
+                except Exception:
+                    pass
+
+                try:
+                    p_keys_content = subprocess.check_output(
+                        ["git", "show", f"{commit_sha}~1:governance/HUMAN_KEYS/keys.asc"],
+                        cwd=REPO_ROOT, stderr=subprocess.DEVNULL
+                    )
+                    open(parent_keys, "wb").write(p_keys_content)
+                    has_parent_registry = True
+                except Exception:
+                    pass
+
+                if not has_parent_registry:
+                    self.block(phase, f"§3.1 Recursion violation: commit {commit_sha} modified HUMAN_KEYS but parent commit {commit_sha}~1 has no HUMAN_KEYS registry")
+                    return False
+
+                parent_sig_ok = self._verify_crypto_signature(
+                    commit_sha,
+                    parent_allowed if os.path.exists(parent_allowed) else None,
+                    parent_keys if os.path.exists(parent_keys) else None
                 )
-                # Recursion must hold
-            except Exception as e:
-                self.block(phase, f"§3.1 Recursion check failed: could not verify signature against parent commit registry: {e}")
-                return False
+                if not parent_sig_ok:
+                    self.block(phase, f"§3.1 Recursion failed: commit {commit_sha} modifying HUMAN_KEYS was NOT signed by a key in parent commit's registry")
+                    return False
+                log_diag("  §3.1 Recursion check passed against parent registry.")
 
         # H7: Verify commit message carries token
         try:
