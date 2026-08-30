@@ -1,6 +1,6 @@
 # PRE-REGISTRATION — Energinet cross-source check for Note #003
 Status: FROZEN / PRE-DATA
-Frozen at: 1f286c632f7d7c9763f280c2f16a44ebdff61c00
+Frozen: see git log for this file (freeze point is the commit introducing this document before data acquisition)
 
 ## 0. Licence (L0)
 
