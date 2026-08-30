@@ -1,0 +1,12 @@
+{
+  "instance": "energinet-residual-gaps-probe",
+  "target_set_sha256": "df9b1353154164b95501f4b919becbb1f682aa4514181848098437ac4dafe634",
+  "total_lookups": 11,
+  "counts": {
+    "CONFIRMED": 11,
+    "NOT_CONFIRMED": 0,
+    "NULL_VALUED": 0,
+    "UNRESOLVED": 0
+  },
+  "verdict_ratio": "11/11 CONFIRMED"
+}
