@@ -63,17 +63,22 @@ for date_key, date_info in DATES.items():
         
         content = None
         status_code = None
-        for attempt in range(5):
+        for attempt in range(8):
             try:
-                r = requests.get("https://web-api.tp.entsoe.eu/api", params=params, timeout=30)
+                r = requests.get(
+                    "https://web-api.tp.entsoe.eu/api",
+                    params=params,
+                    headers={"Connection": "close"},
+                    timeout=45
+                )
                 status_code = r.status_code
                 if r.status_code == 200:
                     content = r.content
                     break
                 else:
-                    time.sleep(2.0 * (attempt + 1))
+                    time.sleep(2.0 + 1.5 * attempt)
             except Exception:
-                time.sleep(2.0 * (attempt + 1))
+                time.sleep(2.0 + 1.5 * attempt)
                 
         if content is None:
             raise RuntimeError(f"Failed to fetch data for {zone} ({date_key}) after retries. Last status: {status_code}")
@@ -121,13 +126,11 @@ for date_key, df_day in all_data.items():
     csv_path = os.path.join(DATA_DIR, f"prices_{date_key}.csv")
     df_day.to_csv(csv_path)
 
-# Evaluate Hypotheses
-results = {
-    "instance": "instances/fr-be-de-eclipse-coupling-probe",
-    "preregistration_commit": "e8d267c",
-    "status": "SPREMNO ZA GEJT",
-    "dates_evaluated": {}
-}
+# Evaluate Hypotheses & Target Set
+all_lookups = []
+date_results = {}
+total_coupled = 0
+total_diverged = 0
 
 for date_key, df_day in all_data.items():
     date_label = DATES[date_key]["date_label"]
@@ -181,16 +184,30 @@ for date_key, df_day in all_data.items():
     df_evening["max_divergence"] = df_evening[["diff_FR_BE", "diff_FR_DE", "diff_BE_DE"]].max(axis=1)
     df_evening["verdict"] = df_evening["max_divergence"].apply(lambda x: "COUPLED_EXACT" if x <= 0.01 else "DIVERGED")
     
-    coupled_count = (df_evening["verdict"] == "COUPLED_EXACT").sum()
-    diverged_count = (df_evening["verdict"] == "DIVERGED").sum()
+    coupled_count = int((df_evening["verdict"] == "COUPLED_EXACT").sum())
+    diverged_count = int((df_evening["verdict"] == "DIVERGED").sum())
     total_evening = len(df_evening)
+    total_coupled += coupled_count
+    total_diverged += diverged_count
     
     print(f"\n[Evening Coupling (18:00 - 22:00 CEST, {total_evening} MTUs)]", flush=True)
     print(df_evening[["CEST", "FR", "BE", "DE_LU", "max_divergence", "verdict"]].to_string(index=False))
     print(f"\n  Coupled MTUs (diff <= 0.01): {coupled_count} / {total_evening}", flush=True)
     print(f"  Diverged MTUs (diff > 0.01):  {diverged_count} / {total_evening}", flush=True)
     
-    results["dates_evaluated"][date_key] = {
+    for idx_row, row in df_evening.iterrows():
+        all_lookups.append({
+            "date": date_key,
+            "timestamp_utc": str(idx_row),
+            "time_cest": str(row["CEST"]),
+            "price_FR": float(row["FR"]),
+            "price_BE": float(row["BE"]),
+            "price_DE_LU": float(row["DE_LU"]),
+            "max_divergence_eur_mwh": float(row["max_divergence"]),
+            "verdict": str(row["verdict"])
+        })
+        
+    date_results[date_key] = {
         "date_label": date_label,
         "record_count": len(df_day),
         "resolution": str(res_mode),
@@ -207,8 +224,28 @@ for date_key, df_day in all_data.items():
         "evening_coupling_summary": f"COUPLED_EXACT: {coupled_count}/{total_evening}, DIVERGED: {diverged_count}/{total_evening}"
     }
 
+# Save per-lookup CSV
+df_lookups = pd.DataFrame(all_lookups)
+df_lookups.to_csv(os.path.join(DATA_DIR, "coupling_lookups.csv"), index=False)
+
 # Save results.json
+results = {
+    "instance": "instances/fr-be-de-eclipse-coupling-probe",
+    "preregistration_commit": "e8d267c",
+    "status": "SPREMNO ZA GEJT",
+    "target_set": {
+        "total_retrieved_points": 576,
+        "total_lookups": len(all_lookups),
+        "counts": {
+            "COUPLED_EXACT": total_coupled,
+            "DIVERGED": total_diverged
+        },
+        "verdict_ratio": f"{total_coupled}/{len(all_lookups)} COUPLED_EXACT, {total_diverged}/{len(all_lookups)} DIVERGED"
+    },
+    "dates_evaluated": date_results
+}
+
 with open(os.path.join(INSTANCE_DIR, "results.json"), "w") as f:
     json.dump(results, f, indent=2)
 
-print(f"\nAudit complete. Artifacts saved in {INSTANCE_DIR}", flush=True)
+print("\nAudit complete. Artifacts saved in instances/fr-be-de-eclipse-coupling-probe", flush=True)

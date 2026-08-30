@@ -2,6 +2,15 @@
   "instance": "instances/fr-be-de-eclipse-coupling-probe",
   "preregistration_commit": "e8d267c",
   "status": "SPREMNO ZA GEJT",
+  "target_set": {
+    "total_retrieved_points": 576,
+    "total_lookups": 32,
+    "counts": {
+      "COUPLED_EXACT": 22,
+      "DIVERGED": 10
+    },
+    "verdict_ratio": "22/32 COUPLED_EXACT, 10/32 DIVERGED"
+  },
   "dates_evaluated": {
     "Date_A_2026-08-12": {
       "date_label": "2026-08-12 (Wednesday - Eclipse Day)",
