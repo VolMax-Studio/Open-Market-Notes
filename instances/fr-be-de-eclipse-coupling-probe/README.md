@@ -45,20 +45,27 @@ This instance evaluates public market claims regarding European Day-Ahead electr
 
 ---
 
-## 3. Data Manifest & Raw Response Checksums
+## 3. Data Governance & Artifact Tracking Decisions
 
-| Target Window | Zone | Records | SHA-256 Checksum of Raw API Response |
-| :--- | :---: | :---: | :--- |
-| `Date_A_2026-08-12` | `FR` | 96 | `34d7b76b6ed872539aa9bbedcf65ccf352c11f283e911759d6f952ba586addce` |
-| `Date_A_2026-08-12` | `BE` | 96 | `3872c3b24a6ee9d6afb59550c32b00882968480ef89e91a8e1d578f6f01f6c9e` |
-| `Date_A_2026-08-12` | `DE_LU` | 96 | `d22d0887ac1d6ef779b6d50e061ffc622ae48b81296c98c74fd85dff7d9a0f57` |
-| `Date_B_2026-08-13` | `FR` | 96 | `a5676c9a665b68d296d033c85364211bf7a645d81c5ea3a464cb60871be6f9bb` |
-| `Date_B_2026-08-13` | `BE` | 96 | `2b0aae784318623df46ecdc6cf7b30334eb7bf5199d95aebdf5c8cef6e60a662` |
-| `Date_B_2026-08-13` | `DE_LU` | 96 | `7fa632423d091a5dd8384dea8234c57f33906f9657f5d6eb8c39eb858dc71a74` |
+- **Derived Audit Table:** `data/coupling_lookups.csv` is an evaluated, derived 32-row tabular dataset under CC BY 4.0 (attribution: "Source: ENTSO-E Transparency Platform (transparency.entsoe.eu), under CC BY 4.0 license"). Because it is a structured audit evaluation artifact rather than raw bulky XML/telemetry payloads, it is tracked directly in git.
+- **Exploratory Network Calibration:** During runner resilience calibration for transient ENTSO-E 503/ReadTimeout responses, isolated requests were tested to establish request timeout bounds (fixed at 45s with explicit connection closure). All definitive telemetry is parsed and emitted strictly through `src/run_audit.py`.
 
 ---
 
-## 4. Deterministic Recreation Verification
+## 4. Data Manifest & Raw Response Checksums
+
+| Target Window | Zone | Records | SHA-256 Checksum of Raw API Response |
+| :--- | :---: | :---: | :--- |
+| `Date_A_2026-08-12` | `FR` | 96 | `514a06c93ff848356d4375f8d0796fb1120dddc1a0b920e6d37c56fee3dbbb52` |
+| `Date_A_2026-08-12` | `BE` | 96 | `c327e22e73bcb389a652a91e850e68d1f33f8593ab5bdca33afffd56dd6bcb15` |
+| `Date_A_2026-08-12` | `DE_LU` | 96 | `79ac02e5d7661693735c5fe22bbbe054a92eb65e991a27228e5d924ebe8bfa67` |
+| `Date_B_2026-08-13` | `FR` | 96 | `a7c93d856abacf08a004f657ebda8b98a4dd1f19e7f642611bae7aea0a53e820` |
+| `Date_B_2026-08-13` | `BE` | 96 | `3f97550d47098cb5f65bbfca405f6725a5def1479feb8f673e3ee21b9e8c039a` |
+| `Date_B_2026-08-13` | `DE_LU` | 96 | `dfaa09939de084af4bb369ab0044a5fbb09e122634f847d05cf3e89c10e6f0c4` |
+
+---
+
+## 5. Deterministic Recreation Verification
 
 ```bash
 mv instances/fr-be-de-eclipse-coupling-probe/results.json instances/fr-be-de-eclipse-coupling-probe/results.json.bak
