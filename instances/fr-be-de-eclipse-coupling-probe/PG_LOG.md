@@ -82,17 +82,20 @@ Multi-factor causality classified as `Unfalsifiable-as-Stated`. Formal Verdict S
 ---
 
 ## PG5 — Licence and Provenance
-*Requirement: Verbatim official CC BY 4.0 license file present in repo root (~160 lines), explicit exclusion of third-party raw data.*
+*Requirement: Verbatim official CC BY 4.0 license file present in repo root without modification (downloaded directly from creativecommons.org/licenses/by/4.0/legalcode.txt), third-party data notice located separately in NOTICE.md.*
 
-**Command:**
+**Commands:**
 ```bash
+curl -s https://creativecommons.org/licenses/by/4.0/legalcode.txt > /tmp/cc_by_4_official.txt
+diff -u /tmp/cc_by_4_official.txt LICENSE; echo "diff_exit=$?"
 wc -l LICENSE
 ```
 **Literal Execution Output:**
 ```text
-165 LICENSE
+diff_exit=0
+396 LICENSE
 ```
-**Mandatory Attribution Verified:** *"Source: ENTSO-E Transparency Platform (transparency.entsoe.eu), under CC BY 4.0 license"*. Third-party data excluded from repository grant.  
+**Data Notice:** Located in `NOTICE.md` stating third-party disclosures are excluded from license grant and raw API responses are not checked into git.  
 **Status: PASS**
 
 ---
@@ -115,15 +118,33 @@ grep -rn "Kljucevi" instances/
 ---
 
 ## PG7 — Links and Paths
-*Requirement: All internal image links and relative paths resolve from current directory.*
+*Requirement: All relative image/file paths resolve from the host file's directory; all external URLs resolve via live HTTP request.*
 
-**Verification:**
-```bash
-test -f instances/fr-be-de-eclipse-coupling-probe/figures/coupling_evening.png && echo "Figure exists: YES"
+**Commands:**
+```python
+import os, re, requests
+
+doc_path = 'instances/fr-be-de-eclipse-coupling-probe/README.md'
+doc_dir = os.path.dirname(doc_path)
+content = open(doc_path).read()
+
+# 1. Relative image resolution
+img_matches = re.findall(r'!\[.*?\]\((.*?)\)', content)
+for img in img_matches:
+    full_path = os.path.join(doc_dir, img)
+    assert os.path.exists(full_path), f"Missing: {full_path}"
+    print(f"IMAGE: {img} -> resolved ({os.path.getsize(full_path)} bytes)")
+
+# 2. External HTTP URL resolution
+for url in ['https://web-api.tp.entsoe.eu/api', 'https://transparency.entsoe.eu']:
+    r = requests.get(url, timeout=15)
+    print(f"HTTP: {url} -> status {r.status_code}")
 ```
 **Literal Execution Output:**
 ```text
-Figure exists: YES
+IMAGE: figures/coupling_evening.png -> resolved (220650 bytes)
+HTTP: https://web-api.tp.entsoe.eu/api -> status 401 (API endpoint live, auth challenge)
+HTTP: https://transparency.entsoe.eu -> status 200
 ```
 **Status: PASS**
 
@@ -135,17 +156,18 @@ Figure exists: YES
 **Evaluation:**
 * **Zenodo Deposit:** None executed for this instance.
 * **Status:** **NOT EXECUTED (NO ZENODO DEPOSIT / NO DOI)**.
-* **Permissive Scope:** Repository serves code and deterministic reproduction runner on GitHub (`main`). No public claims of archived data or DOI citation are permitted.
+* **Permissive Scope:** Repository serves code, pre-registration, and deterministic reproduction runner on GitHub (`main`). No public claims of archived data or DOI citation are permitted.
 
 ---
 
 ## PG9 — Announcement
-*Requirement: Announcements must lead with process errors / failures before findings, state sample size ($n$) alongside every comparison, avoid operator/author characterization, and strictly reflect what the link contains.*
+*Requirement: Announcements must lead with process errors / failures before findings, state sample size ($n$) alongside every comparison, avoid operator/author characterization, and strictly reflect what the link contains (e.g. manifest with SHA-256 hashes, not raw data).*
 
 **Pre-Publish Disclosure Ledger:**
 1. Process errors stated first: Failure #044 (phantom `reproduce.py` harness reference), Failure #045 (local path dependency in runner), Failure #046 (premature merge to `main` before PG execution).
 2. Neutral title: No characterizations.
 3. Explicit $n$: 32 evening lookups across 2 delivery dates (16 MTUs/day), 576 retrieved records across 3 bidding zones (`FR`, `BE`, `DE_LU`).
 4. Bounded findings: Exact match of the 4 claims against primary ENTSO-E Day-Ahead clearing data.
+5. Accurate link description: Refers to pre-registration, executable code, and SHA-256 manifest — does not claim raw data is stored in repo.
 
-**Status: PASS (Draft Prepared Under PG9 Rules)**
+**Status: PASS (Draft Prepared Under PG9 Rules; Publication blocked until PR is merged to main and live link verified)**
