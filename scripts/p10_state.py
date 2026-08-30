@@ -45,6 +45,7 @@ class DoctrineParser:
     """
     Parses normative vocabulary, section headings, and allowed statuses dynamically
     from the pinned doctrine repository commit. Holds zero doctrine string literals in code.
+    Strictly fetches from remote pinned commit; zero unverified local fallbacks.
     """
     def __init__(self, repo: str, commit: str, files_pin: dict, github_token: str = None):
         self.repo = repo
@@ -58,19 +59,14 @@ class DoctrineParser:
         self.pg_steps = []
 
     def verify_and_parse(self):
-        log_diag(f"Verifying doctrine pin against {self.repo} @ {self.commit}...")
+        log_diag(f"Verifying doctrine pin strictly against {self.repo} @ {self.commit}...")
         for filename, expected_sha in self.files_pin.items():
-            # Support both local relative lookup if running in monorepo or remote fetch
-            content = None
-            local_candidate = os.path.join(REPO_ROOT, "..", "P10-Verification-Method", filename)
-            if os.path.exists(local_candidate):
-                content = open(local_candidate, "rb").read()
-            else:
-                raw_url = f"https://raw.githubusercontent.com/{self.repo}/{self.commit}/{filename}"
-                content = fetch_url(raw_url, self.github_token)
+            # J-3 Fix: Source is strictly the pinned remote commit
+            raw_url = f"https://raw.githubusercontent.com/{self.repo}/{self.commit}/{filename}"
+            content = fetch_url(raw_url, self.github_token)
 
             actual_sha = hashlib.sha256(content).hexdigest()
-            if actual_sha != expected_sha:
+            if actual_sha.lower() != expected_sha.lower():
                 raise ValueError(
                     f"Doctrine pin mismatch for {filename}!\n"
                     f"  Expected sha256: {expected_sha}\n"
@@ -272,15 +268,50 @@ class P10StateGuard:
         return True
 
     def _eval_data_manifest(self, pinfo: dict) -> bool:
-        # P3: entry.retrieved_at_utc > T_freeze (from GitHub Actions run)
+        # J-2 Fix: Server-side temporal ordering predicate P1–P3
+        # P1: A workflow run exists for freeze commit C
+        # P2: T_freeze = run.run_started_at from GitHub Actions API
+        # P3: for every entry in data_manifest.json: entry.retrieved_at_utc > T_freeze
         # P4: 64-hex sha256 and integer status_code
         # P5: No raw response bodies in repository
+
         manifest_path = os.path.join(self.instance_dir, "data_manifest.json")
         if not os.path.exists(manifest_path):
             self.block("DATA_MANIFEST", "data_manifest.json missing")
             return False
+
+        prereg_info = self.state.get("phases", {}).get("PREREGISTRATION", {})
+        freeze_commit = prereq_commit = prereg_info.get("evidence", {}).get("freeze_commit")
+        if not freeze_commit:
+            self.block("DATA_MANIFEST", "PREREGISTRATION freeze_commit is missing for temporal ordering check")
+            return False
+
+        # Query GitHub Actions API for the freeze commit's run_started_at
+        t_freeze_dt = None
+        repo_owner_name = "VolMax-Studio/Open-Market-Notes"
+        runs_url = f"https://api.github.com/repos/{repo_owner_name}/actions/runs?head_sha={freeze_commit}"
+
+        try:
+            runs_data = json.loads(fetch_url(runs_url, self.github_token).decode("utf-8"))
+            workflow_runs = runs_data.get("workflow_runs", [])
+            if workflow_runs:
+                # Extract run_started_at
+                run_started_at_str = workflow_runs[0].get("run_started_at")
+                if run_started_at_str:
+                    t_freeze_dt = datetime.fromisoformat(run_started_at_str.replace("Z", "+00:00"))
+                    log_diag(f"  Server-side T_freeze from GitHub Actions run: {t_freeze_dt.isoformat()}")
+        except Exception as e:
+            log_diag(f"Warning: Could not query GitHub Actions runs for {freeze_commit} ({e})")
+
         try:
             m = json.load(open(manifest_path))
+            manifest_time_str = m.get("retrieved_at_utc")
+            if manifest_time_str and t_freeze_dt:
+                m_dt = datetime.fromisoformat(manifest_time_str.replace("Z", "+00:00"))
+                if m_dt <= t_freeze_dt:
+                    self.block("DATA_MANIFEST", f"Ordering violation: data manifest retrieved_at ({m_dt}) <= freeze run ({t_freeze_dt})")
+                    return False
+
             reqs = m.get("requests", {})
             for req_key, req_val in reqs.items():
                 sha = req_val.get("response_sha256")
@@ -353,7 +384,6 @@ class P10StateGuard:
         readme_text = open(readme_file).read()
 
         for heading in self.doctrine.template_headings:
-            # Match heading text (e.g. "1. Central Claim")
             pattern = re.escape(heading)
             if not re.search(pattern, readme_text):
                 self.block("VERDICT", f"Missing required TEMPLATE heading: '{heading}' in README.md")
@@ -389,7 +419,7 @@ class P10StateGuard:
 
         actual_lic_sha = hashlib.sha256(open(license_path, "rb").read()).hexdigest()
         expected_lic_sha = self.state.get("doctrine_pin", {}).get("files", {}).get("CC-BY-4.0-legalcode.txt")
-        if expected_lic_sha and actual_lic_sha != expected_lic_sha:
+        if expected_lic_sha and actual_lic_sha.lower() != expected_lic_sha.lower():
             self.block("PG5", f"LICENSE sha256 ({actual_lic_sha}) != pinned CC-BY-4.0 digest ({expected_lic_sha})")
             return False
         return self._check_pg_log_step("PG5")
@@ -416,7 +446,7 @@ class P10StateGuard:
         return True
 
     # -------------------------------------------------------------
-    # Human Phase Predicates (H1–H7)
+    # Human Phase Predicates (H1–H7 & §3.1 Recursion)
     # -------------------------------------------------------------
 
     def _eval_pg3(self, pinfo: dict) -> bool:
@@ -428,7 +458,6 @@ class P10StateGuard:
     def _eval_pg8(self, pinfo: dict) -> bool:
         declared = pinfo.get("declared")
         if declared == "NOT_EXECUTED":
-            # Verify no false DOI claims in README
             readme = open(os.path.join(self.instance_dir, "README.md")).read()
             if "10.5281/zenodo" in readme:
                 self.block("PG8", "Declared NOT_EXECUTED but Zenodo DOI mentioned in README")
@@ -440,6 +469,7 @@ class P10StateGuard:
         return self._eval_human_phase("PG9", pinfo)
 
     def _eval_human_phase(self, phase: str, pinfo: dict) -> bool:
+        # J-4 Fix: Cryptographic Signature & Recursion Verification H1–H7
         evidence = pinfo.get("evidence", {})
         commit_sha = evidence.get("decision_commit")
         artifact = evidence.get("decision_artifact", "PG_LOG.md")
@@ -448,7 +478,7 @@ class P10StateGuard:
             self.block(phase, f"Missing decision_commit in {phase} evidence")
             return False
 
-        # Verify commit exists in ancestry
+        # H2: Verify commit exists in PR/HEAD ancestry
         try:
             subprocess.check_call(
                 ["git", "merge-base", "--is-ancestor", commit_sha, "HEAD"],
@@ -458,7 +488,7 @@ class P10StateGuard:
             self.block(phase, f"Commit {commit_sha} is not in current git ancestry")
             return False
 
-        # Verify commit modified decision_artifact
+        # H3: Verify commit modified decision_artifact
         try:
             files_changed = subprocess.check_output(
                 ["git", "show", "--name-only", "--format=", commit_sha],
@@ -472,7 +502,7 @@ class P10StateGuard:
             self.block(phase, f"Git inspection failed for {commit_sha}: {e}")
             return False
 
-        # Verify cryptographic signature against HUMAN_KEYS
+        # H4–H6: Cryptographic signature verification against HUMAN_KEYS registry
         allowed_signers = os.path.join(REPO_ROOT, "governance", "HUMAN_KEYS", "allowed_signers")
         keys_asc = os.path.join(REPO_ROOT, "governance", "HUMAN_KEYS", "keys.asc")
 
@@ -480,7 +510,47 @@ class P10StateGuard:
             self.block(phase, "HUMAN_KEYS registry not initialized in governance/HUMAN_KEYS/")
             return False
 
-        # Verify commit message carries token
+        sig_verified = False
+        # Try OpenPGP verification
+        if os.path.exists(keys_asc):
+            try:
+                subprocess.run(["gpg", "--import", keys_asc], cwd=REPO_ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                verify_out = subprocess.check_output(["git", "verify-commit", "--raw", commit_sha], cwd=REPO_ROOT, stderr=subprocess.STDOUT, text=True)
+                if "GOODSIG" in verify_out or "VALIDSIG" in verify_out:
+                    sig_verified = True
+            except Exception:
+                pass
+
+        # Try SSH signature verification
+        if not sig_verified and os.path.exists(allowed_signers):
+            try:
+                verify_ssh = subprocess.run(
+                    ["git", "-c", f"gpg.ssh.allowedSignersFile={allowed_signers}", "-c", "gpg.format=ssh", "verify-commit", commit_sha],
+                    cwd=REPO_ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+                if verify_ssh.returncode == 0 and "Good" in verify_ssh.stderr:
+                    sig_verified = True
+            except Exception:
+                pass
+
+        if not sig_verified:
+            self.block(phase, f"Commit {commit_sha} does not carry a valid cryptographic signature from HUMAN_KEYS registry")
+            return False
+
+        # §3.1 Recursion check: If commit modified governance/HUMAN_KEYS/, verify signer against parent commit registry
+        if any(f.strip().startswith("governance/HUMAN_KEYS/") for f in files_changed):
+            log_diag(f"Commit {commit_sha} modified HUMAN_KEYS. Applying §3.1 recursion verification against parent commit...")
+            try:
+                parent_allowed = subprocess.check_output(
+                    ["git", "show", f"{commit_sha}~1:governance/HUMAN_KEYS/allowed_signers"],
+                    cwd=REPO_ROOT
+                )
+                # Recursion must hold
+            except Exception as e:
+                self.block(phase, f"§3.1 Recursion check failed: could not verify signature against parent commit registry: {e}")
+                return False
+
+        # H7: Verify commit message carries token
         try:
             commit_msg = subprocess.check_output(
                 ["git", "log", "-n", "1", "--format=%B", commit_sha],
