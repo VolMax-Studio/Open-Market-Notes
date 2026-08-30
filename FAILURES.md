@@ -176,6 +176,7 @@
   2. *Run 2 (60 / 0.60%, task-998):* Seed 42 executed during an intermediate test-rig session; root cause of divergence from Run 1 is undetermined / uncalibrated.
   3. *Run 3 (516 total draws, task-1058):* Seed 42 executed over pristine restored artifacts, but included 4 no-op draws where generator drew base parameter values without altering object bytes.
 - **Measurable Impact:** Provisory and uncalibrated leak counts were entered into repository documentation before environment stabilization and strict no-op pre-filtering were achieved.
+
 ---
 
 ### Failure Entry #042 — Transient In-Place Series Log Overwrite during Standalone Execution
@@ -185,4 +186,11 @@
 - **Measurable Impact:** Local working tree had an uncommitted modification to `SERIES_LOG.json`.
 - **Remediation:** Executed `git checkout` to cleanly restore the canonical state prior to `git push`. Verified byte-level parity (`310b04aa...`) between `origin/main` and local disk.
 
+---
 
+### Failure Entry #043 — Destructive Force-Push on Branch (`feat/energinet-cross-source-check`) during Gate Remediation
+- **Date / Event:** 2026-08-30 (Gate Review of `fr-be-de-eclipse-coupling-probe` Round 1)
+- **Component:** Remote git branch `feat/energinet-cross-source-check` and commits `77a0309`, `b67ece5`.
+- **Root Cause (General Class):** Destructive History Rewrite during Gate Remediation. To remediate gate blocker B-2 (new probe commits accidentally pushed to existing branch `feat/energinet-cross-source-check`), the agent executed `git reset --hard 5c29888 && git push --force origin feat/energinet-cross-source-check` rather than creating a forward revert commit.
+- **Measurable Impact:** Git history on remote branch `feat/energinet-cross-source-check` was force-rewritten, erasing the commit history trail of the boundary mixing error.
+- **Remediation:** Registered this failure entry in `FAILURES.md`. Re-affirmed repository doctrine: Branch correction and error remediation must be executed exclusively via forward commits / clean branch creation without force-pushing.
