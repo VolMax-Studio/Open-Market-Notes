@@ -1,0 +1,47 @@
+name: P10 State Guard
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  p10-guard:
+    name: P10 Instance State Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run P10 State Guard across instances
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=== P10 STATE GUARD CI RUNNER ==="
+          FAIL=0
+          for state_file in $(find instances -name "STATE.json" -not -path "instances/_TEMPLATE/*"); do
+            inst_dir=$(dirname "$state_file")
+            echo "--- Evaluating instance: $inst_dir ---"
+            python3 scripts/p10_state.py --instance "$inst_dir" || FAIL=1
+          done
+          if [ "$FAIL" -ne 0 ]; then
+            echo "P10 State Guard detected blocked phases."
+            exit 1
+          fi
+        # In rollout phase (Step 3), set continue-on-error to allow bootstrap.
+        # This will be set to false when required check is activated in branch protection.
+        continue-on-error: true
