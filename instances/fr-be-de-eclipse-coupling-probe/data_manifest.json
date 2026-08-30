@@ -1,0 +1,60 @@
+{
+  "retrieved_at_utc": "2026-08-30T13:30:32.735129+00:00",
+  "attribution": "Source: ENTSO-E Transparency Platform (transparency.entsoe.eu), under CC BY 4.0 license",
+  "requests": {
+    "Date_A_2026-08-12_FR": {
+      "zone": "FR",
+      "eic": "10YFR-RTE------C",
+      "start_utc": "2026-08-11 22:00:00+00:00",
+      "end_utc": "2026-08-12 22:00:00+00:00",
+      "response_bytes": 28636,
+      "response_sha256": "34d7b76b6ed872539aa9bbedcf65ccf352c11f283e911759d6f952ba586addce",
+      "status_code": 200
+    },
+    "Date_A_2026-08-12_BE": {
+      "zone": "BE",
+      "eic": "10YBE----------2",
+      "start_utc": "2026-08-11 22:00:00+00:00",
+      "end_utc": "2026-08-12 22:00:00+00:00",
+      "response_bytes": 28660,
+      "response_sha256": "3872c3b24a6ee9d6afb59550c32b00882968480ef89e91a8e1d578f6f01f6c9e",
+      "status_code": 200
+    },
+    "Date_A_2026-08-12_DE_LU": {
+      "zone": "DE_LU",
+      "eic": "10Y1001A1001A82H",
+      "start_utc": "2026-08-11 22:00:00+00:00",
+      "end_utc": "2026-08-12 22:00:00+00:00",
+      "response_bytes": 28899,
+      "response_sha256": "d22d0887ac1d6ef779b6d50e061ffc622ae48b81296c98c74fd85dff7d9a0f57",
+      "status_code": 200
+    },
+    "Date_B_2026-08-13_FR": {
+      "zone": "FR",
+      "eic": "10YFR-RTE------C",
+      "start_utc": "2026-08-12 22:00:00+00:00",
+      "end_utc": "2026-08-13 22:00:00+00:00",
+      "response_bytes": 28668,
+      "response_sha256": "a5676c9a665b68d296d033c85364211bf7a645d81c5ea3a464cb60871be6f9bb",
+      "status_code": 200
+    },
+    "Date_B_2026-08-13_BE": {
+      "zone": "BE",
+      "eic": "10YBE----------2",
+      "start_utc": "2026-08-12 22:00:00+00:00",
+      "end_utc": "2026-08-13 22:00:00+00:00",
+      "response_bytes": 28934,
+      "response_sha256": "2b0aae784318623df46ecdc6cf7b30334eb7bf5199d95aebdf5c8cef6e60a662",
+      "status_code": 200
+    },
+    "Date_B_2026-08-13_DE_LU": {
+      "zone": "DE_LU",
+      "eic": "10Y1001A1001A82H",
+      "start_utc": "2026-08-12 22:00:00+00:00",
+      "end_utc": "2026-08-13 22:00:00+00:00",
+      "response_bytes": 28376,
+      "response_sha256": "7fa632423d091a5dd8384dea8234c57f33906f9657f5d6eb8c39eb858dc71a74",
+      "status_code": 200
+    }
+  }
+}

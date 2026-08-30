@@ -1,0 +1,39 @@
+{
+  "instance": "instances/fr-be-de-eclipse-coupling-probe",
+  "preregistration_commit": "e8d267c",
+  "status": "SPREMNO ZA GEJT",
+  "dates_evaluated": {
+    "Date_A_2026-08-12": {
+      "date_label": "2026-08-12 (Wednesday - Eclipse Day)",
+      "record_count": 96,
+      "resolution": "0 days 00:15:00",
+      "max_15m_price_fr": 461.17,
+      "max_15m_time_cest": "2026-08-12 19:45:00+02:00",
+      "max_hourly_mean_price_fr": 300.0,
+      "max_hourly_mean_time_cest": "2026-08-12 19:00:00+02:00",
+      "hour_20_cest_mean_fr": 289.18,
+      "hypothesis_2_peak_338_86_verdict": "PEAK_NOT_CONFIRMED",
+      "hypothesis_3_spike_over_400_verdict": "SPIKE_CONFIRMED",
+      "evening_window_mtu_total": 16,
+      "evening_window_coupled_mtus": 10,
+      "evening_window_diverged_mtus": 6,
+      "evening_coupling_summary": "COUPLED_EXACT: 10/16, DIVERGED: 6/16"
+    },
+    "Date_B_2026-08-13": {
+      "date_label": "2026-08-13 (Thursday - Text Claim Day)",
+      "record_count": 96,
+      "resolution": "0 days 00:15:00",
+      "max_15m_price_fr": 487.38,
+      "max_15m_time_cest": "2026-08-13 19:45:00+02:00",
+      "max_hourly_mean_price_fr": 338.8625,
+      "max_hourly_mean_time_cest": "2026-08-13 20:00:00+02:00",
+      "hour_20_cest_mean_fr": 338.8625,
+      "hypothesis_2_peak_338_86_verdict": "PEAK_CONFIRMED",
+      "hypothesis_3_spike_over_400_verdict": "SPIKE_CONFIRMED",
+      "evening_window_mtu_total": 16,
+      "evening_window_coupled_mtus": 12,
+      "evening_window_diverged_mtus": 4,
+      "evening_coupling_summary": "COUPLED_EXACT: 12/16, DIVERGED: 4/16"
+    }
+  }
+}
