@@ -1,7 +1,7 @@
 {
   "instance": "instances/fr-be-de-eclipse-coupling-probe",
   "preregistration_commit": "e8d267c",
-  "status": "RATIFIED 2026-08-30",
+  "status": "CLOSED",
   "target_set": {
     "total_retrieved_points": 576,
     "total_lookups": 32,

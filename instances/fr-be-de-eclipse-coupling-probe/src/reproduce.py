@@ -10,7 +10,7 @@ import sys
 import hashlib
 import subprocess
 
-EXPECTED_RESULTS_SHA256 = "4e4c3b06b8116fd8d72f5a019f118c01a23d2eb8e3d1de6f0133bd5604040e63"
+EXPECTED_RESULTS_SHA256 = "0dbaa4bdbcc73df0abade280c0e9ba46e979fa56a605dc921f6704c115bb7227"
 EXPECTED_LOOKUPS_SHA256 = "8ccb9d803e74b202dc5856120c76a0d25d0e1543b132c9d69e98b5e752c7abfe"
 
 INSTANCE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,11 +23,9 @@ print("=== VOLMAX P10 DETERMINISTIC REPRODUCTION: FR/BE/DE ECLIPSE COUPLING PROB
 
 # Check API Token
 if not os.environ.get("ENTSOE_API_KEY"):
-    key_path = os.path.expanduser("~/Documents/Kljucevi/apientso.txt")
-    if not os.path.exists(key_path):
-        print("[ERROR] ENTSOE_API_KEY environment variable is not set.", file=sys.stderr)
-        print("Please export your API key before running reproduction:\n  export ENTSOE_API_KEY=\"<your-token>\"\n", file=sys.stderr)
-        sys.exit(1)
+    print("[ERROR] ENTSOE_API_KEY environment variable is not set.", file=sys.stderr)
+    print("Please export your API key before running reproduction:\n  export ENTSOE_API_KEY=\"<your-token>\"\n", file=sys.stderr)
+    sys.exit(1)
 
 # 1. Run Audit
 print("--- [1/2] Executing run_audit.py against ENTSO-E API ---")

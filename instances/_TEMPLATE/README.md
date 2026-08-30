@@ -1,7 +1,27 @@
 # Instance: <Instance Name>
 
-**Target Subject:** <Note / Claim / Issue Reference>  
-**Objective:** <Single-sentence operational question under test>
+> [!IMPORTANT]
+> **5-Point Verification Standard Compliance (P10 Protocol)**
+
+---
+
+## 1. Central Claim
+*<State the singular, falsifiable assertion. What does this artifact prove or measure?>*
+
+## 2. What Would Falsify It
+*<Define the exact quantitative or physical threshold that invalidates this claim.>*
+
+## 3. Limitations & Boundaries
+*<Document all structural, numerical, hardware, and physical assumptions (e.g., resolution floors, unobserved intervals, market rule boundaries)>.*
+
+## 4. Operational Status
+*Specify exact status: `CLOSED`, `COMPLETE & VERIFIED (PENDING RATIFICATION)`, or `PRE-REGISTERED`.*
+
+## 5. Provenance & Anchor
+* **Public Source / API / DOI:** <Link or DOI citation>
+* **Verification Method:** Verified live in browser / HTTP response check (not agent-only self-certification).
+* **Verification Timestamp:** YYYY-MM-DD
+* **Data License:** Clean open license (e.g., CC BY 4.0, OGL v3.0, MIT).
 
 ---
 
@@ -15,7 +35,7 @@ instances/<instance-name>/
 ├── results.json                    # Machine-readable aggregate verdicts
 ├── src/
 │   ├── run_audit.py                # In-instance acquisition & evaluation runner
-│   └── reproduce.py                # Single entry-point reproduction runner with hash check
+│   └── reproduce.py                # Single entry-point reproduction runner with hash assertions
 ├── figures/                        # Generated figures (strictly from audit CSV)
 │   └── .gitkeep
 └── data/
@@ -24,17 +44,7 @@ instances/<instance-name>/
 
 ---
 
-## 1. Legal and Mandatory Attribution (L0)
-
-* **Source:** <Source Name / Operator>
-* **Dataset:** <Dataset Name & ID>
-* **License:** <Clean Open License, e.g. CC BY 4.0>
-* **Mandatory Attribution:** *"<Verbatim Attribution String>"*
-* **Endpoint:** `<URL>`
-
----
-
-## 2. Methodology & Invariants
+## 6. Methodology & Invariants
 
 * **Target Set Derivation:** <Explicit rule and input provenance for target timestamps/lookups>
 * **Decision Rules:** Each lookup is evaluated across the closed partition:
@@ -48,7 +58,7 @@ instances/<instance-name>/
 
 ---
 
-## 3. Results
+## 7. Results
 
 ```json
 {
@@ -71,13 +81,13 @@ instances/<instance-name>/
 
 ---
 
-## 4. Deterministic Reproduction & Execution Trace
+## 8. Deterministic Reproduction & Execution Trace
 
 To independently reproduce all findings and verify byte-identical hash matching:
 
 ```bash
 pip install -r requirements.txt
-export API_TOKEN="<your-token>"
+export API_TOKEN="your-api-token-here"
 python3 src/reproduce.py
 ```
 
