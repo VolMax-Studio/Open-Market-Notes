@@ -1,7 +1,7 @@
 {
   "instance": "instances/fr-be-de-eclipse-coupling-probe",
   "preregistration_commit": "e8d267c",
-  "status": "SPREMNO ZA GEJT",
+  "status": "RATIFIED 2026-08-30",
   "target_set": {
     "total_retrieved_points": 576,
     "total_lookups": 32,
