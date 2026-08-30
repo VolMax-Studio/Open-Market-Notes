@@ -26,6 +26,17 @@ __pycache__/
 env/
 venv/
 .env
+.env.*
+*.env
+
+# Credentials and Security
+*token*
+*.key
+*.pem
+*.secret
+*credentials*
+keys/
+secrets/
 
 # OS specific files
 .DS_Store
