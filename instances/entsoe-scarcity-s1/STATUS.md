@@ -7,7 +7,7 @@ owner: Ivan
 research_lead: Sol
 gate: Claude
 ops: Ananke
-branch: instances/entsoe-scarcity-s2
+branch: null (historical)
 status_based_on_commit: null
 prereg_commit: null
 last_run_id: null

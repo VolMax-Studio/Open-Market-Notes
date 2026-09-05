@@ -30,10 +30,10 @@ The audit therefore does not test the complete earlier GB-versus-Europe narrativ
 
 ---
 
-## 2. Primary public source
+## 2. Primary public source & Request Contract
 
 Source system:
-`ENTSO-E Transparency Platform`.
+`ENTSO-E Transparency Platform Web API` (`https://web-api.tp.entsoe.eu/api`).
 
 Data class:
 `Imbalance prices`.
@@ -41,10 +41,10 @@ Data class:
 Regulatory / document identity:
 - TR art. 17.1.g / corresponding balancing publication;
 - `documentType = A85`;
-- realised process where applicable: `processType = A16`;
+- realised process: `processType = A16`;
 - raw ENTSO-E / IEC 62325 balancing-market documents (`Balancing_MarketDocument` XML).
 
-Target Area EICs:
+Target Area EICs (`ControlArea_Domain`):
 - AT: `10YAT-APG------L`
 - BE: `10YBE----------X`
 - DK-1: `10YDK-1--------W`
@@ -52,10 +52,33 @@ Target Area EICs:
 - FR: `10YFR-RTE------C`
 - NL: `10YNL----------L`
 
-The production API endpoint, query template, domain/EIC identifiers and document schema requirements are documented in `L0.md` (status: `PENDING`).
+### Request Plan (Exactly 12 Requests)
+The official acquisition executes exactly 12 HTTP GET requests (6 zones $\times$ 2 measurement windows):
+
+Query selector template:
+```text
+GET https://web-api.tp.entsoe.eu/api
+  ?documentType=A85
+  &ControlArea_Domain=<PINNED_EIC>
+  &periodStart=<YYYYMMDDHHMM UTC>
+  &periodEnd=<YYYYMMDDHHMM UTC>
+  &securityToken=<SECRET — NEVER COMMITTED>
+```
+
+For each zone:
+1. **Baseline Window (334 calendar days / 32,064 expected MTUs):**
+   - `periodStart=202507312200`
+   - `periodEnd=202606302200`
+2. **Target Window (31 calendar days / 2,976 expected MTUs):**
+   - `periodStart=202606302200`
+   - `periodEnd=202607312200`
+
+### Boundary & Chunking Invariants
+- **Zero Chunking:** No monthly partitioning. No adaptive date sub-window retry.
+- **Unsupported Request Rule:** If the baseline 334-day request is rejected because the API imposes a tighter A85 interval limit $\rightarrow$ `HALT: request contract unsupported`. A new preregistration version is required.
 
 No `entsoe-py` dataframe is an evidentiary source.  
-`entsoe-py` may later be evaluated as an implementation under test, but the authoritative input for this instance is the preserved raw response from the ENTSO-E source.
+The authoritative input for this instance is the preserved raw response payload from the ENTSO-E API.
 
 ---
 
@@ -64,34 +87,27 @@ No `entsoe-py` dataframe is an evidentiary source.
 ENTSO-E data may be revised after initial publication (e.g. intermediate values replaced by final values).  
 Therefore the identity of the input is:
 
-$$\text{source identity} + \text{exact request} + \text{acquisition batch timestamps} + \text{raw response bytes}$$
+$$\text{source identity} + \text{exact 12 requests} + \text{acquisition batch timestamps} + \text{raw response bytes}$$
 
 rather than merely:
 
 $$\text{zone} + \text{historical delivery period}$$
 
 ### Acquisition Batch & Vintage Timestamps
-Because querying six zones involves multiple HTTP requests, the vintage is defined as a **single frozen acquisition batch**:
+The vintage is defined as a **single frozen acquisition batch**:
 - $T_{\text{run\_start}}$: UTC timestamp recorded immediately before the first evidentiary ENTSO-E request of the official run.
-- $T_{\text{run\_end}}$: UTC timestamp recorded immediately after the final response is received.
+- $T_{\text{run\_end}}$: UTC timestamp recorded immediately after the 12th response is received.
 - For each request: request URL/parameters (credentials redacted), exact request timestamp $T_{\text{req}}$, response timestamp $T_{\text{resp}}$, HTTP status, and SHA-256 hash of the raw response payload.
 
 All timestamps and hashes must be written to `run_metadata.json` before any response is parsed or interpreted.  
 The raw responses captured in that batch become the immutable audit vintage.
 
-For every returned `MarketDocument`, preserve where supplied:
-- `mRID`;
-- `revisionNumber`;
-- `createdDateTime`;
-- publication/finality status;
-- schema namespace/version.
-
-No later ENTSO-E revision may silently replace that preserved artifact.  
-A later-source comparison is a new run / new vintage.
-
-### Important limitation
-This protocol does not assume that the public Web API provides arbitrary historical "as-of" reconstruction.  
-It establishes an auditor-side vintage by capturing and hashing the raw public responses within the registered acquisition batch.
+### Multi-Document & Revision Handling
+For every returned `MarketDocument`:
+- Inventory and preserve every XML document raw byte-for-byte.
+- Verify `documentType = A85` and `process.processType = A16`.
+- For repeated `mRID` document revisions, identify the numerically latest `revisionNumber` as the current-state document while preserving all received revisions in the inventory.
+- After source-defined revision handling, any remaining collision on the same registered UTC MTU is a duplicate and Target S fails. Zero analyst-discretion deduplication.
 
 ---
 
@@ -99,13 +115,14 @@ It establishes an auditor-side vintage by capturing and hashing the raw public r
 
 ### Baseline
 Local-market interval:
-`2025-08-01 00:00` inclusive through `2026-07-01 00:00` exclusive (11 calendar months / 334 calendar days).
+`2025-08-01 00:00` inclusive through `2026-07-01 00:00` exclusive (11 calendar months / 334 calendar days).  
+UTC equivalent: `2025-07-31 22:00:00Z` to `2026-06-30 22:00:00Z`.
 
 ### Target
 Local-market interval:
-`2026-07-01 00:00` inclusive through `2026-08-01 00:00` exclusive (31 calendar days).
+`2026-07-01 00:00` inclusive through `2026-08-01 00:00` exclusive (31 calendar days).  
+UTC equivalent: `2026-06-30 22:00:00Z` to `2026-07-31 22:00:00Z`.
 
-The six zones use the applicable CET/CEST civil-time regime for these boundaries.  
 All boundaries are converted exactly once to UTC before request construction.  
 All internal interval identities after acquisition are UTC instants.  
 No naive datetime is permitted.
@@ -312,7 +329,7 @@ at minimum:
 
 Additionally required:
 - exact request parameters with security credentials redacted;
-- raw HTTP response bodies;
+- raw HTTP response bodies (`evidence/runs/<RUN_ID>/raw/`);
 - response headers relevant to provenance;
 - raw XML document inventory;
 - parsed document metadata inventory;
@@ -326,7 +343,7 @@ Derived counts do not replace raw listings.
 ## 13. Freeze and execution order
 
 Required order:
-1. complete L0 source/schema/licence identification (status: `PENDING`);
+1. complete L0 source/schema/licence identification and 12-request contract;
 2. Claude pre-execution Gate review of draft specification;
 3. Sol addresses any gate findings;
 4. Ivan accepts specification;
@@ -352,6 +369,7 @@ HALT when any of the following occurs:
 - expected A85 document identity cannot be established;
 - requested period semantics are ambiguous;
 - timezone conversion is ambiguous;
+- API rejects 334-day or 31-day request (`HALT: request contract unsupported`);
 - quantile implementation cannot be executed via pinned `pandas.Series.quantile(0.90, interpolation='linear')`;
 - unexpected MTU resolution is present;
 - raw artifact is unavailable;

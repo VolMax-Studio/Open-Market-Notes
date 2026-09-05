@@ -5,7 +5,7 @@
 Project: entsoe-scarcity-s1
 Record type: Reconstructed terminal record (established 2026-09-05 to document the 2026-09-04 human ABORT decision)
 Repository: VolMax-Studio/Open-Market-Notes
-Branch: instances/entsoe-scarcity-s2
+Branch: null (historical)
 Current commit: null
 Preregistration commit: null
 Latest run ID: null
@@ -26,7 +26,7 @@ Published number/text: See preserved s1 materials.
 ## Evidence boundary
 
 Public artifacts: Preserve exactly as already recorded.
-Hashes / DOI / commit SHA: Preserve existing records.
+Hashes / DOI / commit SHA: Preserved in `instances/entsoe-scarcity-s1/inputs/MANIFEST.json`.
 Missing artifacts: Preserve existing records.
 Evidence owner: Preserve existing classification.
 Independence class: Preserve existing classification; do not upgrade.
@@ -54,7 +54,7 @@ Potential contamination: Preserve and disclose; do not clean history.
 Measured: Historical record only.
 Derived: Historical record only.
 Scope findings: Historical record only.
-Protocol failures: See FAILURES.md.
+Protocol failures: See FAILURES.md (#001, #002).
 
 ## Gate status
 
@@ -65,7 +65,7 @@ Blocking findings: Instance abandoned by human decision.
 
 ## Failures
 
-List IDs from FAILURES.md: Preserve append-only.
+List IDs from FAILURES.md: #001, #002.
 
 ## Next single action
 
