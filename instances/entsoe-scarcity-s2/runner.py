@@ -5,14 +5,16 @@ runner.py — Official Execution Harness for entsoe-scarcity-s2
 Executes the frozen 12-request acquisition batch.
 Enforces pre-execution environment invariants (clean tree, git commit verification).
 Derives evidence dynamically from system state.
-Preserves all raw response payloads byte-for-byte before parsing.
+Handles PKZip transport containers and multi-member Balancing_MarketDocument XMLs.
 Evaluates Target S (exact population) and Target R (July 2026 scarcity classification).
 """
 
 import os
 import sys
+import io
 import json
 import hashlib
+import zipfile
 import argparse
 import subprocess
 from datetime import datetime, timezone, timedelta
@@ -74,7 +76,6 @@ def verify_environment(instance_dir, expected_prereg_sha=None):
     Enforces EXECUTION_STATE_INVALID halt if preconditions fail.
     """
     try:
-        # 1. Clean status check
         res_status = subprocess.run(
             ["git", "status", "--porcelain"],
             cwd=instance_dir,
@@ -86,7 +87,6 @@ def verify_environment(instance_dir, expected_prereg_sha=None):
             sys.stderr.write(f"FATAL [EXECUTION_STATE_INVALID]: Working tree is not clean:\n{res_status.stdout}\n")
             sys.exit(1)
 
-        # 2. Dynamic SHA capture
         res_sha = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             cwd=instance_dir,
@@ -96,7 +96,6 @@ def verify_environment(instance_dir, expected_prereg_sha=None):
         )
         actual_sha = res_sha.stdout.strip()
 
-        # 3. If governing PREREG_SHA is passed, verify exact match
         if expected_prereg_sha and actual_sha != expected_prereg_sha:
             sys.stderr.write(
                 f"FATAL [EXECUTION_STATE_INVALID]: git rev-parse HEAD ({actual_sha}) != expected PREREG_SHA ({expected_prereg_sha})\n"
@@ -149,7 +148,24 @@ def record_immutable_inputs(instance_dir, run_dir):
 def parse_acknowledgement(raw_bytes):
     """Parses ENTSO-E Acknowledgement_MarketDocument XML to classify error reasons."""
     try:
-        root = ET.fromstring(raw_bytes)
+        # Check if zip
+        if raw_bytes.startswith(b'PK\x03\x04'):
+            with zipfile.ZipFile(io.BytesIO(raw_bytes)) as z:
+                for name in sorted(z.namelist()):
+                    member_data = z.read(name)
+                    code, text = parse_ack_xml(member_data)
+                    if code or text:
+                        return code, text
+        else:
+            return parse_ack_xml(raw_bytes)
+    except Exception:
+        pass
+    return None, None
+
+
+def parse_ack_xml(xml_bytes):
+    try:
+        root = ET.fromstring(xml_bytes)
         ns = {'ns': root.tag.split('}')[0].strip('{')} if '}' in root.tag else {}
         reason_elem = root.find('.//ns:Reason', ns) if ns else root.find('.//Reason')
         if reason_elem is not None:
@@ -163,14 +179,109 @@ def parse_acknowledgement(raw_bytes):
     return None, None
 
 
+def extract_and_parse_a85_payload(raw_bytes, zone, window_name):
+    """
+    Handles PKZip containers and plain XML streams.
+    Extracts member documents in deterministic alphabetical order.
+    Returns: list of point dicts, list of document metadata dicts.
+    """
+    docs_meta = []
+    points_out = []
+
+    xml_documents = []
+
+    if raw_bytes.startswith(b'PK\x03\x04'):
+        try:
+            with zipfile.ZipFile(io.BytesIO(raw_bytes)) as z:
+                for member_name in sorted(z.namelist()):
+                    m_bytes = z.read(member_name)
+                    m_sha = hashlib.sha256(m_bytes).hexdigest()
+                    xml_documents.append((member_name, m_bytes, m_sha))
+        except Exception as e:
+            raise ValueError(f"PAYLOAD_FORMAT_UNEXPECTED: Corrupted PKZip archive: {e}") from e
+    elif raw_bytes.startswith(b'<?xml') or b'<Balancing_MarketDocument' in raw_bytes[:300]:
+        m_sha = hashlib.sha256(raw_bytes).hexdigest()
+        xml_documents.append(("direct_payload.xml", raw_bytes, m_sha))
+    else:
+        raise ValueError(f"PAYLOAD_FORMAT_UNEXPECTED: Payload is neither PKZip nor valid XML (header: {raw_bytes[:20]!r})")
+
+    for doc_name, doc_bytes, doc_sha in xml_documents:
+        try:
+            root = ET.fromstring(doc_bytes)
+        except Exception as e:
+            raise ValueError(f"PAYLOAD_FORMAT_UNEXPECTED: XML ParseError in member {doc_name}: {e}") from e
+
+        ns = {'ns': root.tag.split('}')[0].strip('{')} if '}' in root.tag else {}
+
+        doctype_elem = root.find('.//ns:type', ns) if ns else root.find('.//type')
+        doctype = doctype_elem.text.strip() if doctype_elem is not None and doctype_elem.text else ""
+
+        process_elem = root.find('.//ns:process.processType', ns) if ns else root.find('.//process.processType')
+        process_type = process_elem.text.strip() if process_elem is not None and process_elem.text else ""
+
+        timeseries_nodes = root.findall('.//ns:TimeSeries', ns) if ns else root.findall('.//TimeSeries')
+        
+        for ts in timeseries_nodes:
+            mrid_elem = ts.find('.//ns:mRID', ns) if ns else ts.find('.//mRID')
+            mrid = mrid_elem.text if mrid_elem is not None else "unknown"
+
+            flow_dir = ts.find('.//ns:flowDirection.direction', ns) if ns else ts.find('.//flowDirection.direction')
+            dir_str = flow_dir.text if flow_dir is not None else ""
+
+            period_node = ts.find('.//ns:Period', ns) if ns else ts.find('.//Period')
+            if period_node is None:
+                continue
+
+            res_node = period_node.find('.//ns:resolution', ns) if ns else period_node.find('.//resolution')
+            resolution = res_node.text if res_node is not None else ""
+
+            start_node = period_node.find('.//ns:timeInterval/ns:start', ns) if ns else period_node.find('.//timeInterval/start')
+            p_start = start_node.text if start_node is not None else ""
+
+            docs_meta.append({
+                'member_name': doc_name,
+                'member_sha256': doc_sha,
+                'mRID': mrid,
+                'document_type': doctype,
+                'process_type': process_type,
+                'resolution': resolution,
+                'direction': dir_str,
+                'period_start': p_start
+            })
+
+            if not p_start:
+                continue
+
+            p_start_dt = pd.to_datetime(p_start)
+            point_nodes = period_node.findall('.//ns:Point', ns) if ns else period_node.findall('.//Point')
+            
+            for pt in point_nodes:
+                pos_node = pt.find('.//ns:position', ns) if ns else pt.find('.//position')
+                price_node = pt.find('.//ns:imbalance_Price.amount', ns) if ns else pt.find('.//imbalance_Price.amount')
+                
+                if pos_node is not None and price_node is not None:
+                    pos = int(pos_node.text)
+                    price = float(price_node.text)
+                    pt_time = p_start_dt + pd.Timedelta(minutes=15 * (pos - 1))
+                    pt_iso = pt_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+                    points_out.append({
+                        'timestamp_utc': pt_iso,
+                        'shortage_price': price,
+                        'direction': dir_str,
+                        'position': pos,
+                        'member_name': doc_name
+                    })
+
+    return points_out, docs_meta
+
+
 def execute_run(instance_dir, run_dir, run_id, prereg_sha):
     raw_dir = os.path.join(run_dir, "raw")
     os.makedirs(raw_dir, exist_ok=True)
 
-    # 1. Record inputs.sha256
     record_immutable_inputs(instance_dir, run_dir)
 
-    # 2. Record dynamic git_commit.txt
     with open(os.path.join(run_dir, "git_commit.txt"), "w") as f:
         f.write(f"{prereg_sha}\n")
 
@@ -207,7 +318,7 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
 
             print(f"[{req_idx:02d}/12] Requesting {zone} {window_name} ({win_info['periodStart']} -> {win_info['periodEnd']})...")
             
-            req_obj = urllib.request.Request(full_url, headers={'User-Agent': 'VolMax-Studio-Audit/2.0'})
+            req_obj = urllib.request.Request(full_url, headers={'User-Agent': 'VolMax-Studio-Audit/3.0'})
             status_code = None
             raw_bytes = b''
 
@@ -225,7 +336,6 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
             t_resp = datetime.now(timezone.utc).isoformat()
             sha256_digest = hashlib.sha256(raw_bytes).hexdigest() if raw_bytes else None
 
-            # Save raw bytes immediately before any inspection
             raw_filename = f"{zone}_{window_name}_raw.xml"
             raw_filepath = os.path.join(raw_dir, raw_filename)
             with open(raw_filepath, "wb") as f:
@@ -249,7 +359,6 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
                 'redacted_url': redacted_url
             }
 
-            # Evaluation of response status and halt taxonomy classification
             if status_code != 200:
                 halt_class = "HTTP_ERROR"
                 halt_reason = f"HTTP_ERROR: Server returned HTTP {status_code} on {zone} {window_name}"
@@ -288,7 +397,6 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
     t_run_end = datetime.now(timezone.utc).isoformat()
     print(f"\n=== ACQUISITION COMPLETED: {t_run_end} ===")
 
-    # Step 2: Assemble run_metadata.json
     run_metadata = {
         'run_id': run_id,
         'prereg_sha': prereg_sha,
@@ -314,7 +422,7 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
         return 1
 
     # Step 3: Parse raw responses and evaluate Target S & R
-    print("\n=== PARSING RAW XML RESPONSES & EVALUATING TARGET S ===")
+    print("\n=== EXTRACTING PKZIP CONTAINERS & EVALUATING TARGET S ===")
     
     expected_grids = {}
     missing_listings = {}
@@ -334,12 +442,25 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
             raw_filename = f"{zone}_{window_name}_raw.xml"
             raw_filepath = os.path.join(raw_dir, raw_filename)
             with open(raw_filepath, "rb") as f:
-                xml_bytes = f.read()
+                raw_bytes = f.read()
 
-            parsed_data, docs_meta = parse_a85_xml(xml_bytes, zone, window_name)
+            try:
+                parsed_data, docs_meta = extract_and_parse_a85_payload(raw_bytes, zone, window_name)
+            except Exception as e:
+                halt_class = "PAYLOAD_FORMAT_UNEXPECTED"
+                halt_reason = f"PAYLOAD_FORMAT_UNEXPECTED on {zone} {window_name}: {e}"
+                print(f"\n[AUDIT HALT — {halt_class}] {halt_reason}")
+                run_metadata['halt_class'] = halt_class
+                run_metadata['halt_reason'] = halt_reason
+                with open(os.path.join(run_dir, "run_metadata.json"), "w") as f:
+                    json.dump(run_metadata, f, indent=2)
+                with open(os.path.join(run_dir, "exit_code.txt"), "w") as f:
+                    f.write("1\n")
+                save_outputs_sha256(run_dir)
+                return 1
+
             doc_inventory[key] = docs_meta
 
-            # B-16 Enforcement: Document Identity Verification
             has_correct_resolution = (len(docs_meta) > 0 and all(d.get('resolution') == 'PT15M' for d in docs_meta))
             has_correct_doctype = (len(docs_meta) > 0 and all(d.get('document_type') == 'A85' for d in docs_meta))
             has_correct_process = (len(docs_meta) > 0 and all(d.get('process_type') == 'A16' for d in docs_meta))
@@ -440,10 +561,8 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
         b_prices = parsed_series[zone]['baseline']
         t_prices = parsed_series[zone]['target']
 
-        # Single executable quantile formula
         r_z = float(pd.Series(b_prices).quantile(0.90, interpolation='linear'))
 
-        # July occupancy
         count_elevated = sum(1 for p in t_prices if p >= r_z)
         m_z = count_elevated / 2976.0
         m_z_pct = m_z * 100.0
@@ -490,77 +609,6 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
     return 0
 
 
-def parse_a85_xml(xml_bytes, zone, window_name):
-    """
-    Parses Balancing_MarketDocument XML payload.
-    Extracts 15-minute points, verifies process/document types, and resolves latest revisions.
-    """
-    root = ET.fromstring(xml_bytes)
-    ns = {'ns': root.tag.split('}')[0].strip('{')} if '}' in root.tag else {}
-    
-    doctype_elem = root.find('.//ns:type', ns) if ns else root.find('.//type')
-    doctype = doctype_elem.text.strip() if doctype_elem is not None and doctype_elem.text else ""
-
-    process_elem = root.find('.//ns:process.processType', ns) if ns else root.find('.//process.processType')
-    process_type = process_elem.text.strip() if process_elem is not None and process_elem.text else ""
-
-    docs_meta = []
-    points_out = []
-
-    timeseries_nodes = root.findall('.//ns:TimeSeries', ns) if ns else root.findall('.//TimeSeries')
-    
-    for ts in timeseries_nodes:
-        mrid_elem = ts.find('.//ns:mRID', ns) if ns else ts.find('.//mRID')
-        mrid = mrid_elem.text if mrid_elem is not None else "unknown"
-
-        flow_dir = ts.find('.//ns:flowDirection.direction', ns) if ns else ts.find('.//flowDirection.direction')
-        dir_str = flow_dir.text if flow_dir is not None else ""
-
-        period_node = ts.find('.//ns:Period', ns) if ns else ts.find('.//Period')
-        if period_node is None:
-            continue
-
-        res_node = period_node.find('.//ns:resolution', ns) if ns else period_node.find('.//resolution')
-        resolution = res_node.text if res_node is not None else ""
-
-        start_node = period_node.find('.//ns:timeInterval/ns:start', ns) if ns else period_node.find('.//timeInterval/start')
-        p_start = start_node.text if start_node is not None else ""
-
-        docs_meta.append({
-            'mRID': mrid,
-            'document_type': doctype,
-            'process_type': process_type,
-            'resolution': resolution,
-            'direction': dir_str,
-            'period_start': p_start
-        })
-
-        if not p_start:
-            continue
-
-        p_start_dt = pd.to_datetime(p_start)
-        point_nodes = period_node.findall('.//ns:Point', ns) if ns else period_node.findall('.//Point')
-        
-        for pt in point_nodes:
-            pos_node = pt.find('.//ns:position', ns) if ns else pt.find('.//position')
-            price_node = pt.find('.//ns:imbalance_Price.amount', ns) if ns else pt.find('.//imbalance_Price.amount')
-            
-            if pos_node is not None and price_node is not None:
-                pos = int(pos_node.text)
-                price = float(price_node.text)
-                pt_time = p_start_dt + pd.Timedelta(minutes=15 * (pos - 1))
-                pt_iso = pt_time.strftime('%Y-%m-%dT%H:%M:%SZ')
-
-                points_out.append({
-                    'timestamp_utc': pt_iso,
-                    'shortage_price': price,
-                    'direction': dir_str,
-                    'position': pos
-                })
-
-    return points_out, docs_meta
-
-
 def save_outputs_sha256(run_dir):
     out_hashes = []
     for root, _, files in os.walk(run_dir):
@@ -579,7 +627,7 @@ def save_outputs_sha256(run_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Official Execution Runner for entsoe-scarcity-s2")
-    parser.add_argument("--run-id", default="run-002-confirmatory", help="Run ID")
+    parser.add_argument("--run-id", default="run-003-confirmatory", help="Run ID")
     parser.add_argument("--prereg-sha", default=None, help="Expected governing PREREG_SHA")
     parser.add_argument("--skip-git-check", action="store_true", help="Skip git environment checks (dry run only)")
     args = parser.parse_args()

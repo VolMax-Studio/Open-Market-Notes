@@ -1,7 +1,7 @@
 # ENTSO-E Scarcity Vintage-Stability Audit — Pre-registration
 
 **Instance:** `entsoe-scarcity-s2`  
-**Status:** FROZEN (Formalized pre-registration following Claude Gate PASS at draft `ac33cdc` and Operator Acceptance)  
+**Status:** DRAFT v3 — NOT FROZEN (FOR PRE-EXECUTION GATE REVIEW)  
 **Deadline:** 2026-09-12  
 **Architecture:** Pinned-vintage ENTSO-E Transparency Platform / IEC 62325 raw-document architecture  
 **Audit Class:** Internal self-reproduction and vintage-stability audit of published VolMax Open Market Note #003 findings.  
@@ -9,7 +9,7 @@
 
 This instance is a new registered reproduction / vintage-stability audit.  
 It is not a repair of `entsoe-scarcity-s1`.  
-The team has prior exposure to the published July-2026 scarcity result and empirical findings from exploratory `run-001`. Therefore this instance is not outcome-naive and must not be described as first-pass confirmatory discovery.
+The team has prior exposure to the published July-2026 scarcity result and empirical findings from `run-001` and `run-002`. Therefore this instance is not outcome-naive and must not be described as first-pass confirmatory discovery.
 
 ---
 
@@ -45,12 +45,12 @@ Regulatory / document identity:
 - raw ENTSO-E / IEC 62325 balancing-market documents (`Balancing_MarketDocument` XML).
 
 Target Area EICs (`controlArea_Domain`):
-- AT (Austria): `10YAT-APG------L` (Austrian Power Grid CA/BZ per ENTSO-E Market Areas v2.0; confirmed HTTP 200 in run-001)
-- BE (Belgium): `10YBE----------2` (Belgian BZ/CA per ENTSO-E Market Areas v2.0; replaces Elia Party EIC `10YBE----------X`)
-- DK-1 (Denmark West): `10YDK-1--------W` (DK1 BZ per ENTSO-E Market Areas v2.0)
-- DK-2 (Denmark East): `10YDK-2--------M` (DK2 BZ per ENTSO-E Market Areas v2.0; aligned with DK1 BZ scheme, replacing CA code `10YDK-2--------T`)
-- FR (France): `10YFR-RTE------C` (RTE CA/BZ per ENTSO-E Market Areas v2.0)
-- NL (Netherlands): `10YNL----------L` (TenneT NL CA/BZ per ENTSO-E Market Areas v2.0)
+- AT (Austria): `10YAT-APG------L` (Austrian Power Grid CA/BZ per ENTSO-E Market Areas v2.0; confirmed HTTP 200 in run-001 and run-002)
+- BE (Belgium): `10YBE----------2` (Belgian BZ/CA per ENTSO-E Market Areas v2.0; confirmed HTTP 200, 595 kB in run-002)
+- DK-1 (Denmark West): `10YDK-1--------W` (DK1 BZ per ENTSO-E Market Areas v2.0; confirmed HTTP 200 in run-002)
+- DK-2 (Denmark East): `10YDK-2--------M` (DK2 BZ per ENTSO-E Market Areas v2.0; confirmed HTTP 200 in run-002)
+- FR (France): `10YFR-RTE------C` (RTE CA/BZ per ENTSO-E Market Areas v2.0; confirmed HTTP 200 in run-002)
+- NL (Netherlands): `10YNL----------L` (TenneT NL CA/BZ per ENTSO-E Market Areas v2.0; confirmed HTTP 200 in run-002)
 
 *(Area EIC provenance: Pinned from primary ENTSO-E Market Areas v2.0 specification; selector `controlArea_Domain` sourced from ENTSO-E Implementation Guide for Data Extraction).*
 
@@ -84,7 +84,7 @@ The authoritative input for this instance is the preserved raw response payload 
 
 ---
 
-## 3. Vintage definition
+## 3. Vintage definition & PKZip Container Architecture
 
 ENTSO-E data may be revised after initial publication (e.g. intermediate values replaced by final values).  
 Therefore the identity of the input is:
@@ -104,12 +104,22 @@ The vintage is defined as a **single frozen acquisition batch**:
 All timestamps and hashes must be written to `run_metadata.json` before any response is parsed or interpreted.  
 The raw responses captured in that batch become the immutable audit vintage.
 
+### Transport Container & Deterministic Extraction Rules (B-19 Resolution)
+1. **Raw Byte Preservation:** Raw response bytes are saved directly under `evidence/runs/<RUN_ID>/raw/` before decompression.
+2. **PKZip Detection:** ENTSO-E delivers A85 responses encapsulated within standard PKZip compressed archives (magic bytes `50 4B 03 04` / `b'PK\x03\x04'`).
+3. **Deterministic Member Ordering:** When a PKZip payload is detected:
+   - Extract member names sorted alphabetically (`sorted(zip_ref.namelist())`).
+   - Process each XML member document sequentially in that deterministic order.
+   - Record individual member metadata (filename, uncompressed byte size, member SHA-256) into `document_inventory.json`.
+4. **Direct XML Fallback:** If the payload begins with direct XML (`b'<'`), parse as a single document without archive decompression.
+5. **Format Halting:** If the payload is neither a valid PKZip archive nor valid XML, halt immediately under `PAYLOAD_FORMAT_UNEXPECTED`.
+
 ### Multi-Document & Revision Handling
-For every returned `MarketDocument`:
-- Inventory and preserve every XML document raw byte-for-byte.
-- Verify `documentType = A85` and `process.processType = A16`.
-- For repeated `mRID` document revisions, identify the numerically latest `revisionNumber` as the current-state document while preserving all received revisions in the inventory.
-- After source-defined revision handling, any remaining collision on the same registered UTC MTU is a duplicate and Target S fails. Zero analyst-discretion deduplication.
+For every extracted `Balancing_MarketDocument` XML document:
+- Verify `documentType = A85` and `<process.processType>A16</process.processType>`.
+- Verify `<resolution>PT15M</resolution>` across all periods.
+- For repeated `mRID` document revisions across archive members, identify the numerically latest `revisionNumber` as the current-state document while preserving all received revisions in the document inventory.
+- After source-defined revision handling, map all extracted 15-minute observations to the registered continuous UTC grid. Any remaining collision or conflicting value on the same registered UTC MTU is a duplicate and Target S fails. Zero analyst-discretion deduplication.
 
 ---
 
@@ -291,14 +301,15 @@ The run produces separate outcomes:
 - `PARTIALLY_REPRODUCED`
 - `NOT_EVALUATED`
 
-### Frozen Halt Taxonomy (B-17 & B-16 Resolution)
+### Frozen Halt Taxonomy (B-20 & B-17 Resolution)
 When execution stops abnormally, the reason must be strictly classified into one of the following categories:
 1. `HTTP_ERROR`: Non-200 HTTP response code returned by the server (e.g. 400, 401, 403, 429, 500, 503).
 2. `REQUEST_CONTRACT_UNSUPPORTED`: API returns an Acknowledgement payload explicitly rejecting the request structure or time window (e.g. "amount of requested data exceeds allowed limit").
 3. `API_REPORTS_NO_MATCHING_DATA`: API returns an Acknowledgement payload with Reason 999 ("No matching data found for Data item ... and interval"). *Note: This classification strictly describes the textual response returned by the API for the submitted query parameters, and does not assert physical absence of underlying market data in the power system.*
 4. `API_REASON_OTHER`: API returns an Acknowledgement payload with a reason code other than 999.
-5. `SOURCE_IDENTITY_INVALID`: Returned XML payload violates document identity invariants (e.g. `documentType != A85`, `processType != A16`, or unexpected resolution != `PT15M`). This condition is actively enforced in `runner.py`.
-6. `EXECUTION_STATE_INVALID`: Execution environment preconditions violated (e.g. non-clean working tree, git commit mismatch with governing `PREREG_SHA`).
+5. `PAYLOAD_FORMAT_UNEXPECTED`: Raw payload is not in a supported transport container format (e.g. corrupted PKZip archive, unparseable non-XML stream, decompression failure).
+6. `SOURCE_IDENTITY_INVALID`: Returned XML document violates document identity invariants (e.g. `documentType != A85`, `processType != A16`, or unexpected resolution != `PT15M`).
+7. `EXECUTION_STATE_INVALID`: Execution environment preconditions violated (e.g. non-clean working tree, git commit mismatch with governing `PREREG_SHA`).
 
 ---
 
@@ -311,15 +322,16 @@ Before this preregistration the team has already seen:
 - the published five-of-six classification;
 - alternative exploratory baseline constructions;
 - cross-source investigations involving Danish intervals;
-- **Exploratory `run-001` outcomes:**
-  1. Austria baseline request over the full 334-day window succeeded with HTTP 200 (567,572 bytes), establishing that the ENTSO-E API accepts 334-day A85 requests.
-  2. Austria target request over 31 days succeeded with HTTP 200 (55,981 bytes).
-  3. Belgium baseline request using `10YBE----------X` returned Reason 999 because `10YBE----------X` is the Elia TSO Party identifier rather than the Area EIC `10YBE----------2`.
+- **Exploratory `run-001` outcomes:** AT baseline 334d HTTP 200, BE `10YBE----------X` Reason 999.
+- **`run-002-confirmatory` outcomes:**
+  1. All 12 requests returned HTTP 200 across all six zones with corrected EIC `10YBE----------2` and `10YDK-2--------M`.
+  2. The 334-day request window is fully supported by ENTSO-E.
+  3. Returned payloads are PKZip containers; AT and BE baseline each contain 2 XML members; the other 10 contain 1 XML member.
 
 Therefore:
 - this run is not epistemically blind;
 - the old result is not treated as unseen confirmatory evidence;
-- the contribution of s2 is the stricter source-vintage, exact-boundary, and raw-document verification.
+- the contribution of s2 is the stricter source-vintage, exact-boundary, container-aware, and raw-document verification.
 
 The exploratory six-month rolling-baseline analysis is not part of this target and must not be substituted for the published July-specific rule.
 
@@ -344,9 +356,9 @@ Additionally required:
 - exact request parameters with security credentials redacted;
 - raw HTTP response bodies (`evidence/runs/<RUN_ID>/raw/`);
 - response headers relevant to provenance;
-- raw XML document inventory;
+- raw XML document / zip member inventory (`document_inventory.json`);
 - parsed document metadata inventory;
-- expected timestamp grid;
+- expected timestamp grid (`expected_grids.json`);
 - missing/duplicate/extra timestamp listing per zone.
 
 Derived counts do not replace raw listings.
@@ -360,26 +372,24 @@ Required order:
 2. Claude pre-execution Gate review of draft specification;
 3. Sol addresses any gate findings;
 4. Ivan accepts specification;
-5. Commit frozen preregistration on `main` (or designated tracking branch);
-6. Record preregistration SHA (`PREREG_SHA`);
+5. Commit frozen preregistration on `instances/entsoe-scarcity-s2`;
+6. Record preregistration SHA (`PREREG_SHA_v3`);
 7. No further semantic or code changes;
-8. Ananke executes official run strictly on `PREREG_SHA` (capturing raw responses at $T_{\text{vintage}}$);
+8. Ananke executes official `run-003-confirmatory` strictly on `PREREG_SHA_v3` (capturing raw responses at $T_{\text{vintage}}$);
 9. Literal evidence packet produced under `evidence/runs/<RUN_ID>/`;
 10. Clean recreation from preserved raw vintage;
 11. Claude final Gate;
 12. Ivan ratification.
-
-Any data execution before step 6 is:
-`Exploratory (Protocol Non-Compliance)`.
 
 ---
 
 ## 14. HALT conditions
 
 HALT when any of the following occurs:
-- executed git SHA differs from frozen SHA;
+- executed git SHA differs from frozen SHA (`EXECUTION_STATE_INVALID`);
 - git working tree is not clean at run initialization (`EXECUTION_STATE_INVALID`);
 - exact ENTSO-E source identity is unresolved;
+- payload format is corrupted or unexpected (`PAYLOAD_FORMAT_UNEXPECTED`);
 - expected A85 document identity cannot be established (`SOURCE_IDENTITY_INVALID`);
 - requested period semantics are ambiguous;
 - timezone conversion is ambiguous;

@@ -20,4 +20,30 @@
 - Author and freeze `runner.py`, `requirements.txt`, `L0.md` v2, and `PREREGISTRATION.md` v2 in the pre-execution commit before any network execution.
 - Update EICs: Belgium (`BE`) = `10YBE----------2`, Denmark East (`DK-2`) = `10YDK-2--------M`.
 - Implement dynamic git verification (`git rev-parse HEAD` and `git status --porcelain`) inside `runner.py`.
-- Formalize structured halt taxonomy (`HTTP_ERROR`, `REQUEST_CONTRACT_UNSUPPORTED`, `SOURCE_DATA_ABSENT`, `API_REASON_OTHER`, `SOURCE_IDENTITY_INVALID`, `EXECUTION_STATE_INVALID`).
+- Formalize structured halt taxonomy (`HTTP_ERROR`, `REQUEST_CONTRACT_UNSUPPORTED`, `API_REPORTS_NO_MATCHING_DATA`, `API_REASON_OTHER`, `SOURCE_IDENTITY_INVALID`, `EXECUTION_STATE_INVALID`).
+
+---
+
+## [FAILURES #004] run-002-confirmatory Specification Boundary Failure (PKZip Container & Multi-Member Extraction)
+
+- **Run ID:** `run-002-confirmatory`
+- **Execution Date:** 2026-09-05
+- **Nominal Freeze Commit:** `98929035eb86a6f65a83fc4538a732e98f13912a`
+- **Evidence Commit:** `1a53d688b1f41bf56ca01062b0c3ffb9cf1ba895`
+- **Disposition:** `Halted outside frozen taxonomy (Clean 12/12 acquisition, interpretation halted on undescribed PKZip container format)`
+- **Preserved Evidence:** Preserved under `evidence/runs/run-002-confirmatory/` (12 raw HTTP 200 PKZip payloads totaling ~3.5MB, `command.sh`, `env.txt`, `git_commit.txt`, `inputs.sha256`, `outputs.sha256`, `run_metadata.json`, `stdout.log`, `stderr.log`).
+
+### Findings Recorded:
+1. **B-19 (Payload is PKZip Container, not Plain XML):** All 12 successful HTTP 200 responses were delivered by ENTSO-E as PKZip compressed archives (magic bytes `50 4b 03 04`). AT and BE baseline each contain 2 XML members in the archive; the remaining 10 contain 1 XML member. The frozen v2 specification and parser expected direct uncompressed XML bytes, causing `xml.etree.ElementTree.ParseError`. Multi-member archive ordering and extraction must be explicitly specified and implemented.
+2. **B-20 (Halt was Outside Pre-registered Taxonomy):** The parse exception escaped unhandled, resulting in `exit_code = 1` recorded by shell with `halt_class = None` in metadata. Halt taxonomy must include `PAYLOAD_FORMAT_UNEXPECTED` (or explicit container validation).
+
+### Confirmed Surviving Findings from run-002:
+- ENTSO-E accepted the full preregistered 334-day baseline request for all six zones (12/12 HTTP 200).
+- All six corrected area identifiers produced valid HTTP 200 responses.
+- Raw payload hashes match recorded run metadata down to the byte.
+- Execution harness was frozen before run; dynamic commit check passed cleanly.
+
+### Remediation for run-003:
+- In `L0.md` v3 and `PREREGISTRATION.md` v3, formalize §3 PKZip container detection, member sorting, multi-member XML extraction, and deterministic MTU merging.
+- Add `PAYLOAD_FORMAT_UNEXPECTED` to the frozen halt taxonomy in §10 and `runner.py`.
+- Update `runner.py` to transparently extract PKZip payloads using `zipfile.ZipFile`, parse all contained `Balancing_MarketDocument` XMLs, and evaluate Target S & Target R.
