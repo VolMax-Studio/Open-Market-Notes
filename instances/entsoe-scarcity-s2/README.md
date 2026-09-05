@@ -241,36 +241,83 @@ The project uses only the following scientific verdict vocabulary:
 - `Unfalsifiable-as-Stated`
 - `Deferred`
 
-Execution states such as `HALT`, `Exploratory (not pre-registered)`, `SPREMNO ZA GEJT`, and `Ratified` are not scientific verdicts.  
-At the current stage, this instance has no scientific verdict.
+---
+
+## Final Ratification Record
+
+- **Operator:** Ivan Nestorov
+- **Instance:** `entsoe-scarcity-s2`
+- **Canonical Evaluated Run:** `run-005-recreation`
+- **Governing PREREG_SHA_v4:** `88c7959e3dae0eb8cb5ad49640424d368e625eea`
+- **Evidence Commit:** `f2d39e67aa21448b111db09df70da72c544e5904`
+- **Controlled P10 Verdict:** **`Not Demonstrated`**
+- **Process Status:** `Ratified & Closed`
+
+### Ratified Finding
+
+Under the frozen ENTSO-E Transparency Platform vintage and the preregistered A85/A16/PT15M interpretation rules, none of the twelve zone/window populations satisfied the exact Target S interval-population invariant.
+
+All twelve evaluated populations contained one or more missing expected MTUs from the public source response.
+
+Across all twelve populations:
+- **Duplicate registered UTC MTUs:** `0`
+- **Unexpected registered UTC MTUs:** `0`
+- **Document identity (`documentType=A85`):** Satisfied (`100%`)
+- **Process semantics (`processType=A16`):** Satisfied (`100%`)
+- **Interval resolution (`resolution=PT15M`):** Satisfied (`100%`)
+- **Price direction filtering (`category=A04`):** Satisfied (`100%`)
+
+Because every zone failed the preregistered structural Target S gate, Target R was `NOT_EVALUATED` for all six zones.
+
+The previously published July-2026 six-zone European scarcity classification was therefore not reproduced or contradicted by this instance. Its reproduction is formally classified as:
+
+$$\text{Verdict: }\mathbf{Not\ Demonstrated}$$
+
+under the evidentiary boundary of this audit.
 
 ---
 
-## Reproducibility principle
+## Empirical Results: Missing MTU Rate by Zone
 
-This repository distinguishes:
-- source acquisition
-- artifact preservation
-- structural admissibility
-- numerical reproduction
-- scientific interpretation
-- ratification
+```text
+Missing MTU Rate (% of expected population missing from source payload)
 
-A successful network request is not a successful audit.  
-A deterministic computation is not scientific truth.  
-A failed run is not erased when a later run succeeds.
+Zone    July 2026 Target (31 days)           Baseline (334 days)
+----------------------------------------------------------------------
+AT      [#] 0.40% (12 / 2,976)               [#] 0.72% (230 / 32,064)
+BE      [##] 1.48% (44 / 2,976)              [####] 4.64% (1,487 / 32,064)
+DK-1    [####] 3.66% (109 / 2,976)           [####] 3.56% (1,142 / 32,064)
+DK-2    [###] 2.28% (68 / 2,976)             [####] 3.78% (1,212 / 32,064)
+FR      [######] 5.85% (174 / 2,976)         [####] 3.22% (1,033 / 32,064)
+NL      [##########] 9.27% (276 / 2,976)     [############] 12.11% (3,884 / 32,064)
+```
+
+### Measured Target S Population Summary
+
+| Zone | Area EIC | Baseline Observed | Baseline Missing | Baseline Missing % | Target Observed | Target Missing | Target Missing % | Duplicates | Target S |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **AT** | `10YAT-APG------L` | 31,834 / 32,064 | 230 | 0.72% | 2,964 / 2,976 | 12 | 0.40% | 0 | **S-FAIL** |
+| **BE** | `10YBE----------2` | 30,577 / 32,064 | 1,487 | 4.64% | 2,932 / 2,976 | 44 | 1.48% | 0 | **S-FAIL** |
+| **DK-1** | `10YDK-1--------W` | 30,922 / 32,064 | 1,142 | 3.56% | 2,867 / 2,976 | 109 | 3.66% | 0 | **S-FAIL** |
+| **DK-2** | `10YDK-2--------M` | 30,852 / 32,064 | 1,212 | 3.78% | 2,908 / 2,976 | 68 | 2.28% | 0 | **S-FAIL** |
+| **FR** | `10YFR-RTE------C` | 31,031 / 32,064 | 1,033 | 3.22% | 2,802 / 2,976 | 174 | 5.85% | 0 | **S-FAIL** |
+| **NL** | `10YNL----------L` | 28,180 / 32,064 | 3,884 | 12.11% | 2,700 / 2,976 | 276 | 9.27% | 0 | **S-FAIL** |
 
 ---
 
-## Status
+## Strict Evidentiary Limitations (§15 Invariant)
 
-- **Latest completed run:** `run-004-confirmatory`
-- **Acquisition:** `VERIFIED (reused pinned 12/12 HTTP 200 raw vintage from run-003)`
-- **Interpretation:** `DETERMINISTIC / VALID (zero duplicates across all 12 series)`
-- **Target S:** `S-FAIL across all 6 zones (true source missing MTUs present, 0 duplicates, 0 unexpected)`
-- **Target R:** `NOT EVALUATED (blocked by Target S structural gate failure)`
-- **Scientific verdict:** `NONE (pending post-execution Gate & Operator ratification)`
-- **Next protocol step:** `Post-Execution Gate for run-004-confirmatory`
+> [!IMPORTANT]
+> The finding establishes only that the frozen public source response, under the frozen request and interpretation contract, did not provide the complete preregistered interval population.
+> 
+> It **does not** establish:
+> - that ENTSO-E's underlying databases lack those intervals;
+> - that an originating Transmission System Operator (TSO) failed to measure or report them;
+> - why the intervals are absent from the returned API payload;
+> - that the previously published scarcity classification is false.
+> 
+> In accordance with the preregistered protocol, **zero missing intervals were interpolated, forward-filled, repaired, or excluded from the denominator.**
+
 
 ---
 

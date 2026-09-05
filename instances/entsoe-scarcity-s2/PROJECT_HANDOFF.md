@@ -5,17 +5,17 @@
 Project: entsoe-scarcity-s2
 Repository: VolMax-Studio/Open-Market-Notes
 Branch: instances/entsoe-scarcity-s2
-Current commit: Pending evidence commit for run-005
+Current commit: Final Ratification & Closure
 Preregistration commit: 88c7959e3dae0eb8cb5ad49640424d368e625eea (PREREG_SHA_v4)
 Latest run ID: run-005-recreation (Deterministic Target S recreation: 6/6 zones S-FAIL on missing intervals; 0 duplicates; Target R blocked)
-Next run ID: Final Post-Execution Gate review and Ratification
+Next run ID: None (Instance Closed)
 Deadline: 2026-09-12
 
 ## Phase
 
-Post-Execution Evidence Review (run-005-recreation) — Execution State: SPREMNO ZA GEJT
+Ratified — Controlled P10 Verdict: `Not Demonstrated` — Execution State: RATIFIED
 
-Portfolio status: ACTIVE / DEADLINE PRIORITY
+Portfolio status: ARCHIVED / CLOSED
 
 Architecture:
 Pinned-vintage ENTSO-E Transparency Platform / IEC 62325 raw-document architecture with PKZip transport container extraction, multi-period iteration, unconditional A04 shortage price category filtering, and source vintage integrity verification.
@@ -45,15 +45,20 @@ Public artifacts:
 - run-002-confirmatory: Permanently classified as `Halted outside taxonomy` per FAILURES #004.
 - run-003-confirmatory: Permanently classified as `Acquisition valid — interpretation invalid` per FAILURES #005 (Complete 12/12 HTTP 200 raw vintage preserved).
 - run-004-confirmatory: Classified as `Procedural Non-Compliance / Provenance Defect (B-27)` per FAILURES #006.
-- run-005-recreation: Clean single execution of deterministic recreation over pinned run-003 vintage under PREREG_SHA_v4. Target S evaluated for all 6 zones: 6/6 S-FAIL due to true source missing intervals (0 duplicates, 0 unexpected). Target R blocked by Target S failure.
+- run-005-recreation: Clean single execution of deterministic recreation over pinned run-003 vintage under PREREG_SHA_v4. Target S evaluated for all 6 zones: 6/6 S-FAIL due to true source missing intervals (0 duplicates, 0 unexpected). Target R blocked by Target S failure. Ratified as canonical evidence record.
 
 ## Gate status
 
 Gate model/person: Claude
-Gate outcome: PENDING POST-EXECUTION GATE REVIEW (run-005-recreation)
+Gate outcome: SURVIVES-REVIEW (run-005-recreation)
 Blocking findings:
 None.
 
-## Next single action
+## Final Ratification
 
-Submit run-005-recreation evidence package to Claude for final Post-Execution Gate review.
+- Operator: Ivan Nestorov
+- Final Evaluated Run: `run-005-recreation`
+- Governing PREREG_SHA_v4: `88c7959e3dae0eb8cb5ad49640424d368e625eea`
+- Controlled P10 Verdict: `Not Demonstrated`
+- Status: RATIFIED & CLOSED
+

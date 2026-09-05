@@ -1,5 +1,5 @@
 project: entsoe-scarcity-s2
-phase: post_execution_run_005
+phase: Ratified
 owner: Ivan
 research_lead: Sol
 gate: Claude
@@ -13,10 +13,14 @@ run_001_disposition: Exploratory (Protocol Non-Compliance)
 run_002_disposition: Halted outside taxonomy (Clean 12/12 acquisition, interpretation halted on PKZip container format)
 run_003_disposition: Acquisition valid — interpretation invalid (frozen parser specification defect)
 run_004_disposition: Procedural Non-Compliance / Provenance Defect (B-27)
-run_005_status: EXECUTED (Deterministic recreation of Target S: 6/6 zones S-FAIL on missing intervals; 0 duplicates; Target R blocked)
+run_005_status: RATIFIED_EVIDENCE_RECORD (Deterministic recreation of Target S: 6/6 zones S-FAIL on true source missing intervals; 0 duplicates; Target R blocked)
 independence_class: unresolved (self-reproduction / internal audit)
 deadline: 2026-09-12
-verdict: null
-execution_state: SPREMNO_ZA_GEJT
+verdict: Not Demonstrated
+final_run: run-005-recreation
+governing_prereg_sha: 88c7959e3dae0eb8cb5ad49640424d368e625eea
+final_gate: SURVIVES-REVIEW
+execution_state: RATIFIED
 blocking_issue: null
-next_action: Submit run-005-recreation evidence package to Claude for Post-Execution Gate review.
+next_action: None — instance closed.
+
