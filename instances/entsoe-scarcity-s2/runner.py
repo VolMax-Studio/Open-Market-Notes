@@ -2,17 +2,20 @@
 """
 runner.py — Official Execution Harness for entsoe-scarcity-s2
 
-Executes the frozen 12-request acquisition batch.
+Executes or interprets the frozen 12-request acquisition batch.
 Enforces pre-execution environment invariants (clean tree, git commit verification).
 Derives evidence dynamically from system state.
-Preserves all raw response payloads byte-for-byte before parsing.
+Handles PKZip transport containers, multi-period TimeSeries iteration, and A04 shortage price category filtering.
 Evaluates Target S (exact population) and Target R (July 2026 scarcity classification).
 """
 
 import os
 import sys
+import io
 import json
+import shutil
 import hashlib
+import zipfile
 import argparse
 import subprocess
 from datetime import datetime, timezone, timedelta
@@ -74,7 +77,6 @@ def verify_environment(instance_dir, expected_prereg_sha=None):
     Enforces EXECUTION_STATE_INVALID halt if preconditions fail.
     """
     try:
-        # 1. Clean status check
         res_status = subprocess.run(
             ["git", "status", "--porcelain"],
             cwd=instance_dir,
@@ -86,7 +88,6 @@ def verify_environment(instance_dir, expected_prereg_sha=None):
             sys.stderr.write(f"FATAL [EXECUTION_STATE_INVALID]: Working tree is not clean:\n{res_status.stdout}\n")
             sys.exit(1)
 
-        # 2. Dynamic SHA capture
         res_sha = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             cwd=instance_dir,
@@ -96,7 +97,6 @@ def verify_environment(instance_dir, expected_prereg_sha=None):
         )
         actual_sha = res_sha.stdout.strip()
 
-        # 3. If governing PREREG_SHA is passed, verify exact match
         if expected_prereg_sha and actual_sha != expected_prereg_sha:
             sys.stderr.write(
                 f"FATAL [EXECUTION_STATE_INVALID]: git rev-parse HEAD ({actual_sha}) != expected PREREG_SHA ({expected_prereg_sha})\n"
@@ -149,7 +149,23 @@ def record_immutable_inputs(instance_dir, run_dir):
 def parse_acknowledgement(raw_bytes):
     """Parses ENTSO-E Acknowledgement_MarketDocument XML to classify error reasons."""
     try:
-        root = ET.fromstring(raw_bytes)
+        if raw_bytes.startswith(b'PK\x03\x04'):
+            with zipfile.ZipFile(io.BytesIO(raw_bytes)) as z:
+                for name in sorted(z.namelist()):
+                    member_data = z.read(name)
+                    code, text = parse_ack_xml(member_data)
+                    if code or text:
+                        return code, text
+        else:
+            return parse_ack_xml(raw_bytes)
+    except Exception:
+        pass
+    return None, None
+
+
+def parse_ack_xml(xml_bytes):
+    try:
+        root = ET.fromstring(xml_bytes)
         ns = {'ns': root.tag.split('}')[0].strip('{')} if '}' in root.tag else {}
         reason_elem = root.find('.//ns:Reason', ns) if ns else root.find('.//Reason')
         if reason_elem is not None:
@@ -163,74 +179,273 @@ def parse_acknowledgement(raw_bytes):
     return None, None
 
 
-def execute_run(instance_dir, run_dir, run_id, prereg_sha):
+def extract_and_parse_a85_payload(raw_bytes, zone, window_name):
+    """
+    Handles PKZip containers and plain XML streams.
+    Extracts member documents in deterministic alphabetical order.
+    Iterates over all <Period> children within each <TimeSeries>.
+    Filters points strictly matching shortage category <imbalance_Price.category>A04</imbalance_Price.category>.
+    Returns: list of point dicts, list of document metadata dicts.
+    """
+    docs_meta = []
+    points_out = []
+
+    xml_documents = []
+
+    if raw_bytes.startswith(b'PK\x03\x04'):
+        try:
+            with zipfile.ZipFile(io.BytesIO(raw_bytes)) as z:
+                for member_name in sorted(z.namelist()):
+                    m_bytes = z.read(member_name)
+                    m_sha = hashlib.sha256(m_bytes).hexdigest()
+                    xml_documents.append((member_name, m_bytes, m_sha))
+        except Exception as e:
+            raise ValueError(f"PAYLOAD_FORMAT_UNEXPECTED: Corrupted PKZip archive: {e}") from e
+    elif raw_bytes.startswith(b'<?xml') or b'<Balancing_MarketDocument' in raw_bytes[:300]:
+        m_sha = hashlib.sha256(raw_bytes).hexdigest()
+        xml_documents.append(("direct_payload.xml", raw_bytes, m_sha))
+    else:
+        raise ValueError(f"PAYLOAD_FORMAT_UNEXPECTED: Payload is neither PKZip nor valid XML (header: {raw_bytes[:20]!r})")
+
+    for doc_name, doc_bytes, doc_sha in xml_documents:
+        try:
+            root = ET.fromstring(doc_bytes)
+        except Exception as e:
+            raise ValueError(f"PAYLOAD_FORMAT_UNEXPECTED: XML ParseError in member {doc_name}: {e}") from e
+
+        ns = {'ns': root.tag.split('}')[0].strip('{')} if '}' in root.tag else {}
+
+        doctype_elem = root.find('.//ns:type', ns) if ns else root.find('.//type')
+        doctype = doctype_elem.text.strip() if doctype_elem is not None and doctype_elem.text else ""
+
+        process_elem = root.find('.//ns:process.processType', ns) if ns else root.find('.//process.processType')
+        process_type = process_elem.text.strip() if process_elem is not None and process_elem.text else ""
+
+        timeseries_nodes = root.findall('.//ns:TimeSeries', ns) if ns else root.findall('.//TimeSeries')
+        
+        for ts in timeseries_nodes:
+            mrid_elem = ts.find('.//ns:mRID', ns) if ns else ts.find('.//mRID')
+            mrid = mrid_elem.text if mrid_elem is not None else "unknown"
+
+            # B-21 Resolution: Find ALL Period nodes within this TimeSeries
+            period_nodes = ts.findall('.//ns:Period', ns) if ns else ts.findall('.//Period')
+            
+            for period_node in period_nodes:
+                res_node = period_node.find('.//ns:resolution', ns) if ns else period_node.find('.//resolution')
+                resolution = res_node.text.strip() if res_node is not None and res_node.text else ""
+
+                start_node = period_node.find('.//ns:timeInterval/ns:start', ns) if ns else period_node.find('.//timeInterval/start')
+                p_start = start_node.text.strip() if start_node is not None and start_node.text else ""
+
+                docs_meta.append({
+                    'member_name': doc_name,
+                    'member_sha256': doc_sha,
+                    'mRID': mrid,
+                    'document_type': doctype,
+                    'process_type': process_type,
+                    'resolution': resolution,
+                    'period_start': p_start
+                })
+
+                if not p_start:
+                    continue
+
+                p_start_dt = pd.to_datetime(p_start)
+                point_nodes = period_node.findall('.//ns:Point', ns) if ns else period_node.findall('.//Point')
+                
+                for pt in point_nodes:
+                    pos_node = pt.find('.//ns:position', ns) if ns else pt.find('.//position')
+                    price_node = pt.find('.//ns:imbalance_Price.amount', ns) if ns else pt.find('.//imbalance_Price.amount')
+                    cat_node = pt.find('.//ns:imbalance_Price.category', ns) if ns else pt.find('.//imbalance_Price.category')
+                    
+                    category = cat_node.text.strip() if cat_node is not None and cat_node.text else ""
+
+                    # B-23 & B-25 Resolution: Filter strictly and unconditionally for Shortage price category A04
+                    if category != 'A04':
+                        continue
+
+                    if pos_node is not None and price_node is not None:
+                        pos = int(pos_node.text)
+                        price = float(price_node.text)
+                        pt_time = p_start_dt + pd.Timedelta(minutes=15 * (pos - 1))
+                        pt_iso = pt_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+                        points_out.append({
+                            'timestamp_utc': pt_iso,
+                            'shortage_price': price,
+                            'category': category,
+                            'position': pos,
+                            'member_name': doc_name
+                        })
+
+    return points_out, docs_meta
+
+
+def execute_run(instance_dir, run_dir, run_id, prereg_sha, source_raw_dir=None):
     raw_dir = os.path.join(run_dir, "raw")
     os.makedirs(raw_dir, exist_ok=True)
 
-    # 1. Record inputs.sha256
     record_immutable_inputs(instance_dir, run_dir)
 
-    # 2. Record dynamic git_commit.txt
     with open(os.path.join(run_dir, "git_commit.txt"), "w") as f:
         f.write(f"{prereg_sha}\n")
-
-    token = get_token()
 
     t_run_start = datetime.now(timezone.utc).isoformat()
     print(f"=== OFFICIAL RUN START: {t_run_start} ===")
     print(f"RUN_ID:     {run_id}")
-    print(f"PREREG_SHA: {prereg_sha}\n")
+    print(f"PREREG_SHA: {prereg_sha}")
+    if source_raw_dir:
+        print(f"MODE:       Offline interpretation from preserved raw vintage: {source_raw_dir}\n")
+    else:
+        print(f"MODE:       Live ENTSO-E API acquisition\n")
 
     requests_meta = []
     raw_file_hashes = {}
     halt_class = None
     halt_reason = None
 
-    # Step 1: Execute exactly 12 HTTP requests
+    token = None if source_raw_dir else get_token()
+    expected_vintage_hashes = {}
+
+    if source_raw_dir:
+        norm_src = os.path.normpath(source_raw_dir)
+        if os.path.basename(norm_src) == "raw":
+            source_raw_files_dir = norm_src
+            source_meta_dir = os.path.dirname(norm_src)
+        else:
+            source_raw_files_dir = os.path.join(norm_src, "raw") if os.path.exists(os.path.join(norm_src, "raw")) else norm_src
+            source_meta_dir = norm_src
+
+        # B-26 Resolution: Load pinned hashes from source vintage metadata
+        meta_file = os.path.join(source_meta_dir, "run_metadata.json")
+        outputs_sha_file = os.path.join(source_meta_dir, "outputs.sha256")
+
+        if os.path.exists(meta_file):
+            try:
+                with open(meta_file, "r") as f:
+                    s_meta = json.load(f)
+                for req in s_meta.get("requests", []):
+                    if "raw_filename" in req and "sha256" in req:
+                        expected_vintage_hashes[req["raw_filename"]] = req["sha256"]
+            except Exception as e:
+                halt_class = "EXECUTION_STATE_INVALID"
+                halt_reason = f"EXECUTION_STATE_INVALID: Failed reading source vintage metadata at {meta_file}: {e}"
+        elif os.path.exists(outputs_sha_file):
+            try:
+                with open(outputs_sha_file, "r") as f:
+                    for line in f:
+                        parts = line.strip().split()
+                        if len(parts) == 2:
+                            h, p = parts[0], parts[1]
+                            fn = os.path.basename(p)
+                            if fn.endswith("_raw.xml"):
+                                expected_vintage_hashes[fn] = h
+            except Exception as e:
+                halt_class = "EXECUTION_STATE_INVALID"
+                halt_reason = f"EXECUTION_STATE_INVALID: Failed reading source vintage hashes at {outputs_sha_file}: {e}"
+        else:
+            halt_class = "EXECUTION_STATE_INVALID"
+            halt_reason = f"EXECUTION_STATE_INVALID: Source vintage metadata (run_metadata.json or outputs.sha256) not found in {source_meta_dir}"
+
+        if not halt_class and len(expected_vintage_hashes) < 12:
+            halt_class = "EXECUTION_STATE_INVALID"
+            halt_reason = f"EXECUTION_STATE_INVALID: Source vintage metadata in {source_meta_dir} contains only {len(expected_vintage_hashes)}/12 expected raw file hashes"
+
+    if halt_class:
+        print(f"\n[AUDIT HALT — {halt_class}] {halt_reason}")
+        run_metadata = {
+            'run_id': run_id,
+            'prereg_sha': prereg_sha,
+            'repository': 'VolMax-Studio/Open-Market-Notes',
+            'branch': 'instances/entsoe-scarcity-s2',
+            'acquisition_mode': 'offline_vintage_interpretation' if source_raw_dir else 'live_api_acquisition',
+            'source_raw_vintage': source_raw_dir,
+            't_run_start_utc': t_run_start,
+            't_run_end_utc': datetime.now(timezone.utc).isoformat(),
+            'total_requests_executed': 0,
+            'expected_requests_count': 12,
+            'halt_class': halt_class,
+            'halt_reason': halt_reason,
+            'requests': []
+        }
+        with open(os.path.join(run_dir, "run_metadata.json"), "w") as f:
+            json.dump(run_metadata, f, indent=2)
+        with open(os.path.join(run_dir, "exit_code.txt"), "w") as f:
+            f.write("1\n")
+        save_outputs_sha256(run_dir)
+        return 1
+
+    # Step 1: Acquire or load raw payload batch
     for zone, eic in ZONES.items():
         for window_name, win_info in WINDOWS.items():
             req_idx = len(requests_meta) + 1
-            t_req = datetime.now(timezone.utc).isoformat()
-            
-            params = {
-                'documentType': 'A85',
-                'controlArea_Domain': eic,
-                'periodStart': win_info['periodStart'],
-                'periodEnd': win_info['periodEnd'],
-                'securityToken': token
-            }
-            
-            redacted_params = {k: ('[REDACTED]' if k == 'securityToken' else v) for k, v in params.items()}
-            query_str = urllib.parse.urlencode(params)
-            full_url = f"{ENDPOINT}?{query_str}"
-            redacted_url = f"{ENDPOINT}?{urllib.parse.urlencode(redacted_params)}"
-
-            print(f"[{req_idx:02d}/12] Requesting {zone} {window_name} ({win_info['periodStart']} -> {win_info['periodEnd']})...")
-            
-            req_obj = urllib.request.Request(full_url, headers={'User-Agent': 'VolMax-Studio-Audit/2.0'})
-            status_code = None
-            raw_bytes = b''
-
-            try:
-                with urllib.request.urlopen(req_obj, timeout=120) as resp:
-                    status_code = resp.status
-                    raw_bytes = resp.read()
-            except urllib.error.HTTPError as e:
-                status_code = e.code
-                raw_bytes = e.read()
-            except Exception as e:
-                status_code = 0
-                raw_bytes = str(e).encode('utf-8')
-
-            t_resp = datetime.now(timezone.utc).isoformat()
-            sha256_digest = hashlib.sha256(raw_bytes).hexdigest() if raw_bytes else None
-
-            # Save raw bytes immediately before any inspection
             raw_filename = f"{zone}_{window_name}_raw.xml"
             raw_filepath = os.path.join(raw_dir, raw_filename)
-            with open(raw_filepath, "wb") as f:
-                f.write(raw_bytes)
 
+            if source_raw_dir:
+                # Load from preserved vintage
+                src_path = os.path.join(source_raw_files_dir, raw_filename)
+                if not os.path.exists(src_path):
+                    halt_class = "PAYLOAD_FORMAT_UNEXPECTED"
+                    halt_reason = f"PAYLOAD_FORMAT_UNEXPECTED: Preserved raw file {raw_filename} missing at {src_path}"
+                    break
+                shutil.copy2(src_path, raw_filepath)
+                with open(raw_filepath, "rb") as f:
+                    raw_bytes = f.read()
+
+                sha256_digest = hashlib.sha256(raw_bytes).hexdigest() if raw_bytes else None
+
+                # B-26 Resolution: Verify loaded file matches pinned vintage hash
+                expected_sha = expected_vintage_hashes.get(raw_filename)
+                if not expected_sha:
+                    halt_class = "EXECUTION_STATE_INVALID"
+                    halt_reason = f"EXECUTION_STATE_INVALID: No pinned SHA256 found for {raw_filename} in source vintage metadata"
+                    break
+                if sha256_digest != expected_sha:
+                    halt_class = "EXECUTION_STATE_INVALID"
+                    halt_reason = f"EXECUTION_STATE_INVALID: Source vintage integrity mismatch on {raw_filename} (expected {expected_sha}, computed {sha256_digest})"
+                    break
+
+                status_code = 200
+                t_req = t_run_start
+                t_resp = t_run_start
+                redacted_url = f"{ENDPOINT}?documentType=A85&controlArea_Domain={eic}&periodStart={win_info['periodStart']}&periodEnd={win_info['periodEnd']}&securityToken=[REDACTED]"
+            else:
+                # Live network acquisition
+                t_req = datetime.now(timezone.utc).isoformat()
+                params = {
+                    'documentType': 'A85',
+                    'controlArea_Domain': eic,
+                    'periodStart': win_info['periodStart'],
+                    'periodEnd': win_info['periodEnd'],
+                    'securityToken': token
+                }
+                redacted_params = {k: ('[REDACTED]' if k == 'securityToken' else v) for k, v in params.items()}
+                query_str = urllib.parse.urlencode(params)
+                full_url = f"{ENDPOINT}?{query_str}"
+                redacted_url = f"{ENDPOINT}?{urllib.parse.urlencode(redacted_params)}"
+
+                print(f"[{req_idx:02d}/12] Requesting {zone} {window_name} ({win_info['periodStart']} -> {win_info['periodEnd']})...")
+                req_obj = urllib.request.Request(full_url, headers={'User-Agent': 'VolMax-Studio-Audit/4.0'})
+                status_code = None
+                raw_bytes = b''
+
+                try:
+                    with urllib.request.urlopen(req_obj, timeout=120) as resp:
+                        status_code = resp.status
+                        raw_bytes = resp.read()
+                except urllib.error.HTTPError as e:
+                    status_code = e.code
+                    raw_bytes = e.read()
+                except Exception as e:
+                    status_code = 0
+                    raw_bytes = str(e).encode('utf-8')
+
+                t_resp = datetime.now(timezone.utc).isoformat()
+                with open(raw_filepath, "wb") as f:
+                    f.write(raw_bytes)
+
+            sha256_digest = hashlib.sha256(raw_bytes).hexdigest() if raw_bytes else None
             raw_file_hashes[raw_filename] = sha256_digest
 
             req_record = {
@@ -249,7 +464,6 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
                 'redacted_url': redacted_url
             }
 
-            # Evaluation of response status and halt taxonomy classification
             if status_code != 200:
                 halt_class = "HTTP_ERROR"
                 halt_reason = f"HTTP_ERROR: Server returned HTTP {status_code} on {zone} {window_name}"
@@ -279,21 +493,22 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
                 requests_meta.append(req_record)
                 break
 
-            print(f"  -> HTTP {status_code} OK ({len(raw_bytes)} bytes, SHA256: {sha256_digest[:16]}...)")
+            print(f"  [{zone} {window_name}] HTTP {status_code} OK ({len(raw_bytes)} bytes, SHA256: {sha256_digest[:16]}...)")
             requests_meta.append(req_record)
 
         if halt_class:
             break
 
     t_run_end = datetime.now(timezone.utc).isoformat()
-    print(f"\n=== ACQUISITION COMPLETED: {t_run_end} ===")
+    print(f"\n=== ACQUISITION/PAYLOAD LOAD COMPLETED: {t_run_end} ===")
 
-    # Step 2: Assemble run_metadata.json
     run_metadata = {
         'run_id': run_id,
         'prereg_sha': prereg_sha,
         'repository': 'VolMax-Studio/Open-Market-Notes',
         'branch': 'instances/entsoe-scarcity-s2',
+        'acquisition_mode': 'offline_vintage_interpretation' if source_raw_dir else 'live_api_acquisition',
+        'source_raw_vintage': source_raw_dir,
         't_run_start_utc': t_run_start,
         't_run_end_utc': t_run_end,
         'total_requests_executed': len(requests_meta),
@@ -313,7 +528,7 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
         save_outputs_sha256(run_dir)
         return 1
 
-    # Step 3: Parse raw responses and evaluate Target S & R
+    # Step 2: Parse raw responses and evaluate Target S & R
     print("\n=== PARSING RAW XML RESPONSES & EVALUATING TARGET S ===")
     
     expected_grids = {}
@@ -334,12 +549,25 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
             raw_filename = f"{zone}_{window_name}_raw.xml"
             raw_filepath = os.path.join(raw_dir, raw_filename)
             with open(raw_filepath, "rb") as f:
-                xml_bytes = f.read()
+                raw_bytes = f.read()
 
-            parsed_data, docs_meta = parse_a85_xml(xml_bytes, zone, window_name)
+            try:
+                parsed_data, docs_meta = extract_and_parse_a85_payload(raw_bytes, zone, window_name)
+            except Exception as e:
+                halt_class = "PAYLOAD_FORMAT_UNEXPECTED"
+                halt_reason = f"PAYLOAD_FORMAT_UNEXPECTED on {zone} {window_name}: {e}"
+                print(f"\n[AUDIT HALT — {halt_class}] {halt_reason}")
+                run_metadata['halt_class'] = halt_class
+                run_metadata['halt_reason'] = halt_reason
+                with open(os.path.join(run_dir, "run_metadata.json"), "w") as f:
+                    json.dump(run_metadata, f, indent=2)
+                with open(os.path.join(run_dir, "exit_code.txt"), "w") as f:
+                    f.write("1\n")
+                save_outputs_sha256(run_dir)
+                return 1
+
             doc_inventory[key] = docs_meta
 
-            # B-16 Enforcement: Document Identity Verification
             has_correct_resolution = (len(docs_meta) > 0 and all(d.get('resolution') == 'PT15M' for d in docs_meta))
             has_correct_doctype = (len(docs_meta) > 0 and all(d.get('document_type') == 'A85' for d in docs_meta))
             has_correct_process = (len(docs_meta) > 0 and all(d.get('process_type') == 'A16' for d in docs_meta))
@@ -419,7 +647,7 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
     with open(os.path.join(run_dir, "document_inventory.json"), "w") as f:
         json.dump(doc_inventory, f, indent=2)
 
-    # Step 4: Evaluate Target R
+    # Step 3: Evaluate Target R
     print("\n=== EVALUATING TARGET R (SCARCITY REPRODUCTION) ===")
     target_r_results = {}
     classifications_match = True
@@ -440,10 +668,8 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
         b_prices = parsed_series[zone]['baseline']
         t_prices = parsed_series[zone]['target']
 
-        # Single executable quantile formula
         r_z = float(pd.Series(b_prices).quantile(0.90, interpolation='linear'))
 
-        # July occupancy
         count_elevated = sum(1 for p in t_prices if p >= r_z)
         m_z = count_elevated / 2976.0
         m_z_pct = m_z * 100.0
@@ -490,77 +716,6 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
     return 0
 
 
-def parse_a85_xml(xml_bytes, zone, window_name):
-    """
-    Parses Balancing_MarketDocument XML payload.
-    Extracts 15-minute points, verifies process/document types, and resolves latest revisions.
-    """
-    root = ET.fromstring(xml_bytes)
-    ns = {'ns': root.tag.split('}')[0].strip('{')} if '}' in root.tag else {}
-    
-    doctype_elem = root.find('.//ns:type', ns) if ns else root.find('.//type')
-    doctype = doctype_elem.text.strip() if doctype_elem is not None and doctype_elem.text else ""
-
-    process_elem = root.find('.//ns:process.processType', ns) if ns else root.find('.//process.processType')
-    process_type = process_elem.text.strip() if process_elem is not None and process_elem.text else ""
-
-    docs_meta = []
-    points_out = []
-
-    timeseries_nodes = root.findall('.//ns:TimeSeries', ns) if ns else root.findall('.//TimeSeries')
-    
-    for ts in timeseries_nodes:
-        mrid_elem = ts.find('.//ns:mRID', ns) if ns else ts.find('.//mRID')
-        mrid = mrid_elem.text if mrid_elem is not None else "unknown"
-
-        flow_dir = ts.find('.//ns:flowDirection.direction', ns) if ns else ts.find('.//flowDirection.direction')
-        dir_str = flow_dir.text if flow_dir is not None else ""
-
-        period_node = ts.find('.//ns:Period', ns) if ns else ts.find('.//Period')
-        if period_node is None:
-            continue
-
-        res_node = period_node.find('.//ns:resolution', ns) if ns else period_node.find('.//resolution')
-        resolution = res_node.text if res_node is not None else ""
-
-        start_node = period_node.find('.//ns:timeInterval/ns:start', ns) if ns else period_node.find('.//timeInterval/start')
-        p_start = start_node.text if start_node is not None else ""
-
-        docs_meta.append({
-            'mRID': mrid,
-            'document_type': doctype,
-            'process_type': process_type,
-            'resolution': resolution,
-            'direction': dir_str,
-            'period_start': p_start
-        })
-
-        if not p_start:
-            continue
-
-        p_start_dt = pd.to_datetime(p_start)
-        point_nodes = period_node.findall('.//ns:Point', ns) if ns else period_node.findall('.//Point')
-        
-        for pt in point_nodes:
-            pos_node = pt.find('.//ns:position', ns) if ns else pt.find('.//position')
-            price_node = pt.find('.//ns:imbalance_Price.amount', ns) if ns else pt.find('.//imbalance_Price.amount')
-            
-            if pos_node is not None and price_node is not None:
-                pos = int(pos_node.text)
-                price = float(price_node.text)
-                pt_time = p_start_dt + pd.Timedelta(minutes=15 * (pos - 1))
-                pt_iso = pt_time.strftime('%Y-%m-%dT%H:%M:%SZ')
-
-                points_out.append({
-                    'timestamp_utc': pt_iso,
-                    'shortage_price': price,
-                    'direction': dir_str,
-                    'position': pos
-                })
-
-    return points_out, docs_meta
-
-
 def save_outputs_sha256(run_dir):
     out_hashes = []
     for root, _, files in os.walk(run_dir):
@@ -579,8 +734,9 @@ def save_outputs_sha256(run_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Official Execution Runner for entsoe-scarcity-s2")
-    parser.add_argument("--run-id", default="run-002-confirmatory", help="Run ID")
+    parser.add_argument("--run-id", default="run-004-confirmatory", help="Run ID")
     parser.add_argument("--prereg-sha", default=None, help="Expected governing PREREG_SHA")
+    parser.add_argument("--source-raw-dir", default=None, help="Path to preserved raw response vintage (for offline interpretation)")
     parser.add_argument("--skip-git-check", action="store_true", help="Skip git environment checks (dry run only)")
     args = parser.parse_args()
 
@@ -593,5 +749,5 @@ if __name__ == "__main__":
     else:
         actual_sha = args.prereg_sha or "unverified_dry_run"
     
-    code = execute_run(instance_dir, run_dir, args.run_id, actual_sha)
+    code = execute_run(instance_dir, run_dir, args.run_id, actual_sha, source_raw_dir=args.source_raw_dir)
     sys.exit(code)

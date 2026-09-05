@@ -1,0 +1,43 @@
+=== OFFICIAL RUN START: 2026-09-05T12:29:59.324711+00:00 ===
+RUN_ID:     run-004-confirmatory
+PREREG_SHA: 88c7959e3dae0eb8cb5ad49640424d368e625eea
+MODE:       Offline interpretation from preserved raw vintage: instances/entsoe-scarcity-s2/evidence/runs/run-003-confirmatory/raw
+
+  [AT baseline] HTTP 200 OK (567574 bytes, SHA256: ee7e5ca81bf51c6e...)
+  [AT target] HTTP 200 OK (55990 bytes, SHA256: 3da936c8107f04b1...)
+  [BE baseline] HTTP 200 OK (595789 bytes, SHA256: 74505406e5ff52b8...)
+  [BE target] HTTP 200 OK (60200 bytes, SHA256: c9ea7c0764d122db...)
+  [DK_1 baseline] HTTP 200 OK (424384 bytes, SHA256: 116884d4932c913d...)
+  [DK_1 target] HTTP 200 OK (40757 bytes, SHA256: 97d76f89205cdda5...)
+  [DK_2 baseline] HTTP 200 OK (426993 bytes, SHA256: e1fae28f44fd610a...)
+  [DK_2 target] HTTP 200 OK (41798 bytes, SHA256: f2c688a38d4ad1d5...)
+  [FR baseline] HTTP 200 OK (437114 bytes, SHA256: 92b6291efa414201...)
+  [FR target] HTTP 200 OK (41298 bytes, SHA256: 249af912bd617b15...)
+  [NL baseline] HTTP 200 OK (351906 bytes, SHA256: a737960d9b3f8433...)
+  [NL target] HTTP 200 OK (34774 bytes, SHA256: 61d8cbd2c1971b48...)
+
+=== ACQUISITION/PAYLOAD LOAD COMPLETED: 2026-09-05T12:29:59.332243+00:00 ===
+
+=== PARSING RAW XML RESPONSES & EVALUATING TARGET S ===
+Target S [AT   baseline]: S-FAIL (Observed: 31834/32064, Missing: 230, Duplicates: 0)
+Target S [AT   target  ]: S-FAIL (Observed: 2964/2976, Missing: 12, Duplicates: 0)
+Target S [BE   baseline]: S-FAIL (Observed: 30577/32064, Missing: 1487, Duplicates: 0)
+Target S [BE   target  ]: S-FAIL (Observed: 2932/2976, Missing: 44, Duplicates: 0)
+Target S [DK_1 baseline]: S-FAIL (Observed: 30922/32064, Missing: 1142, Duplicates: 0)
+Target S [DK_1 target  ]: S-FAIL (Observed: 2867/2976, Missing: 109, Duplicates: 0)
+Target S [DK_2 baseline]: S-FAIL (Observed: 30852/32064, Missing: 1212, Duplicates: 0)
+Target S [DK_2 target  ]: S-FAIL (Observed: 2908/2976, Missing: 68, Duplicates: 0)
+Target S [FR   baseline]: S-FAIL (Observed: 31031/32064, Missing: 1033, Duplicates: 0)
+Target S [FR   target  ]: S-FAIL (Observed: 2802/2976, Missing: 174, Duplicates: 0)
+Target S [NL   baseline]: S-FAIL (Observed: 28180/32064, Missing: 3884, Duplicates: 0)
+Target S [NL   target  ]: S-FAIL (Observed: 2700/2976, Missing: 276, Duplicates: 0)
+
+=== EVALUATING TARGET R (SCARCITY REPRODUCTION) ===
+Zone AT: Target S failed -> Target R NOT_EVALUATED
+Zone BE: Target S failed -> Target R NOT_EVALUATED
+Zone DK_1: Target S failed -> Target R NOT_EVALUATED
+Zone DK_2: Target S failed -> Target R NOT_EVALUATED
+Zone FR: Target S failed -> Target R NOT_EVALUATED
+Zone NL: Target S failed -> Target R NOT_EVALUATED
+
+All run artifacts and logs written to /home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/instances/entsoe-scarcity-s2/evidence/runs/run-004-confirmatory

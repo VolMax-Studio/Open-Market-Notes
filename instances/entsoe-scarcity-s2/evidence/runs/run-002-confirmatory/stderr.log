@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/instances/entsoe-scarcity-s2/runner.py", line 596, in <module>
+    code = execute_run(instance_dir, run_dir, args.run_id, actual_sha)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/instances/entsoe-scarcity-s2/runner.py", line 339, in execute_run
+    parsed_data, docs_meta = parse_a85_xml(xml_bytes, zone, window_name)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/instances/entsoe-scarcity-s2/runner.py", line 498, in parse_a85_xml
+    root = ET.fromstring(xml_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/xml/etree/ElementTree.py", line 1335, in XML
+    parser.feed(text)
+xml.etree.ElementTree.ParseError: not well-formed (invalid token): line 1, column 2

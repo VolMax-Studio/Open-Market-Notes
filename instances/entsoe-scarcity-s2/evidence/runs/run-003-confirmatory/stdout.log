@@ -1,0 +1,54 @@
+=== OFFICIAL RUN START: 2026-09-05T12:13:01.650129+00:00 ===
+RUN_ID:     run-003-confirmatory
+PREREG_SHA: d9dfbbada85100243ba0150835d824c1c68629cd
+
+[01/12] Requesting AT baseline (202507312200 -> 202606302200)...
+  -> HTTP 200 OK (567574 bytes, SHA256: ee7e5ca81bf51c6e...)
+[02/12] Requesting AT target (202606302200 -> 202607312200)...
+  -> HTTP 200 OK (55990 bytes, SHA256: 3da936c8107f04b1...)
+[03/12] Requesting BE baseline (202507312200 -> 202606302200)...
+  -> HTTP 200 OK (595789 bytes, SHA256: 74505406e5ff52b8...)
+[04/12] Requesting BE target (202606302200 -> 202607312200)...
+  -> HTTP 200 OK (60200 bytes, SHA256: c9ea7c0764d122db...)
+[05/12] Requesting DK_1 baseline (202507312200 -> 202606302200)...
+  -> HTTP 200 OK (424384 bytes, SHA256: 116884d4932c913d...)
+[06/12] Requesting DK_1 target (202606302200 -> 202607312200)...
+  -> HTTP 200 OK (40757 bytes, SHA256: 97d76f89205cdda5...)
+[07/12] Requesting DK_2 baseline (202507312200 -> 202606302200)...
+  -> HTTP 200 OK (426993 bytes, SHA256: e1fae28f44fd610a...)
+[08/12] Requesting DK_2 target (202606302200 -> 202607312200)...
+  -> HTTP 200 OK (41798 bytes, SHA256: f2c688a38d4ad1d5...)
+[09/12] Requesting FR baseline (202507312200 -> 202606302200)...
+  -> HTTP 200 OK (437114 bytes, SHA256: 92b6291efa414201...)
+[10/12] Requesting FR target (202606302200 -> 202607312200)...
+  -> HTTP 200 OK (41298 bytes, SHA256: 249af912bd617b15...)
+[11/12] Requesting NL baseline (202507312200 -> 202606302200)...
+  -> HTTP 200 OK (351906 bytes, SHA256: a737960d9b3f8433...)
+[12/12] Requesting NL target (202606302200 -> 202607312200)...
+  -> HTTP 200 OK (34774 bytes, SHA256: 61d8cbd2c1971b48...)
+
+=== ACQUISITION COMPLETED: 2026-09-05T12:14:55.177066+00:00 ===
+
+=== EXTRACTING PKZIP CONTAINERS & EVALUATING TARGET S ===
+Target S [AT   baseline]: S-FAIL (Observed: 8757/32064, Missing: 23307, Duplicates: 8757)
+Target S [AT   target  ]: S-FAIL (Observed: 2964/2976, Missing: 12, Duplicates: 2964)
+Target S [BE   baseline]: S-FAIL (Observed: 16494/32064, Missing: 15570, Duplicates: 16494)
+Target S [BE   target  ]: S-FAIL (Observed: 2932/2976, Missing: 44, Duplicates: 2932)
+Target S [DK_1 baseline]: S-FAIL (Observed: 784/32064, Missing: 31280, Duplicates: 784)
+Target S [DK_1 target  ]: S-FAIL (Observed: 2867/2976, Missing: 109, Duplicates: 2867)
+Target S [DK_2 baseline]: S-FAIL (Observed: 774/32064, Missing: 31290, Duplicates: 774)
+Target S [DK_2 target  ]: S-FAIL (Observed: 2908/2976, Missing: 68, Duplicates: 2908)
+Target S [FR   baseline]: S-FAIL (Observed: 31039/32064, Missing: 1025, Duplicates: 31030)
+Target S [FR   target  ]: S-FAIL (Observed: 2802/2976, Missing: 174, Duplicates: 2802)
+Target S [NL   baseline]: S-FAIL (Observed: 29867/32064, Missing: 2197, Duplicates: 27063)
+Target S [NL   target  ]: S-FAIL (Observed: 2796/2976, Missing: 180, Duplicates: 2581)
+
+=== EVALUATING TARGET R (SCARCITY REPRODUCTION) ===
+Zone AT: Target S failed -> Target R NOT_EVALUATED
+Zone BE: Target S failed -> Target R NOT_EVALUATED
+Zone DK_1: Target S failed -> Target R NOT_EVALUATED
+Zone DK_2: Target S failed -> Target R NOT_EVALUATED
+Zone FR: Target S failed -> Target R NOT_EVALUATED
+Zone NL: Target S failed -> Target R NOT_EVALUATED
+
+All run artifacts and logs written to /home/volmax-studio/volmax-projects/iot2/PORTFOLIO/Open-Market-Notes/instances/entsoe-scarcity-s2/evidence/runs/run-003-confirmatory
