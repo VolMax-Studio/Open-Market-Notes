@@ -1,0 +1,1 @@
+python3 instances/entsoe-scarcity-s2/runner.py --run-id run-004-confirmatory --prereg-sha 88c7959e3dae0eb8cb5ad49640424d368e625eea --source-raw-dir instances/entsoe-scarcity-s2/evidence/runs/run-003-confirmatory/raw

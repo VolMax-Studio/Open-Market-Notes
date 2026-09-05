@@ -264,13 +264,13 @@ A failed run is not erased when a later run succeeds.
 
 ## Status
 
-- **Latest completed run:** `run-003-confirmatory`
-- **Acquisition:** `COMPLETE (12/12 HTTP 200)`
-- **Interpretation:** `INVALID (frozen parser defect)`
-- **Target S:** `NOT INTERPRETABLE`
-- **Target R:** `NOT EVALUATED`
-- **Scientific verdict:** `NONE`
-- **Next protocol step:** `prereg v4 → Gate → Operator acceptance → run-004 (offline interpretation over run-003 vintage)`
+- **Latest completed run:** `run-004-confirmatory`
+- **Acquisition:** `VERIFIED (reused pinned 12/12 HTTP 200 raw vintage from run-003)`
+- **Interpretation:** `DETERMINISTIC / VALID (zero duplicates across all 12 series)`
+- **Target S:** `S-FAIL across all 6 zones (true source missing MTUs present, 0 duplicates, 0 unexpected)`
+- **Target R:** `NOT EVALUATED (blocked by Target S structural gate failure)`
+- **Scientific verdict:** `NONE (pending post-execution Gate & Operator ratification)`
+- **Next protocol step:** `Post-Execution Gate for run-004-confirmatory`
 
 ---
 
