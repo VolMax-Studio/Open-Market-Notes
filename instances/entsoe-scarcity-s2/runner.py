@@ -82,7 +82,6 @@ def verify_environment(instance_dir, expected_prereg_sha=None):
             text=True,
             check=True
         )
-        # Note: If uncommitted changes exist, halt immediately
         if res_status.stdout.strip():
             sys.stderr.write(f"FATAL [EXECUTION_STATE_INVALID]: Working tree is not clean:\n{res_status.stdout}\n")
             sys.exit(1)
@@ -267,8 +266,8 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
                 req_record['reason_text'] = reason_text
 
                 if code == "999" or "No matching data found" in (reason_text or ""):
-                    halt_class = "SOURCE_DATA_ABSENT"
-                    halt_reason = f"SOURCE_DATA_ABSENT: Reason 999 on {zone} {window_name}: {reason_text}"
+                    halt_class = "API_REPORTS_NO_MATCHING_DATA"
+                    halt_reason = f"API_REPORTS_NO_MATCHING_DATA: Reason 999 on {zone} {window_name}: {reason_text}"
                 elif "amount of requested data exceeds allowed limit" in (reason_text or "") or "exceeds allowed limit" in raw_bytes.decode('utf-8', errors='replace'):
                     halt_class = "REQUEST_CONTRACT_UNSUPPORTED"
                     halt_reason = f"REQUEST_CONTRACT_UNSUPPORTED: Query window exceeded on {zone} {window_name}: {reason_text}"
@@ -340,6 +339,27 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
             parsed_data, docs_meta = parse_a85_xml(xml_bytes, zone, window_name)
             doc_inventory[key] = docs_meta
 
+            # B-16 Enforcement: Document Identity Verification
+            has_correct_resolution = (len(docs_meta) > 0 and all(d.get('resolution') == 'PT15M' for d in docs_meta))
+            has_correct_doctype = (len(docs_meta) > 0 and all(d.get('document_type') == 'A85' for d in docs_meta))
+            has_correct_process = (len(docs_meta) > 0 and all(d.get('process_type') == 'A16' for d in docs_meta))
+
+            if not (has_correct_doctype and has_correct_process and has_correct_resolution):
+                halt_class = "SOURCE_IDENTITY_INVALID"
+                halt_reason = (
+                    f"SOURCE_IDENTITY_INVALID: Payload failed document identity invariants on {zone} {window_name} "
+                    f"(doctype_ok={has_correct_doctype}, process_ok={has_correct_process}, res_ok={has_correct_resolution})"
+                )
+                print(f"\n[AUDIT HALT — {halt_class}] {halt_reason}")
+                run_metadata['halt_class'] = halt_class
+                run_metadata['halt_reason'] = halt_reason
+                with open(os.path.join(run_dir, "run_metadata.json"), "w") as f:
+                    json.dump(run_metadata, f, indent=2)
+                with open(os.path.join(run_dir, "exit_code.txt"), "w") as f:
+                    f.write("1\n")
+                save_outputs_sha256(run_dir)
+                return 1
+
             observed_timestamps = [p['timestamp_utc'] for p in parsed_data]
             unique_observed = sorted(list(set(observed_timestamps)))
 
@@ -357,10 +377,6 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha):
             missing_listings[key] = missing
             unexpected_listings[key] = unexpected
             duplicate_listings[key] = duplicates
-
-            has_correct_resolution = all(d.get('resolution') == 'PT15M' for d in docs_meta)
-            has_correct_doctype = all(d.get('document_type') == 'A85' for d in docs_meta)
-            has_correct_process = all(d.get('process_type') == 'A16' for d in docs_meta)
 
             s_pass = (
                 len(missing) == 0 and

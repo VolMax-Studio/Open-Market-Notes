@@ -1,7 +1,7 @@
 # ENTSO-E Scarcity Vintage-Stability Audit — Pre-registration
 
 **Instance:** `entsoe-scarcity-s2`  
-**Status:** DRAFT v2 — NOT FROZEN (FOR PRE-EXECUTION GATE REVIEW)  
+**Status:** DRAFT v2 (Pre-execution draft specification for run-002-confirmatory)  
 **Deadline:** 2026-09-12  
 **Architecture:** Pinned-vintage ENTSO-E Transparency Platform / IEC 62325 raw-document architecture  
 **Audit Class:** Internal self-reproduction and vintage-stability audit of published VolMax Open Market Note #003 findings.  
@@ -45,12 +45,12 @@ Regulatory / document identity:
 - raw ENTSO-E / IEC 62325 balancing-market documents (`Balancing_MarketDocument` XML).
 
 Target Area EICs (`controlArea_Domain`):
-- AT: `10YAT-APG------L`
-- BE: `10YBE----------2`
-- DK-1: `10YDK-1--------W`
-- DK-2: `10YDK-2--------M`
-- FR: `10YFR-RTE------C`
-- NL: `10YNL----------L`
+- AT (Austria): `10YAT-APG------L` (Austrian Power Grid CA/BZ per ENTSO-E Market Areas v2.0; confirmed HTTP 200 in run-001)
+- BE (Belgium): `10YBE----------2` (Belgian BZ/CA per ENTSO-E Market Areas v2.0; replaces Elia Party EIC `10YBE----------X`)
+- DK-1 (Denmark West): `10YDK-1--------W` (DK1 BZ per ENTSO-E Market Areas v2.0)
+- DK-2 (Denmark East): `10YDK-2--------M` (DK2 BZ per ENTSO-E Market Areas v2.0; aligned with DK1 BZ scheme, replacing CA code `10YDK-2--------T`)
+- FR (France): `10YFR-RTE------C` (RTE CA/BZ per ENTSO-E Market Areas v2.0)
+- NL (Netherlands): `10YNL----------L` (TenneT NL CA/BZ per ENTSO-E Market Areas v2.0)
 
 *(Area EIC provenance: Pinned from primary ENTSO-E Market Areas v2.0 specification; selector `controlArea_Domain` sourced from ENTSO-E Implementation Guide for Data Extraction).*
 
@@ -172,7 +172,7 @@ Record, without repair:
 ### S-PASS
 A zone/window passes the structural gate only when:
 $$\text{missing} = 0 \quad \text{AND} \quad \text{duplicates} = 0 \quad \text{AND} \quad \text{unexpected timestamps} = 0$$
-AND every populated series used by the estimator has the preregistered `PT15M` semantics.
+AND every populated series used by the estimator has the preregistered `PT15M` semantics and passes document identity checks (`documentType == A85` and `processType == A16`).
 
 ### S-HALT
 Any unexplained deviation from the exact interval population halts scarcity interpretation for the affected zone/window.  
@@ -216,7 +216,7 @@ The quantile estimator is strictly and uniquely defined as:
 ```python
 R_z = float(pd.Series(B_z).quantile(0.90, interpolation='linear'))
 ```
-*(Mathematical equivalence note: This corresponds to Type 7 linear interpolation $Q(p) = (1-\gamma)x_j + \gamma x_{j+1}$ where index $j = \lfloor (n-1)p \rfloor + 1$ and $\gamma = (n-1)p - \lfloor (n-1)p \rfloor$. No alternative software method or default is permitted).*
+*(Mathematical equivalence note: This corresponds to Type 7 linear interpolation $Q(p) = (1-\gamma)x_j + \gamma x_{j+1}$ where index $j = \lfloor (n-1)p \rfloor + 1$ and $\gamma = (n-1)p - \lfloor (n-1)p \rfloor$. Executable environment is strictly pinned in requirements.txt: pandas==2.3.3, numpy==1.26.4, requests==2.34.2).*
 
 Column mapping by zone (DocumentType `A85`):
 - AT: `Short` (Single pricing)
@@ -291,13 +291,13 @@ The run produces separate outcomes:
 - `PARTIALLY_REPRODUCED`
 - `NOT_EVALUATED`
 
-### Frozen Halt Taxonomy
+### Frozen Halt Taxonomy (B-17 & B-16 Resolution)
 When execution stops abnormally, the reason must be strictly classified into one of the following categories:
 1. `HTTP_ERROR`: Non-200 HTTP response code returned by the server (e.g. 400, 401, 403, 429, 500, 503).
 2. `REQUEST_CONTRACT_UNSUPPORTED`: API returns an Acknowledgement payload explicitly rejecting the request structure or time window (e.g. "amount of requested data exceeds allowed limit").
-3. `SOURCE_DATA_ABSENT`: API returns an Acknowledgement payload with Reason 999 ("No matching data found") for a registered valid Area EIC.
+3. `API_REPORTS_NO_MATCHING_DATA`: API returns an Acknowledgement payload with Reason 999 ("No matching data found for Data item ... and interval"). *Note: This classification strictly describes the textual response returned by the API for the submitted query parameters, and does not assert physical absence of underlying market data in the power system.*
 4. `API_REASON_OTHER`: API returns an Acknowledgement payload with a reason code other than 999.
-5. `SOURCE_IDENTITY_INVALID`: Returned payload violates document identity invariants (e.g. `documentType != A85`, `processType != A16`, or unexpected resolution != `PT15M`).
+5. `SOURCE_IDENTITY_INVALID`: Returned XML payload violates document identity invariants (e.g. `documentType != A85`, `processType != A16`, or unexpected resolution != `PT15M`). This condition is actively enforced in `runner.py`.
 6. `EXECUTION_STATE_INVALID`: Execution environment preconditions violated (e.g. non-clean working tree, git commit mismatch with governing `PREREG_SHA`).
 
 ---
@@ -378,13 +378,13 @@ Any data execution before step 6 is:
 
 HALT when any of the following occurs:
 - executed git SHA differs from frozen SHA;
-- git working tree is not clean at run initialization;
+- git working tree is not clean at run initialization (`EXECUTION_STATE_INVALID`);
 - exact ENTSO-E source identity is unresolved;
-- expected A85 document identity cannot be established;
+- expected A85 document identity cannot be established (`SOURCE_IDENTITY_INVALID`);
 - requested period semantics are ambiguous;
 - timezone conversion is ambiguous;
 - API rejects request duration or structure (`REQUEST_CONTRACT_UNSUPPORTED`);
-- API returns missing data acknowledgement (`SOURCE_DATA_ABSENT`);
+- API returns missing data acknowledgement (`API_REPORTS_NO_MATCHING_DATA`);
 - quantile implementation cannot be executed via pinned `pandas.Series.quantile(0.90, interpolation='linear')`;
 - unexpected MTU resolution is present;
 - raw artifact is unavailable;
