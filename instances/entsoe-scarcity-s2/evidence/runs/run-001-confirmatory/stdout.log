@@ -1,0 +1,19 @@
+=== OFFICIAL RUN START: 2026-09-05T11:34:11.743593+00:00 ===
+RUN_ID:     run-001-confirmatory
+PREREG_SHA: 1f6f52d9c6029d105e8a4b80499c7c0553c7525b
+
+[01/12] Requesting AT baseline (202507312200 -> 202606302200)...
+  -> HTTP 200 OK (567572 bytes, SHA256: c89f4607f36c984f...)
+[02/12] Requesting AT target (202606302200 -> 202607312200)...
+  -> HTTP 200 OK (55981 bytes, SHA256: f8d39805d1146505...)
+[03/12] Requesting BE baseline (202507312200 -> 202606302200)...
+  -> HTTP 200 FAIL / API Error. Response snippet: <?xml version="1.0" encoding="UTF-8"?>
+<Acknowledgement_MarketDocument
+	xmlns="urn:iec62325.351:tc57wg16:451-1:acknowledgementdocument:7:0">
+	<mRID>85a08d89-1bc9-4</mRID>
+	<createdDateTime>2026-09-05T11:34:40Z</createdDateTime>
+	<sender_MarketParticipant.mRID codingScheme="A01">10X1001A1001A450</sen
+
+=== ACQUISITION COMPLETED: 2026-09-05T11:34:40.997886+00:00 ===
+
+[AUDIT HALT] HALT: request contract unsupported (HTTP 200 on BE baseline)
