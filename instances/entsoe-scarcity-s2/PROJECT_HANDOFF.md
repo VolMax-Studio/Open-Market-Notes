@@ -5,14 +5,15 @@
 Project: entsoe-scarcity-s2
 Repository: VolMax-Studio/Open-Market-Notes
 Branch: instances/entsoe-scarcity-s2
-Current commit: 1f6f52d9c6029d105e8a4b80499c7c0553c7525b
-Preregistration commit: 1f6f52d9c6029d105e8a4b80499c7c0553c7525b
-Latest run ID: run-001-confirmatory
+Current commit: Pending draft v2 commit
+Preregistration commit: Pending Gate pass and Operator freeze (PREREG_SHA_v2)
+Latest run ID: run-001-confirmatory (Exploratory / Protocol Non-Compliance)
+Next run ID: run-002-confirmatory (NOT YET AUTHORIZED)
 Deadline: 2026-09-12
 
 ## Phase
 
-Preregistered (FROZEN) — Execution State: HALT
+Specification Draft v2 (PRE-EXECUTION GATE DRAFT) — Execution State: NOT AUTHORIZED
 
 Portfolio status: ACTIVE / DEADLINE PRIORITY
 
@@ -36,28 +37,23 @@ Source location: ENTSO-E REST API DocumentType A85 (Area EICs: AT, BE, DK-1, DK-
 
 Public artifacts:
 - ENTSO-E Transparency Platform API (`https://web-api.tp.entsoe.eu/api`, DocumentType A85 / processType A16 / IEC 62325 XML).
-- Raw HTTP response bodies captured under `evidence/runs/run-001-confirmatory/raw/`.
+- Raw HTTP response bodies from run-001 captured under `evidence/runs/run-001-confirmatory/raw/`.
 
-Hashes / DOI / commit SHA:
-See `evidence/runs/run-001-confirmatory/outputs.sha256`.
+Hashes / commit SHA:
+- Preserved run-001 evidence in `evidence/runs/run-001-confirmatory/`.
 
 ## Current results
 
-Measured: none (halted on request 3/12)
-Derived: none
-Scope findings:
-- Request 1 (AT baseline 334d): HTTP 200 OK (567,572 bytes)
-- Request 2 (AT target 31d): HTTP 200 OK (55,981 bytes)
-- Request 3 (BE baseline 334d): HTTP 200 Acknowledgement_MarketDocument Reason 999: "No matching data found for Data item IMBALANCE_PRICES_R3 [17.1.G] (10YBE----------X) and interval 2025-07-31T22:00:00Z/2026-06-30T22:00:00Z."
-Protocol outcome: HALT: request contract unsupported
+- run-001-confirmatory: Permanently classified as `Exploratory (Protocol Non-Compliance)` per FAILURES #003 due to post-freeze harness authorship and incorrect area identifier for Belgium (`10YBE----------X` vs `10YBE----------2`).
+- run-002-confirmatory: Not yet authorized. Awaiting pre-execution Gate review of Draft v2 specification.
 
 ## Gate status
 
 Gate model/person: Claude
-Gate outcome: PENDING POST-EXECUTION GATE
+Gate outcome: PENDING PRE-EXECUTION GATE REVIEW (Draft v2)
 Blocking findings:
-Official run halted per preregistered HALT rule (§14).
+None pending review.
 
 ## Next single action
 
-Submit run-001-confirmatory evidence packet to Claude for post-execution Gate review.
+Submit Draft v2 commit to Claude for pre-execution Gate review.

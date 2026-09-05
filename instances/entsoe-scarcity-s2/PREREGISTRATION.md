@@ -1,7 +1,7 @@
 # ENTSO-E Scarcity Vintage-Stability Audit — Pre-registration
 
 **Instance:** `entsoe-scarcity-s2`  
-**Status:** DRAFT — NOT FROZEN (SPREMNO ZA PRE-EXECUTION GEJT)  
+**Status:** DRAFT v2 — NOT FROZEN (FOR PRE-EXECUTION GATE REVIEW)  
 **Deadline:** 2026-09-12  
 **Architecture:** Pinned-vintage ENTSO-E Transparency Platform / IEC 62325 raw-document architecture  
 **Audit Class:** Internal self-reproduction and vintage-stability audit of published VolMax Open Market Note #003 findings.  
@@ -9,7 +9,7 @@
 
 This instance is a new registered reproduction / vintage-stability audit.  
 It is not a repair of `entsoe-scarcity-s1`.  
-The team has prior exposure to the published July-2026 scarcity result. Therefore this instance is not outcome-naive and must not be described as first-pass confirmatory discovery.
+The team has prior exposure to the published July-2026 scarcity result and empirical findings from exploratory `run-001`. Therefore this instance is not outcome-naive and must not be described as first-pass confirmatory discovery.
 
 ---
 
@@ -41,16 +41,18 @@ Data class:
 Regulatory / document identity:
 - TR art. 17.1.g / corresponding balancing publication;
 - `documentType = A85`;
-- realised process: `processType = A16`;
+- realised process: `processType = A16` (XML validation invariant);
 - raw ENTSO-E / IEC 62325 balancing-market documents (`Balancing_MarketDocument` XML).
 
 Target Area EICs (`controlArea_Domain`):
 - AT: `10YAT-APG------L`
-- BE: `10YBE----------X`
+- BE: `10YBE----------2`
 - DK-1: `10YDK-1--------W`
-- DK-2: `10YDK-2--------T`
+- DK-2: `10YDK-2--------M`
 - FR: `10YFR-RTE------C`
 - NL: `10YNL----------L`
+
+*(Area EIC provenance: Pinned from primary ENTSO-E Market Areas v2.0 specification; selector `controlArea_Domain` sourced from ENTSO-E Implementation Guide for Data Extraction).*
 
 ### Request Plan (Exactly 12 Requests)
 The official acquisition executes exactly 12 HTTP GET requests (6 zones $\times$ 2 measurement windows):
@@ -75,7 +77,7 @@ For each zone:
 
 ### Boundary & Chunking Invariants
 - **Zero Chunking:** No monthly partitioning. No adaptive date sub-window retry.
-- **Unsupported Request Rule:** If the baseline 334-day request is rejected because the API imposes a tighter A85 interval limit $\rightarrow$ `HALT: request contract unsupported`. A new preregistration version is required.
+- **No Adaptive Selectors:** No selector modifications during execution. Any failure halts immediately under the frozen taxonomy.
 
 No `entsoe-py` dataframe is an evidentiary source.  
 The authoritative input for this instance is the preserved raw response payload from the ENTSO-E API.
@@ -271,7 +273,7 @@ No cause is inferred without evidence.
 
 ---
 
-## 10. Decision outcomes
+## 10. Decision outcomes & Halt Taxonomy
 
 The run produces separate outcomes:
 
@@ -289,7 +291,14 @@ The run produces separate outcomes:
 - `PARTIALLY_REPRODUCED`
 - `NOT_EVALUATED`
 
-*(These are reproduction outcomes for an internal self-reproduction audit; no controlled P10 independent verification verdict is automatically generated).*
+### Frozen Halt Taxonomy
+When execution stops abnormally, the reason must be strictly classified into one of the following categories:
+1. `HTTP_ERROR`: Non-200 HTTP response code returned by the server (e.g. 400, 401, 403, 429, 500, 503).
+2. `REQUEST_CONTRACT_UNSUPPORTED`: API returns an Acknowledgement payload explicitly rejecting the request structure or time window (e.g. "amount of requested data exceeds allowed limit").
+3. `SOURCE_DATA_ABSENT`: API returns an Acknowledgement payload with Reason 999 ("No matching data found") for a registered valid Area EIC.
+4. `API_REASON_OTHER`: API returns an Acknowledgement payload with a reason code other than 999.
+5. `SOURCE_IDENTITY_INVALID`: Returned payload violates document identity invariants (e.g. `documentType != A85`, `processType != A16`, or unexpected resolution != `PT15M`).
+6. `EXECUTION_STATE_INVALID`: Execution environment preconditions violated (e.g. non-clean working tree, git commit mismatch with governing `PREREG_SHA`).
 
 ---
 
@@ -301,12 +310,16 @@ Before this preregistration the team has already seen:
 - the published July-2026 six-zone occupancy values;
 - the published five-of-six classification;
 - alternative exploratory baseline constructions;
-- cross-source investigations involving Danish intervals.
+- cross-source investigations involving Danish intervals;
+- **Exploratory `run-001` outcomes:**
+  1. Austria baseline request over the full 334-day window succeeded with HTTP 200 (567,572 bytes), establishing that the ENTSO-E API accepts 334-day A85 requests.
+  2. Austria target request over 31 days succeeded with HTTP 200 (55,981 bytes).
+  3. Belgium baseline request using `10YBE----------X` returned Reason 999 because `10YBE----------X` is the Elia TSO Party identifier rather than the Area EIC `10YBE----------2`.
 
 Therefore:
 - this run is not epistemically blind;
 - the old result is not treated as unseen confirmatory evidence;
-- the contribution of s2 is the stricter source-vintage and exact-boundary test.
+- the contribution of s2 is the stricter source-vintage, exact-boundary, and raw-document verification.
 
 The exploratory six-month rolling-baseline analysis is not part of this target and must not be substituted for the published July-specific rule.
 
@@ -343,21 +356,21 @@ Derived counts do not replace raw listings.
 ## 13. Freeze and execution order
 
 Required order:
-1. complete L0 source/schema/licence identification and 12-request contract;
+1. Complete L0 source/schema/licence identification, 12-request contract, and executable harness (`runner.py`, `requirements.txt`);
 2. Claude pre-execution Gate review of draft specification;
 3. Sol addresses any gate findings;
 4. Ivan accepts specification;
-5. commit frozen preregistration on `main`;
-6. record preregistration SHA (`PREREG_SHA`);
-7. no further semantic changes;
+5. Commit frozen preregistration on `main` (or designated tracking branch);
+6. Record preregistration SHA (`PREREG_SHA`);
+7. No further semantic or code changes;
 8. Ananke executes official run strictly on `PREREG_SHA` (capturing raw responses at $T_{\text{vintage}}$);
-9. literal evidence packet produced under `evidence/runs/<RUN_ID>/`;
-10. clean recreation from preserved raw vintage;
+9. Literal evidence packet produced under `evidence/runs/<RUN_ID>/`;
+10. Clean recreation from preserved raw vintage;
 11. Claude final Gate;
 12. Ivan ratification.
 
 Any data execution before step 6 is:
-`Exploratory (not pre-registered)`.
+`Exploratory (Protocol Non-Compliance)`.
 
 ---
 
@@ -365,11 +378,13 @@ Any data execution before step 6 is:
 
 HALT when any of the following occurs:
 - executed git SHA differs from frozen SHA;
+- git working tree is not clean at run initialization;
 - exact ENTSO-E source identity is unresolved;
 - expected A85 document identity cannot be established;
 - requested period semantics are ambiguous;
 - timezone conversion is ambiguous;
-- API rejects 334-day or 31-day request (`HALT: request contract unsupported`);
+- API rejects request duration or structure (`REQUEST_CONTRACT_UNSUPPORTED`);
+- API returns missing data acknowledgement (`SOURCE_DATA_ABSENT`);
 - quantile implementation cannot be executed via pinned `pandas.Series.quantile(0.90, interpolation='linear')`;
 - unexpected MTU resolution is present;
 - raw artifact is unavailable;
@@ -379,7 +394,7 @@ HALT when any of the following occurs:
 - later source data replaces the frozen vintage;
 - authentication/request failure prevents complete acquisition.
 
-No threshold or estimator is changed after HALT.
+No threshold, selector, or estimator is changed after HALT.
 
 ---
 

@@ -2,7 +2,9 @@
 """
 runner.py — Official Execution Harness for entsoe-scarcity-s2
 
-Executes the frozen 12-request acquisition batch under PREREG_SHA 1f6f52d9c6029d105e8a4b80499c7c0553c7525b.
+Executes the frozen 12-request acquisition batch.
+Enforces pre-execution environment invariants (clean tree, git commit verification).
+Derives evidence dynamically from system state.
 Preserves all raw response payloads byte-for-byte before parsing.
 Evaluates Target S (exact population) and Target R (July 2026 scarcity classification).
 """
@@ -12,6 +14,7 @@ import sys
 import json
 import hashlib
 import argparse
+import subprocess
 from datetime import datetime, timezone, timedelta
 import urllib.request
 import urllib.parse
@@ -19,15 +22,14 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 
-PREREG_SHA = "1f6f52d9c6029d105e8a4b80499c7c0553c7525b"
-RUN_ID = "run-001-confirmatory"
 ENDPOINT = "https://web-api.tp.entsoe.eu/api"
 
+# Pinned Area EICs per ENTSO-E Market Areas v2.0
 ZONES = {
     'AT': '10YAT-APG------L',
-    'BE': '10YBE----------X',
+    'BE': '10YBE----------2',
     'DK_1': '10YDK-1--------W',
-    'DK_2': '10YDK-2--------T',
+    'DK_2': '10YDK-2--------M',
     'FR': '10YFR-RTE------C',
     'NL': '10YNL----------L'
 }
@@ -58,6 +60,55 @@ PUBLISHED_REFERENCES = {
     'DK_2': {'occupancy': 11.3, 'classification': 'NOT_ELEVATED'}
 }
 
+IMMUTABLE_INPUT_FILES = [
+    "PREREGISTRATION.md",
+    "L0.md",
+    "runner.py",
+    "requirements.txt"
+]
+
+
+def verify_environment(instance_dir, expected_prereg_sha=None):
+    """
+    Verifies git working tree cleanliness and captures dynamic commit SHA.
+    Enforces EXECUTION_STATE_INVALID halt if preconditions fail.
+    """
+    try:
+        # 1. Clean status check
+        res_status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=instance_dir,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        # Note: If uncommitted changes exist, halt immediately
+        if res_status.stdout.strip():
+            sys.stderr.write(f"FATAL [EXECUTION_STATE_INVALID]: Working tree is not clean:\n{res_status.stdout}\n")
+            sys.exit(1)
+
+        # 2. Dynamic SHA capture
+        res_sha = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=instance_dir,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        actual_sha = res_sha.stdout.strip()
+
+        # 3. If governing PREREG_SHA is passed, verify exact match
+        if expected_prereg_sha and actual_sha != expected_prereg_sha:
+            sys.stderr.write(
+                f"FATAL [EXECUTION_STATE_INVALID]: git rev-parse HEAD ({actual_sha}) != expected PREREG_SHA ({expected_prereg_sha})\n"
+            )
+            sys.exit(1)
+
+        return actual_sha
+    except Exception as e:
+        sys.stderr.write(f"FATAL [EXECUTION_STATE_INVALID]: Failed git environment check: {e}\n")
+        sys.exit(1)
+
 
 def get_token():
     token_path = os.environ.get("ENTSOE_TOKEN_PATH", "/home/volmax-studio/Documents/Kljucevi/apientso.txt")
@@ -75,24 +126,65 @@ def generate_expected_grid(start_iso, end_iso):
     """Generates continuous 15-minute UTC timestamp grid [start, end)."""
     start_dt = pd.to_datetime(start_iso)
     end_dt = pd.to_datetime(end_iso)
-    # 15min intervals from start inclusive to end exclusive
     grid = pd.date_range(start=start_dt, end=end_dt - pd.Timedelta(minutes=15), freq='15min')
     return [ts.strftime('%Y-%m-%dT%H:%M:%SZ') for ts in grid]
 
 
-def execute_run(run_dir):
+def record_immutable_inputs(instance_dir, run_dir):
+    """Records sha256 digests strictly for immutable specification and execution code."""
+    input_hashes = []
+    for filename in IMMUTABLE_INPUT_FILES:
+        filepath = os.path.join(instance_dir, filename)
+        if not os.path.exists(filepath):
+            sys.stderr.write(f"FATAL [EXECUTION_STATE_INVALID]: Required input file {filename} missing at {filepath}\n")
+            sys.exit(1)
+        with open(filepath, "rb") as f:
+            h = hashlib.sha256(f.read()).hexdigest()
+        input_hashes.append(f"{h}  {filename}")
+
+    inputs_file = os.path.join(run_dir, "inputs.sha256")
+    with open(inputs_file, "w") as f:
+        f.write("\n".join(input_hashes) + "\n")
+
+
+def parse_acknowledgement(raw_bytes):
+    """Parses ENTSO-E Acknowledgement_MarketDocument XML to classify error reasons."""
+    try:
+        root = ET.fromstring(raw_bytes)
+        ns = {'ns': root.tag.split('}')[0].strip('{')} if '}' in root.tag else {}
+        reason_elem = root.find('.//ns:Reason', ns) if ns else root.find('.//Reason')
+        if reason_elem is not None:
+            code_node = reason_elem.find('.//ns:code', ns) if ns else reason_elem.find('.//code')
+            text_node = reason_elem.find('.//ns:text', ns) if ns else reason_elem.find('.//text')
+            code = code_node.text.strip() if code_node is not None and code_node.text else ""
+            text = text_node.text.strip() if text_node is not None and text_node.text else ""
+            return code, text
+    except Exception:
+        pass
+    return None, None
+
+
+def execute_run(instance_dir, run_dir, run_id, prereg_sha):
     raw_dir = os.path.join(run_dir, "raw")
     os.makedirs(raw_dir, exist_ok=True)
+
+    # 1. Record inputs.sha256
+    record_immutable_inputs(instance_dir, run_dir)
+
+    # 2. Record dynamic git_commit.txt
+    with open(os.path.join(run_dir, "git_commit.txt"), "w") as f:
+        f.write(f"{prereg_sha}\n")
 
     token = get_token()
 
     t_run_start = datetime.now(timezone.utc).isoformat()
     print(f"=== OFFICIAL RUN START: {t_run_start} ===")
-    print(f"RUN_ID:     {RUN_ID}")
-    print(f"PREREG_SHA: {PREREG_SHA}\n")
+    print(f"RUN_ID:     {run_id}")
+    print(f"PREREG_SHA: {prereg_sha}\n")
 
     requests_meta = []
     raw_file_hashes = {}
+    halt_class = None
     halt_reason = None
 
     # Step 1: Execute exactly 12 HTTP requests
@@ -109,7 +201,6 @@ def execute_run(run_dir):
                 'securityToken': token
             }
             
-            # Redacted query string for logging
             redacted_params = {k: ('[REDACTED]' if k == 'securityToken' else v) for k, v in params.items()}
             query_str = urllib.parse.urlencode(params)
             full_url = f"{ENDPOINT}?{query_str}"
@@ -117,10 +208,9 @@ def execute_run(run_dir):
 
             print(f"[{req_idx:02d}/12] Requesting {zone} {window_name} ({win_info['periodStart']} -> {win_info['periodEnd']})...")
             
-            req_obj = urllib.request.Request(full_url, headers={'User-Agent': 'VolMax-Studio-Audit/1.0'})
+            req_obj = urllib.request.Request(full_url, headers={'User-Agent': 'VolMax-Studio-Audit/2.0'})
             status_code = None
             raw_bytes = b''
-            error_body = None
 
             try:
                 with urllib.request.urlopen(req_obj, timeout=120) as resp:
@@ -129,15 +219,14 @@ def execute_run(run_dir):
             except urllib.error.HTTPError as e:
                 status_code = e.code
                 raw_bytes = e.read()
-                error_body = raw_bytes.decode('utf-8', errors='replace')
             except Exception as e:
                 status_code = 0
-                error_body = str(e)
+                raw_bytes = str(e).encode('utf-8')
 
             t_resp = datetime.now(timezone.utc).isoformat()
             sha256_digest = hashlib.sha256(raw_bytes).hexdigest() if raw_bytes else None
 
-            # Save raw bytes immediately
+            # Save raw bytes immediately before any inspection
             raw_filename = f"{zone}_{window_name}_raw.xml"
             raw_filepath = os.path.join(raw_dir, raw_filename)
             with open(raw_filepath, "wb") as f:
@@ -161,18 +250,40 @@ def execute_run(run_dir):
                 'redacted_url': redacted_url
             }
 
-            if status_code != 200 or b'<Reason>' in raw_bytes or b'amount of requested data exceeds allowed limit' in raw_bytes:
-                print(f"  -> HTTP {status_code} FAIL / API Error. Response snippet: {raw_bytes[:300].decode('utf-8', errors='replace')}")
+            # Evaluation of response status and halt taxonomy classification
+            if status_code != 200:
+                halt_class = "HTTP_ERROR"
+                halt_reason = f"HTTP_ERROR: Server returned HTTP {status_code} on {zone} {window_name}"
                 req_record['error'] = True
+                req_record['halt_class'] = halt_class
                 req_record['error_snippet'] = raw_bytes[:500].decode('utf-8', errors='replace')
                 requests_meta.append(req_record)
-                halt_reason = f"HALT: request contract unsupported (HTTP {status_code} on {zone} {window_name})"
                 break
-            else:
-                print(f"  -> HTTP {status_code} OK ({len(raw_bytes)} bytes, SHA256: {sha256_digest[:16]}...)")
-                requests_meta.append(req_record)
 
-        if halt_reason:
+            if b'<Reason>' in raw_bytes or b'Acknowledgement_MarketDocument' in raw_bytes:
+                code, reason_text = parse_acknowledgement(raw_bytes)
+                req_record['error'] = True
+                req_record['reason_code'] = code
+                req_record['reason_text'] = reason_text
+
+                if code == "999" or "No matching data found" in (reason_text or ""):
+                    halt_class = "SOURCE_DATA_ABSENT"
+                    halt_reason = f"SOURCE_DATA_ABSENT: Reason 999 on {zone} {window_name}: {reason_text}"
+                elif "amount of requested data exceeds allowed limit" in (reason_text or "") or "exceeds allowed limit" in raw_bytes.decode('utf-8', errors='replace'):
+                    halt_class = "REQUEST_CONTRACT_UNSUPPORTED"
+                    halt_reason = f"REQUEST_CONTRACT_UNSUPPORTED: Query window exceeded on {zone} {window_name}: {reason_text}"
+                else:
+                    halt_class = "API_REASON_OTHER"
+                    halt_reason = f"API_REASON_OTHER: Code {code} on {zone} {window_name}: {reason_text}"
+
+                req_record['halt_class'] = halt_class
+                requests_meta.append(req_record)
+                break
+
+            print(f"  -> HTTP {status_code} OK ({len(raw_bytes)} bytes, SHA256: {sha256_digest[:16]}...)")
+            requests_meta.append(req_record)
+
+        if halt_class:
             break
 
     t_run_end = datetime.now(timezone.utc).isoformat()
@@ -180,14 +291,15 @@ def execute_run(run_dir):
 
     # Step 2: Assemble run_metadata.json
     run_metadata = {
-        'run_id': RUN_ID,
-        'prereg_sha': PREREG_SHA,
+        'run_id': run_id,
+        'prereg_sha': prereg_sha,
         'repository': 'VolMax-Studio/Open-Market-Notes',
         'branch': 'instances/entsoe-scarcity-s2',
         't_run_start_utc': t_run_start,
         't_run_end_utc': t_run_end,
         'total_requests_executed': len(requests_meta),
         'expected_requests_count': 12,
+        'halt_class': halt_class,
         'halt_reason': halt_reason,
         'requests': requests_meta
     }
@@ -195,11 +307,10 @@ def execute_run(run_dir):
     with open(os.path.join(run_dir, "run_metadata.json"), "w") as f:
         json.dump(run_metadata, f, indent=2)
 
-    if halt_reason:
-        print(f"\n[AUDIT HALT] {halt_reason}")
+    if halt_class:
+        print(f"\n[AUDIT HALT — {halt_class}] {halt_reason}")
         with open(os.path.join(run_dir, "exit_code.txt"), "w") as f:
             f.write("1\n")
-        # Save output hashes
         save_outputs_sha256(run_dir)
         return 1
 
@@ -229,7 +340,6 @@ def execute_run(run_dir):
             parsed_data, docs_meta = parse_a85_xml(xml_bytes, zone, window_name)
             doc_inventory[key] = docs_meta
 
-            # Map observations to timestamps
             observed_timestamps = [p['timestamp_utc'] for p in parsed_data]
             unique_observed = sorted(list(set(observed_timestamps)))
 
@@ -239,7 +349,6 @@ def execute_run(run_dir):
             missing = sorted(list(exp_set - obs_set))
             unexpected = sorted(list(obs_set - exp_set))
             
-            # Duplicates calculation
             counts = {}
             for ts in observed_timestamps:
                 counts[ts] = counts.get(ts, 0) + 1
@@ -250,7 +359,17 @@ def execute_run(run_dir):
             duplicate_listings[key] = duplicates
 
             has_correct_resolution = all(d.get('resolution') == 'PT15M' for d in docs_meta)
-            s_pass = (len(missing) == 0 and len(duplicates) == 0 and len(unexpected) == 0 and has_correct_resolution)
+            has_correct_doctype = all(d.get('document_type') == 'A85' for d in docs_meta)
+            has_correct_process = all(d.get('process_type') == 'A16' for d in docs_meta)
+
+            s_pass = (
+                len(missing) == 0 and
+                len(duplicates) == 0 and
+                len(unexpected) == 0 and
+                has_correct_resolution and
+                has_correct_doctype and
+                has_correct_process
+            )
 
             target_s_verdicts[key] = {
                 'zone': zone,
@@ -261,14 +380,14 @@ def execute_run(run_dir):
                 'duplicate_count': len(duplicates),
                 'unexpected_count': len(unexpected),
                 'resolution_verified': has_correct_resolution,
+                'document_type_verified': has_correct_doctype,
+                'process_type_verified': has_correct_process,
                 'status': 'S-PASS' if s_pass else 'S-FAIL'
             }
 
             print(f"Target S [{zone:<4} {window_name:<8}]: {'S-PASS' if s_pass else 'S-FAIL'} (Observed: {len(unique_observed)}/{len(exp_grid)}, Missing: {len(missing)}, Duplicates: {len(duplicates)})")
 
             if s_pass:
-                # Organize time series for Target R
-                # Sort points by timestamp
                 ts_dict = {p['timestamp_utc']: p['shortage_price'] for p in parsed_data}
                 parsed_series[zone][window_name] = [ts_dict[ts] for ts in exp_grid]
 
@@ -337,8 +456,8 @@ def execute_run(run_dir):
     overall_reproduction = "REPRODUCED" if classifications_match else "PARTIALLY_REPRODUCED"
 
     derived_results = {
-        'run_id': RUN_ID,
-        'prereg_sha': PREREG_SHA,
+        'run_id': run_id,
+        'prereg_sha': prereg_sha,
         'structural_target_s': target_s_verdicts,
         'scarcity_target_r': target_r_results,
         'overall_classification_reproduction': overall_reproduction
@@ -358,11 +477,17 @@ def execute_run(run_dir):
 def parse_a85_xml(xml_bytes, zone, window_name):
     """
     Parses Balancing_MarketDocument XML payload.
-    Extracts 15-minute points, resolves latest document revisions, and returns point records.
+    Extracts 15-minute points, verifies process/document types, and resolves latest revisions.
     """
     root = ET.fromstring(xml_bytes)
     ns = {'ns': root.tag.split('}')[0].strip('{')} if '}' in root.tag else {}
     
+    doctype_elem = root.find('.//ns:type', ns) if ns else root.find('.//type')
+    doctype = doctype_elem.text.strip() if doctype_elem is not None and doctype_elem.text else ""
+
+    process_elem = root.find('.//ns:process.processType', ns) if ns else root.find('.//process.processType')
+    process_type = process_elem.text.strip() if process_elem is not None and process_elem.text else ""
+
     docs_meta = []
     points_out = []
 
@@ -372,11 +497,9 @@ def parse_a85_xml(xml_bytes, zone, window_name):
         mrid_elem = ts.find('.//ns:mRID', ns) if ns else ts.find('.//mRID')
         mrid = mrid_elem.text if mrid_elem is not None else "unknown"
 
-        # Direction / Shortage / Surplus
         flow_dir = ts.find('.//ns:flowDirection.direction', ns) if ns else ts.find('.//flowDirection.direction')
         dir_str = flow_dir.text if flow_dir is not None else ""
 
-        # Check resolution
         period_node = ts.find('.//ns:Period', ns) if ns else ts.find('.//Period')
         if period_node is None:
             continue
@@ -389,6 +512,8 @@ def parse_a85_xml(xml_bytes, zone, window_name):
 
         docs_meta.append({
             'mRID': mrid,
+            'document_type': doctype,
+            'process_type': process_type,
             'resolution': resolution,
             'direction': dir_str,
             'period_start': p_start
@@ -397,7 +522,6 @@ def parse_a85_xml(xml_bytes, zone, window_name):
         if not p_start:
             continue
 
-        # Parse Points
         p_start_dt = pd.to_datetime(p_start)
         point_nodes = period_node.findall('.//ns:Point', ns) if ns else period_node.findall('.//Point')
         
@@ -408,7 +532,6 @@ def parse_a85_xml(xml_bytes, zone, window_name):
             if pos_node is not None and price_node is not None:
                 pos = int(pos_node.text)
                 price = float(price_node.text)
-                # Position 1 is at p_start_dt + 0 min, position 2 is + 15 min, etc.
                 pt_time = p_start_dt + pd.Timedelta(minutes=15 * (pos - 1))
                 pt_iso = pt_time.strftime('%Y-%m-%dT%H:%M:%SZ')
 
@@ -440,11 +563,19 @@ def save_outputs_sha256(run_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Official Execution Runner for entsoe-scarcity-s2")
-    parser.add_argument("--run-id", default="run-001-confirmatory", help="Run ID")
+    parser.add_argument("--run-id", default="run-002-confirmatory", help="Run ID")
+    parser.add_argument("--prereg-sha", default=None, help="Expected governing PREREG_SHA")
+    parser.add_argument("--skip-git-check", action="store_true", help="Skip git environment checks (dry run only)")
     args = parser.parse_args()
 
-    run_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "evidence", "runs", args.run_id)
+    instance_dir = os.path.dirname(os.path.abspath(__file__))
+    run_dir = os.path.join(instance_dir, "evidence", "runs", args.run_id)
     os.makedirs(run_dir, exist_ok=True)
+
+    if not args.skip_git_check:
+        actual_sha = verify_environment(instance_dir, expected_prereg_sha=args.prereg_sha)
+    else:
+        actual_sha = args.prereg_sha or "unverified_dry_run"
     
-    code = execute_run(run_dir)
+    code = execute_run(instance_dir, run_dir, args.run_id, actual_sha)
     sys.exit(code)
