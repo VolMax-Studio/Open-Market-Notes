@@ -44,7 +44,7 @@ Regulatory / document identity:
 - realised process: `processType = A16`;
 - raw ENTSO-E / IEC 62325 balancing-market documents (`Balancing_MarketDocument` XML).
 
-Target Area EICs (`ControlArea_Domain`):
+Target Area EICs (`controlArea_Domain`):
 - AT: `10YAT-APG------L`
 - BE: `10YBE----------X`
 - DK-1: `10YDK-1--------W`
@@ -59,7 +59,7 @@ Query selector template:
 ```text
 GET https://web-api.tp.entsoe.eu/api
   ?documentType=A85
-  &ControlArea_Domain=<PINNED_EIC>
+  &controlArea_Domain=<PINNED_EIC>
   &periodStart=<YYYYMMDDHHMM UTC>
   &periodEnd=<YYYYMMDDHHMM UTC>
   &securityToken=<SECRET — NEVER COMMITTED>

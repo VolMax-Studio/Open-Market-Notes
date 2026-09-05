@@ -39,7 +39,7 @@ FR: approx 31.8%, NL: approx 23.3%, BE: approx 18.8%, AT: approx 18.4%, DK-1: ap
 Public artifacts:
 - ENTSO-E Transparency Platform API (`https://web-api.tp.entsoe.eu/api`, DocumentType A85 / processType A16 / IEC 62325 XML).
 - Raw HTTP response bodies captured at T_vintage within the official 12-request acquisition batch.
-- Pinned EIC codes (ControlArea_Domain): 10YAT-APG------L (AT), 10YBE----------X (BE), 10YDK-1--------W (DK_1), 10YDK-2--------T (DK_2), 10YFR-RTE------C (FR), 10YNL----------L (NL).
+- Pinned EIC codes (controlArea_Domain): 10YAT-APG------L (AT), 10YBE----------X (BE), 10YDK-1--------W (DK_1), 10YDK-2--------T (DK_2), 10YFR-RTE------C (FR), 10YNL----------L (NL).
 
 Hashes / DOI / commit SHA:
 Raw response hashes captured at execution post-freeze under PREREG_SHA.
