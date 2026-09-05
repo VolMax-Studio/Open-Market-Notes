@@ -1,0 +1,306 @@
+{
+  "AT_baseline": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202507312200-202511302300.xml",
+      "member_sha256": "b8cce21db4608cd6dc1785b85b1845bbd4332bc2b469bac1130ebfcc0f043438",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202507312200-202511302300.xml",
+      "member_sha256": "b8cce21db4608cd6dc1785b85b1845bbd4332bc2b469bac1130ebfcc0f043438",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    },
+    {
+      "member_name": "002-IMBALANCE_PRICES_R3_202508010000-202606302200.xml",
+      "member_sha256": "f84d60693ab05519c7d12263951972cb9118d0607841a2f25efe9cfd41a8c5bc",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-08-01T00:00Z"
+    },
+    {
+      "member_name": "002-IMBALANCE_PRICES_R3_202508010000-202606302200.xml",
+      "member_sha256": "f84d60693ab05519c7d12263951972cb9118d0607841a2f25efe9cfd41a8c5bc",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-08-01T00:00Z"
+    }
+  ],
+  "AT_target": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "e4076376fa88c778ff3408b2e62ced3088ca9501c43b1007405e9be0206fb1b9",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "e4076376fa88c778ff3408b2e62ced3088ca9501c43b1007405e9be0206fb1b9",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    }
+  ],
+  "BE_baseline": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202601272300-202601302300.xml",
+      "member_sha256": "2927f90b557a087c9f4ac2003219d8db6ab33ac9ddd1c8a8a615a4ce21bd48ab",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-01-27T23:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202601272300-202601302300.xml",
+      "member_sha256": "2927f90b557a087c9f4ac2003219d8db6ab33ac9ddd1c8a8a615a4ce21bd48ab",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-01-27T23:00Z"
+    },
+    {
+      "member_name": "002-IMBALANCE_PRICES_R3_202507312200-202606302200.xml",
+      "member_sha256": "2896a6b809a611d4fce412ec2b8a598e9bc162ccff4025e71424a3fbe75d8fd0",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    },
+    {
+      "member_name": "002-IMBALANCE_PRICES_R3_202507312200-202606302200.xml",
+      "member_sha256": "2896a6b809a611d4fce412ec2b8a598e9bc162ccff4025e71424a3fbe75d8fd0",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    }
+  ],
+  "BE_target": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "189b6d071dd843c2bebc7ecd15ba5259857de402954883909551a04d00ab3927",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "189b6d071dd843c2bebc7ecd15ba5259857de402954883909551a04d00ab3927",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    }
+  ],
+  "DK_1_baseline": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202507312200-202606302200.xml",
+      "member_sha256": "15e6d2af9bf7b3213c9edb182565cd4345b36d6041e904f6c49b55ebf781abb8",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202507312200-202606302200.xml",
+      "member_sha256": "15e6d2af9bf7b3213c9edb182565cd4345b36d6041e904f6c49b55ebf781abb8",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    }
+  ],
+  "DK_1_target": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "183b41a27842c37c091b93340d9643c8da65d823451474d710cfd1572417ad01",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "183b41a27842c37c091b93340d9643c8da65d823451474d710cfd1572417ad01",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    }
+  ],
+  "DK_2_baseline": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202507312200-202606302200.xml",
+      "member_sha256": "b1bbc78b34885f9048548202b9f235ea184af9ca4a151027c9448d6d92d17295",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202507312200-202606302200.xml",
+      "member_sha256": "b1bbc78b34885f9048548202b9f235ea184af9ca4a151027c9448d6d92d17295",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    }
+  ],
+  "DK_2_target": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "c6ec2e9fdb9d096c14ea12f846614dbac85f5431bd3ac2c64b5a6a099d5bc76e",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "c6ec2e9fdb9d096c14ea12f846614dbac85f5431bd3ac2c64b5a6a099d5bc76e",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    }
+  ],
+  "FR_baseline": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202507312200-202606302200.xml",
+      "member_sha256": "dac0005de3c7a892cec9efeef53d1e93a66da16c7e90fb0edcc327f9bbc6b93b",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202507312200-202606302200.xml",
+      "member_sha256": "dac0005de3c7a892cec9efeef53d1e93a66da16c7e90fb0edcc327f9bbc6b93b",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    }
+  ],
+  "FR_target": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "34b231d2b084cffe490f6829f60bc028c548dda52774f50e19b5abfe39837b1f",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "34b231d2b084cffe490f6829f60bc028c548dda52774f50e19b5abfe39837b1f",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    }
+  ],
+  "NL_baseline": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202507312200-202606302200.xml",
+      "member_sha256": "c07952d2c18f0948373b20fc3376aa1f59e7f4706f4dbe142e18de37d8906700",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202507312200-202606302200.xml",
+      "member_sha256": "c07952d2c18f0948373b20fc3376aa1f59e7f4706f4dbe142e18de37d8906700",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2025-07-31T22:00Z"
+    }
+  ],
+  "NL_target": [
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "58e6bb3b2013f1ed10004e5af4beb6785c53a411992496dba5abbaeaec983c8c",
+      "mRID": "1",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    },
+    {
+      "member_name": "001-IMBALANCE_PRICES_R3_202606302200-202607312200.xml",
+      "member_sha256": "58e6bb3b2013f1ed10004e5af4beb6785c53a411992496dba5abbaeaec983c8c",
+      "mRID": "2",
+      "document_type": "A85",
+      "process_type": "A16",
+      "resolution": "PT15M",
+      "direction": "",
+      "period_start": "2026-06-30T22:00Z"
+    }
+  ]
+}
