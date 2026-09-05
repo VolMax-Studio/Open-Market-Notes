@@ -47,3 +47,29 @@
 - In `L0.md` v3 and `PREREGISTRATION.md` v3, formalize §3 PKZip container detection, member sorting, multi-member XML extraction, and deterministic MTU merging.
 - Add `PAYLOAD_FORMAT_UNEXPECTED` to the frozen halt taxonomy in §10 and `runner.py`.
 - Update `runner.py` to transparently extract PKZip payloads using `zipfile.ZipFile`, parse all contained `Balancing_MarketDocument` XMLs, and evaluate Target S & Target R.
+
+---
+
+## [FAILURES #005] run-003-confirmatory Parser Specification Defect (Multi-Period Iteration & Price Category Filtering)
+
+- **Run ID:** `run-003-confirmatory`
+- **Execution Date:** 2026-09-05
+- **Nominal Freeze Commit:** `d9dfbbada85100243ba0150835d824c1c68629cd`
+- **Evidence Commit:** `9a68ed467f56cf8f1155986fc0d17676c66cf1d2`
+- **Disposition:** `Acquisition valid — interpretation invalid (frozen parser specification defect)`
+- **Preserved Evidence:** Preserved under `evidence/runs/run-003-confirmatory/` (12 raw HTTP 200 PKZip payloads totaling ~3.5MB, `command.sh`, `env.txt`, `git_commit.txt`, `inputs.sha256`, `outputs.sha256`, `run_metadata.json`, `derived_results.json`, `expected_grids.json`, `missing_listings.json`, `duplicate_listings.json`, `document_inventory.json`, `stdout.log`, `stderr.log`).
+
+### Findings Recorded:
+1. **B-21 (Multi-Period Iteration within TimeSeries):** In IEC 62325 XML Balancing Market Documents, a single `<TimeSeries>` contains multiple `<Period>` child elements across temporal segments (e.g. across seasonal/DST boundaries). The frozen parser used `ts.find('.//ns:Period')` which read only the first `<Period>` element and ignored all subsequent `<Period>` elements, generating large artificial missing MTU counts (e.g. 23,307 missing intervals in AT baseline).
+2. **B-23 (Price Direction Selection via `<imbalance_Price.category>`):** In DocumentType A85 XML documents, `flowDirection.direction` does not exist on `<TimeSeries>`. Price direction is specified at the `<Point>` level by `<imbalance_Price.category>`: `A04` for Shortage / Deficit price and `A05` for Surplus / Excess price. The parser parsed both `A04` and `A05` series without category filtering, resulting in duplicate counts matching unique observed counts.
+3. **B-24 (`Short` Column Mapping Terminology):** `L0.md` previously described shortage column mapping as "Short" (inherited from `entsoe-py` dataframe semantics), which does not correspond to XML elements. The exact XML selector is `<imbalance_Price.category>A04</imbalance_Price.category>`.
+
+### Confirmed Surviving Findings from run-003:
+- Complete 12/12 HTTP 200 acquisition batch successfully executed and preserved.
+- PKZip container extraction and document identity invariants (`documentType=A85`, `processType=A16`, `resolution=PT15M`) verified across all 12 responses.
+- Preserved raw response vintage is valid, byte-frozen, and reusable for offline interpretation in `run-004`.
+
+### Remediation for run-004:
+- Update `L0.md` v4 and `PREREGISTRATION.md` v4 to specify multi-period iteration across all `<Period>` children and explicit category filtering for `<imbalance_Price.category>A04</imbalance_Price.category>`.
+- Configure `run-004` as an offline interpretation run over the preserved `run-003` raw vintage (`evidence/runs/run-003-confirmatory/raw/`), eliminating source revision noise and isolating all differences strictly to the parser specification fix.
+- Update `README.md` status: `Target S: NOT INTERPRETABLE`, `Target R: NOT EVALUATED`.

@@ -5,7 +5,7 @@
 **Audit class:** Internal self-reproduction / vintage-stability audit  
 **Claimant:** VolMax Studio  
 **Current scientific verdict:** None  
-**Current execution state:** HALT after clean acquisition in `run-002-confirmatory`  
+**Current execution state:** Interpretation invalid in `run-003-confirmatory` (frozen parser specification defect); raw acquisition vintage valid  
 
 ---
 
@@ -96,6 +96,7 @@ The failure path is deliberate. A halted run is preserved as evidence and cannot
 - ENTSO-E Transparency Platform Web API
 - `documentType=A85` — imbalance prices
 - `A16` realised-process semantics validated from the returned document
+- Price category: `<imbalance_Price.category>A04</imbalance_Price.category>` (Shortage / deficit imbalance price)
 - raw public response preserved before interpretation
 
 ### Windows
@@ -159,56 +160,38 @@ The previously published values are comparison outputs only. They are never used
 ### `run-001-confirmatory`
 - **Disposition:** `Exploratory (Protocol Non-Compliance)`
 - The run preserved useful raw observations, but it cannot carry a confirmatory result because the execution harness was authored after the governing preregistration freeze.
-- It also exposed a wrong Belgian area identifier and an overly broad HALT classifier.
+- It also exposed a wrong Belgian area identifier (`10YBE----------X`) and an overly broad HALT classifier.
 - The run is preserved; it is not repaired retroactively.
 
 ### `run-002-confirmatory`
+- **Disposition:** `Halted outside taxonomy` (Specification boundary failure)
 - **Governing preregistration:** `98929035eb86a6f65a83fc4538a732e98f13912a`
 - **Evidence commit:** `1a53d688b1f41bf56ca01062b0c3ffb9cf1ba895`
+- Acquisition: 12/12 HTTP 200 OK.
+- Interpretation: Halted due to PKZip container format unhandled by frozen v2 parser.
+
+### `run-003-confirmatory`
+- **Disposition:** `Acquisition valid — interpretation invalid (frozen parser specification defect)`
+- **Governing preregistration:** `d9dfbbada85100243ba0150835d824c1c68629cd`
+- **Evidence commit:** `9a68ed467f56cf8f1155986fc0d17676c66cf1d2`
 - **Acquisition result:**
-  - 12 / 12 preregistered requests returned HTTP 200.
-  - The 334-day request succeeded for all six zones.
-  - All raw responses were preserved and hashed before parsing.
-  - The corrected BE identifier was empirically confirmed by a successful response.
+  - 12 / 12 requests returned HTTP 200.
+  - The complete 12-response acquisition batch exists as a frozen public vintage.
+  - Raw payload hashes match the recorded run metadata.
 - **Interpretation result:**
-  - The source returned PKZip containers, not direct XML bytes.
-  - The frozen v2 parser attempted to pass the ZIP payload directly to the XML parser and stopped with a parse error.
-  - This is classified as a specification boundary failure, not a source-data result.
-  - No Target S or Target R result was issued.
+  - Multi-Period iteration defect (`ts.find('.//ns:Period')` read only the first `<Period>` per `<TimeSeries>`).
+  - Missing category filter: parsed both `A04` (Shortage) and `A05` (Surplus) series without distinguishing `<imbalance_Price.category>`, producing duplicate timestamps.
+  - Target S outputs from `run-003` are artifacts of the parser and are **not scientifically interpretable**.
 
 ---
 
-## What `run-002` established
+## Current boundary: B-21 / B-23 / B-24
 
-The following findings survive the halted interpretation stage:
-- ENTSO-E accepted the full preregistered 334-day baseline request for all six zones.
-- All six corrected area identifiers produced HTTP 200 responses.
-- The complete 12-response acquisition batch exists as a frozen public vintage.
-- Raw payload hashes match the recorded run metadata.
-- The acquisition layer completed without adaptive chunking, request changes, or silent repair.
-- The returned transport format is ZIP.
-- Some ZIP payloads contain multiple market-document members, which requires an explicitly frozen merge rule before interpretation.
-
-What it did not establish:
-- exact MTU completeness;
-- scarcity occupancy;
-- reproduction of the five-of-six classification;
-- a P10 scientific verdict.
-
----
-
-## Current boundary: B-19 / B-20
-
-The next preregistration version must explicitly define:
-- ZIP detection and extraction;
-- deterministic member ordering;
-- preservation and hashing of extracted members;
-- multi-document merge rules;
-- revision handling;
-- duplicate-MTU behavior across ZIP members;
-- a frozen outcome for unexpected payload/container formats.
-
-The existing `run-002` raw vintage can potentially be reused for interpretation, but that choice must itself be preregistered and gated before execution.
+The v4 preregistration defines:
+- Iteration over all `<Period>` children within each `<TimeSeries>`;
+- Extraction of timestamp from each `<Period>`'s own `timeInterval/start`;
+- Selection of shortage price series strictly via `<imbalance_Price.category>A04</imbalance_Price.category>`;
+- Execution of `run-004-confirmatory` as an offline interpretation run over the preserved `run-003` raw vintage.
 
 ---
 
@@ -281,13 +264,13 @@ A failed run is not erased when a later run succeeds.
 
 ## Status
 
-- **Latest completed run:** `run-002-confirmatory`
+- **Latest completed run:** `run-003-confirmatory`
 - **Acquisition:** `COMPLETE (12/12 HTTP 200)`
-- **Interpretation:** `HALTED`
-- **Target S:** `NOT EVALUATED`
+- **Interpretation:** `INVALID (frozen parser defect)`
+- **Target S:** `NOT INTERPRETABLE`
 - **Target R:** `NOT EVALUATED`
 - **Scientific verdict:** `NONE`
-- **Next protocol step:** `prereg v3 → Gate → Operator acceptance → run-003`
+- **Next protocol step:** `prereg v4 → Gate → Operator acceptance → run-004 (offline interpretation over run-003 vintage)`
 
 ---
 
