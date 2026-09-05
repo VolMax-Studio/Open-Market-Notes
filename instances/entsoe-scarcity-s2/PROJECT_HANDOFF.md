@@ -5,15 +5,15 @@
 Project: entsoe-scarcity-s2
 Repository: VolMax-Studio/Open-Market-Notes
 Branch: instances/entsoe-scarcity-s2
-Current commit: Pending draft v3 commit
-Preregistration commit: Pending Gate pass and Operator freeze (PREREG_SHA_v3)
+Current commit: Pending freeze commit (PREREG_SHA_v3)
+Preregistration commit: Pending freeze commit (PREREG_SHA_v3)
 Latest run ID: run-002-confirmatory (Halted outside taxonomy on PKZip container format)
-Next run ID: run-003-confirmatory (NOT YET AUTHORIZED)
+Next run ID: run-003-confirmatory (AUTHORIZED — Fresh acquisition vintage)
 Deadline: 2026-09-12
 
 ## Phase
 
-Specification Draft v3 (PRE-EXECUTION GATE DRAFT) — Execution State: NOT AUTHORIZED
+Preregistered v3 (FROZEN) — Execution State: AUTHORIZED FOR run-003-confirmatory
 
 Portfolio status: ACTIVE / DEADLINE PRIORITY
 
@@ -46,15 +46,15 @@ Hashes / commit SHA:
 
 - run-001-confirmatory: Permanently classified as `Exploratory (Protocol Non-Compliance)` per FAILURES #003.
 - run-002-confirmatory: Permanently classified as `Halted outside taxonomy` per FAILURES #004 (Clean 12/12 HTTP 200 acquisition; interpretation halted on PKZip container format).
-- run-003-confirmatory: Not yet authorized. Awaiting pre-execution Gate review of Draft v3 specification.
+- run-003-confirmatory: AUTHORIZED following Claude Gate PASS at draft `83eafae` and Operator acceptance (Fresh acquisition vintage semantics).
 
 ## Gate status
 
 Gate model/person: Claude
-Gate outcome: PENDING PRE-EXECUTION GATE REVIEW (Draft v3)
+Gate outcome: GATE_PASS (at draft `83eafae`)
 Blocking findings:
-None pending review.
+None. Operator accepted specification.
 
 ## Next single action
 
-Submit Draft v3 commit to Claude for pre-execution Gate review.
+Ananke executes official run-003-confirmatory under PREREG_SHA_v3.
