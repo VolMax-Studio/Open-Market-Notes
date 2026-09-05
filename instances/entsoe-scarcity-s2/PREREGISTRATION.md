@@ -106,12 +106,14 @@ The vintage is defined as a **single frozen acquisition batch**:
    - For each `<Period>`, extract its specific `timeInterval/start` UTC instant ($T_{\text{period\_start}}$).
    - Point timestamp is computed as:
      $$T_{\text{point}} = T_{\text{period\_start}} + 15\text{ min} \times (\text{position} - 1)$$
-3. **Price Category Filtering (B-23 Resolution):**
-   - Extract points strictly matching `<imbalance_Price.category>A04</imbalance_Price.category>`.
+3. **Price Category Filtering (B-23 & B-25 Resolution):**
+   - Points must be filtered strictly and unconditionally for `<imbalance_Price.category>A04</imbalance_Price.category>`. Any point lacking the category element or carrying a category other than `A04` (e.g. `A05`) is omitted from the shortage series.
 4. **Multi-Document Revision Handling:**
    - Verify `documentType = A85`, `processType = A16`, and `resolution = PT15M`.
    - For repeated `mRID` document revisions across archive members, identify the numerically latest `revisionNumber` as the current-state document while preserving all received revisions in the document inventory.
    - Any remaining collision or conflicting value on the same registered UTC MTU is a duplicate and Target S fails.
+5. **Offline Vintage Integrity Invariant (B-26 Resolution):**
+   - When executing an offline interpretation run against a preserved raw vintage directory, the runner must verify that every loaded raw response payload matches the pinned SHA-256 hash recorded in the vintage run's `run_metadata.json` (or `outputs.sha256`) prior to extraction. Any missing metadata or hash mismatch triggers immediate halt with `EXECUTION_STATE_INVALID`.
 
 ---
 

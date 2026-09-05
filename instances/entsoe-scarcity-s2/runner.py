@@ -260,8 +260,8 @@ def extract_and_parse_a85_payload(raw_bytes, zone, window_name):
                     
                     category = cat_node.text.strip() if cat_node is not None and cat_node.text else ""
 
-                    # B-23 Resolution: Filter strictly for Shortage price category A04
-                    if category and category != 'A04':
+                    # B-23 & B-25 Resolution: Filter strictly and unconditionally for Shortage price category A04
+                    if category != 'A04':
                         continue
 
                     if pos_node is not None and price_node is not None:
@@ -305,6 +305,75 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha, source_raw_dir=None):
     halt_reason = None
 
     token = None if source_raw_dir else get_token()
+    expected_vintage_hashes = {}
+
+    if source_raw_dir:
+        norm_src = os.path.normpath(source_raw_dir)
+        if os.path.basename(norm_src) == "raw":
+            source_raw_files_dir = norm_src
+            source_meta_dir = os.path.dirname(norm_src)
+        else:
+            source_raw_files_dir = os.path.join(norm_src, "raw") if os.path.exists(os.path.join(norm_src, "raw")) else norm_src
+            source_meta_dir = norm_src
+
+        # B-26 Resolution: Load pinned hashes from source vintage metadata
+        meta_file = os.path.join(source_meta_dir, "run_metadata.json")
+        outputs_sha_file = os.path.join(source_meta_dir, "outputs.sha256")
+
+        if os.path.exists(meta_file):
+            try:
+                with open(meta_file, "r") as f:
+                    s_meta = json.load(f)
+                for req in s_meta.get("requests", []):
+                    if "raw_filename" in req and "sha256" in req:
+                        expected_vintage_hashes[req["raw_filename"]] = req["sha256"]
+            except Exception as e:
+                halt_class = "EXECUTION_STATE_INVALID"
+                halt_reason = f"EXECUTION_STATE_INVALID: Failed reading source vintage metadata at {meta_file}: {e}"
+        elif os.path.exists(outputs_sha_file):
+            try:
+                with open(outputs_sha_file, "r") as f:
+                    for line in f:
+                        parts = line.strip().split()
+                        if len(parts) == 2:
+                            h, p = parts[0], parts[1]
+                            fn = os.path.basename(p)
+                            if fn.endswith("_raw.xml"):
+                                expected_vintage_hashes[fn] = h
+            except Exception as e:
+                halt_class = "EXECUTION_STATE_INVALID"
+                halt_reason = f"EXECUTION_STATE_INVALID: Failed reading source vintage hashes at {outputs_sha_file}: {e}"
+        else:
+            halt_class = "EXECUTION_STATE_INVALID"
+            halt_reason = f"EXECUTION_STATE_INVALID: Source vintage metadata (run_metadata.json or outputs.sha256) not found in {source_meta_dir}"
+
+        if not halt_class and len(expected_vintage_hashes) < 12:
+            halt_class = "EXECUTION_STATE_INVALID"
+            halt_reason = f"EXECUTION_STATE_INVALID: Source vintage metadata in {source_meta_dir} contains only {len(expected_vintage_hashes)}/12 expected raw file hashes"
+
+    if halt_class:
+        print(f"\n[AUDIT HALT — {halt_class}] {halt_reason}")
+        run_metadata = {
+            'run_id': run_id,
+            'prereg_sha': prereg_sha,
+            'repository': 'VolMax-Studio/Open-Market-Notes',
+            'branch': 'instances/entsoe-scarcity-s2',
+            'acquisition_mode': 'offline_vintage_interpretation' if source_raw_dir else 'live_api_acquisition',
+            'source_raw_vintage': source_raw_dir,
+            't_run_start_utc': t_run_start,
+            't_run_end_utc': datetime.now(timezone.utc).isoformat(),
+            'total_requests_executed': 0,
+            'expected_requests_count': 12,
+            'halt_class': halt_class,
+            'halt_reason': halt_reason,
+            'requests': []
+        }
+        with open(os.path.join(run_dir, "run_metadata.json"), "w") as f:
+            json.dump(run_metadata, f, indent=2)
+        with open(os.path.join(run_dir, "exit_code.txt"), "w") as f:
+            f.write("1\n")
+        save_outputs_sha256(run_dir)
+        return 1
 
     # Step 1: Acquire or load raw payload batch
     for zone, eic in ZONES.items():
@@ -315,7 +384,7 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha, source_raw_dir=None):
 
             if source_raw_dir:
                 # Load from preserved vintage
-                src_path = os.path.join(source_raw_dir, raw_filename)
+                src_path = os.path.join(source_raw_files_dir, raw_filename)
                 if not os.path.exists(src_path):
                     halt_class = "PAYLOAD_FORMAT_UNEXPECTED"
                     halt_reason = f"PAYLOAD_FORMAT_UNEXPECTED: Preserved raw file {raw_filename} missing at {src_path}"
@@ -323,6 +392,20 @@ def execute_run(instance_dir, run_dir, run_id, prereg_sha, source_raw_dir=None):
                 shutil.copy2(src_path, raw_filepath)
                 with open(raw_filepath, "rb") as f:
                     raw_bytes = f.read()
+
+                sha256_digest = hashlib.sha256(raw_bytes).hexdigest() if raw_bytes else None
+
+                # B-26 Resolution: Verify loaded file matches pinned vintage hash
+                expected_sha = expected_vintage_hashes.get(raw_filename)
+                if not expected_sha:
+                    halt_class = "EXECUTION_STATE_INVALID"
+                    halt_reason = f"EXECUTION_STATE_INVALID: No pinned SHA256 found for {raw_filename} in source vintage metadata"
+                    break
+                if sha256_digest != expected_sha:
+                    halt_class = "EXECUTION_STATE_INVALID"
+                    halt_reason = f"EXECUTION_STATE_INVALID: Source vintage integrity mismatch on {raw_filename} (expected {expected_sha}, computed {sha256_digest})"
+                    break
+
                 status_code = 200
                 t_req = t_run_start
                 t_resp = t_run_start

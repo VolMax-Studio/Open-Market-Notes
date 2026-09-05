@@ -64,12 +64,15 @@
 2. **B-23 (Price Direction Selection via `<imbalance_Price.category>`):** In DocumentType A85 XML documents, `flowDirection.direction` does not exist on `<TimeSeries>`. Price direction is specified at the `<Point>` level by `<imbalance_Price.category>`: `A04` for Shortage / Deficit price and `A05` for Surplus / Excess price. The parser parsed both `A04` and `A05` series without category filtering, resulting in duplicate counts matching unique observed counts.
 3. **B-24 (`Short` Column Mapping Terminology):** `L0.md` previously described shortage column mapping as "Short" (inherited from `entsoe-py` dataframe semantics), which does not correspond to XML elements. The exact XML selector is `<imbalance_Price.category>A04</imbalance_Price.category>`.
 
+4. **B-25 (Unconditional Category Filtering):** `<imbalance_Price.category>` filter must be unconditional (`if category != 'A04': continue`), preventing any point lacking category or bearing a non-A04 category from silently entering the shortage population.
+5. **B-26 (Source Vintage Hash Verification Invariant):** Offline interpretation runs (`--source-raw-dir`) must verify before extraction that every loaded payload matches the pinned SHA-256 hash in the source run's `run_metadata.json` (or `outputs.sha256`), triggering `EXECUTION_STATE_INVALID` on any missing metadata or mismatch.
+
 ### Confirmed Surviving Findings from run-003:
 - Complete 12/12 HTTP 200 acquisition batch successfully executed and preserved.
 - PKZip container extraction and document identity invariants (`documentType=A85`, `processType=A16`, `resolution=PT15M`) verified across all 12 responses.
 - Preserved raw response vintage is valid, byte-frozen, and reusable for offline interpretation in `run-004`.
 
 ### Remediation for run-004:
-- Update `L0.md` v4 and `PREREGISTRATION.md` v4 to specify multi-period iteration across all `<Period>` children and explicit category filtering for `<imbalance_Price.category>A04</imbalance_Price.category>`.
+- Update `L0.md` v4 and `PREREGISTRATION.md` v4 to specify multi-period iteration across all `<Period>` children, unconditional category filtering for `<imbalance_Price.category>A04</imbalance_Price.category>`, and strict source vintage hash verification.
 - Configure `run-004` as an offline interpretation run over the preserved `run-003` raw vintage (`evidence/runs/run-003-confirmatory/raw/`), eliminating source revision noise and isolating all differences strictly to the parser specification fix.
 - Update `README.md` status: `Target S: NOT INTERPRETABLE`, `Target R: NOT EVALUATED`.
