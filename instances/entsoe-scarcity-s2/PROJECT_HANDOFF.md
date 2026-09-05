@@ -5,15 +5,15 @@
 Project: entsoe-scarcity-s2
 Repository: VolMax-Studio/Open-Market-Notes
 Branch: instances/entsoe-scarcity-s2
-Current commit: Pending draft v2 commit
-Preregistration commit: Pending Gate pass and Operator freeze (PREREG_SHA_v2)
+Current commit: Pending freeze commit (PREREG_SHA_v2)
+Preregistration commit: Pending freeze commit (PREREG_SHA_v2)
 Latest run ID: run-001-confirmatory (Exploratory / Protocol Non-Compliance)
-Next run ID: run-002-confirmatory (NOT YET AUTHORIZED)
+Next run ID: run-002-confirmatory (AUTHORIZED)
 Deadline: 2026-09-12
 
 ## Phase
 
-Specification Draft v2 (PRE-EXECUTION GATE DRAFT) — Execution State: NOT AUTHORIZED
+Preregistered v2 (FROZEN) — Execution State: AUTHORIZED FOR run-002-confirmatory
 
 Portfolio status: ACTIVE / DEADLINE PRIORITY
 
@@ -45,15 +45,15 @@ Hashes / commit SHA:
 ## Current results
 
 - run-001-confirmatory: Permanently classified as `Exploratory (Protocol Non-Compliance)` per FAILURES #003 due to post-freeze harness authorship and incorrect area identifier for Belgium (`10YBE----------X` vs `10YBE----------2`).
-- run-002-confirmatory: Not yet authorized. Awaiting pre-execution Gate review of Draft v2 specification.
+- run-002-confirmatory: AUTHORIZED following Claude Gate PASS at draft `ac33cdc` and Operator acceptance.
 
 ## Gate status
 
 Gate model/person: Claude
-Gate outcome: PENDING PRE-EXECUTION GATE REVIEW (Draft v2)
+Gate outcome: GATE_PASS (at draft `ac33cdc`)
 Blocking findings:
-None pending review.
+None. Operator accepted specification.
 
 ## Next single action
 
-Submit Draft v2 commit to Claude for pre-execution Gate review.
+Ananke executes official run-002-confirmatory under PREREG_SHA_v2.

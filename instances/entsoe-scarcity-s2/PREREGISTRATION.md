@@ -1,7 +1,7 @@
 # ENTSO-E Scarcity Vintage-Stability Audit — Pre-registration
 
 **Instance:** `entsoe-scarcity-s2`  
-**Status:** DRAFT v2 (Pre-execution draft specification for run-002-confirmatory)  
+**Status:** FROZEN (Formalized pre-registration following Claude Gate PASS at draft `ac33cdc` and Operator Acceptance)  
 **Deadline:** 2026-09-12  
 **Architecture:** Pinned-vintage ENTSO-E Transparency Platform / IEC 62325 raw-document architecture  
 **Audit Class:** Internal self-reproduction and vintage-stability audit of published VolMax Open Market Note #003 findings.  
