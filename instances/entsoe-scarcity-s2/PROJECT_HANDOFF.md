@@ -4,15 +4,15 @@
 
 Project: entsoe-scarcity-s2
 Repository: VolMax-Studio/Open-Market-Notes
-Branch: instances/entsoe-scarcity-s2
+Branch: main
 Current commit: [track via git rev-parse HEAD]
-Preregistration commit: null
+Preregistration commit: [PREREG_SHA recorded upon freeze commit]
 Latest run ID: null
 Deadline: 2026-09-12
 
 ## Phase
 
-Candidate (SPREMNO ZA CLAUDE PRE-EXECUTION GATE)
+Preregistered (FROZEN)
 
 Portfolio status: ACTIVE / DEADLINE PRIORITY
 
@@ -105,9 +105,9 @@ Protocol failures: none for s2 at initialization
 
 Gate model/person: Claude
 Conflict check: No known model-provider conflict from the current target description.
-Gate outcome: SPREMNO ZA CLAUDE PRE-EXECUTION GATE
+Gate outcome: GATE_PASS (at draft 9977e08; accepted by Operator Ivan Nestorov)
 Blocking findings:
-None pending; draft ready for gate review.
+None. Preregistration frozen on main.
 
 ## Failures
 
@@ -116,4 +116,4 @@ None at initialization.
 
 ## Next single action
 
-Submit PREREGISTRATION.md draft to Claude for pre-execution Gate review.
+Execute official 12-request acquisition batch under PREREG_SHA.
