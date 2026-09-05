@@ -5,15 +5,15 @@
 Project: entsoe-scarcity-s2
 Repository: VolMax-Studio/Open-Market-Notes
 Branch: instances/entsoe-scarcity-s2
-Current commit: Pending evidence commit for run-004
+Current commit: Pending evidence commit for run-005
 Preregistration commit: 88c7959e3dae0eb8cb5ad49640424d368e625eea (PREREG_SHA_v4)
-Latest run ID: run-004-confirmatory (Target S evaluated: 6/6 zones S-FAIL on missing intervals; 0 duplicates; Target R blocked)
-Next run ID: Pending post-execution Gate review
+Latest run ID: run-005-recreation (Deterministic Target S recreation: 6/6 zones S-FAIL on missing intervals; 0 duplicates; Target R blocked)
+Next run ID: Final Post-Execution Gate review and Ratification
 Deadline: 2026-09-12
 
 ## Phase
 
-Post-Execution Evidence Review (run-004-confirmatory) — Execution State: SPREMNO ZA GEJT
+Post-Execution Evidence Review (run-005-recreation) — Execution State: SPREMNO ZA GEJT
 
 Portfolio status: ACTIVE / DEADLINE PRIORITY
 
@@ -37,22 +37,23 @@ Source location: ENTSO-E REST API DocumentType A85 (Area EICs: AT, BE, DK-1, DK-
 
 Public artifacts:
 - ENTSO-E Transparency Platform API (`https://web-api.tp.entsoe.eu/api`, DocumentType A85 / processType A16 / IEC 62325 XML / PKZip container).
-- Preserved raw HTTP response bodies from run-003 reused in run-004 under `evidence/runs/run-004-confirmatory/raw/` with verified bit-for-bit SHA-256 integrity.
+- Preserved raw HTTP response bodies from run-003 reused in run-005 under `evidence/runs/run-005-recreation/raw/` with verified bit-for-bit SHA-256 integrity.
 
 ## Current results
 
 - run-001-confirmatory: Permanently classified as `Exploratory (Protocol Non-Compliance)` per FAILURES #003.
 - run-002-confirmatory: Permanently classified as `Halted outside taxonomy` per FAILURES #004.
 - run-003-confirmatory: Permanently classified as `Acquisition valid — interpretation invalid` per FAILURES #005 (Complete 12/12 HTTP 200 raw vintage preserved).
-- run-004-confirmatory: Executed offline against run-003 vintage. Target S evaluated for all 6 zones: 6/6 S-FAIL due to true source missing intervals (0 duplicates, 0 unexpected). Target R blocked by Target S failure.
+- run-004-confirmatory: Classified as `Procedural Non-Compliance / Provenance Defect (B-27)` per FAILURES #006.
+- run-005-recreation: Clean single execution of deterministic recreation over pinned run-003 vintage under PREREG_SHA_v4. Target S evaluated for all 6 zones: 6/6 S-FAIL due to true source missing intervals (0 duplicates, 0 unexpected). Target R blocked by Target S failure.
 
 ## Gate status
 
 Gate model/person: Claude
-Gate outcome: PENDING POST-EXECUTION GATE REVIEW (run-004-confirmatory)
+Gate outcome: PENDING POST-EXECUTION GATE REVIEW (run-005-recreation)
 Blocking findings:
 None.
 
 ## Next single action
 
-Submit run-004-confirmatory evidence package to Claude for Post-Execution Gate review.
+Submit run-005-recreation evidence package to Claude for final Post-Execution Gate review.

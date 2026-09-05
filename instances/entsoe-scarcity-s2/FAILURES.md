@@ -76,3 +76,24 @@
 - Update `L0.md` v4 and `PREREGISTRATION.md` v4 to specify multi-period iteration across all `<Period>` children, unconditional category filtering for `<imbalance_Price.category>A04</imbalance_Price.category>`, and strict source vintage hash verification.
 - Configure `run-004` as an offline interpretation run over the preserved `run-003` raw vintage (`evidence/runs/run-003-confirmatory/raw/`), eliminating source revision noise and isolating all differences strictly to the parser specification fix.
 - Update `README.md` status: `Target S: NOT INTERPRETABLE`, `Target R: NOT EVALUATED`.
+
+---
+
+## [FAILURES #006] run-004-confirmatory RUN_ID Reuse & Execution History Provenance (B-27)
+
+- **Run ID:** `run-004-confirmatory`
+- **Execution Date:** 2026-09-05
+- **Nominal Freeze Commit:** `88c7959e3dae0eb8cb5ad49640424d368e625eea` (PREREG_SHA_v4)
+- **Evidence Commit:** `37d1fd02e604fdfa069dfb4f53597d3aa05e6080`
+- **Disposition:** `Procedural Non-Compliance / Provenance Defect (B-27)` — Numerical Target S observations preserved, clean deterministic recreation required.
+- **Preserved Evidence:** Preserved under `evidence/runs/run-004-confirmatory/`.
+
+### Findings Recorded:
+1. **B-27 (RUN_ID Reuse / Overwritten Execution History):** During official ops execution, `runner.py` was invoked more than once under the same RUN_ID `run-004-confirmatory` (with an intermediate `rm -rf evidence/runs/run-004-confirmatory` prior to committing), meaning the final committed evidence package represents a recreated execution rather than the initial run invocation.
+2. **Surviving Evidentiary Status:** Because `PREREG_SHA_v4` (`88c7959`), `runner.py`, and all 12 SHA-256 pinned input raw files remained strictly constant across invocations (verified byte-for-byte by Gate review), the numerical Target S findings (0 duplicates, exact missing MTU distribution) are mathematically valid but require an uncontaminated recreation run (`run-005-recreation`).
+
+### Remediation for run-005:
+- Retain `run-004-confirmatory` as permanent historical evidence with its recorded B-27 disposition.
+- Execute a single, clean offline execution `run-005-recreation` under `PREREG_SHA_v4` over the same hash-pinned vintage without modifying any method, code, or preregistration.
+- Verify byte-level determinism between run-004 and run-005 outputs.
+
