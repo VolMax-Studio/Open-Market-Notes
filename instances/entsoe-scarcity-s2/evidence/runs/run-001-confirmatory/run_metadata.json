@@ -1,0 +1,60 @@
+{
+  "run_id": "run-001-confirmatory",
+  "prereg_sha": "1f6f52d9c6029d105e8a4b80499c7c0553c7525b",
+  "repository": "VolMax-Studio/Open-Market-Notes",
+  "branch": "instances/entsoe-scarcity-s2",
+  "t_run_start_utc": "2026-09-05T11:34:11.743593+00:00",
+  "t_run_end_utc": "2026-09-05T11:34:40.997886+00:00",
+  "total_requests_executed": 3,
+  "expected_requests_count": 12,
+  "halt_reason": "HALT: request contract unsupported (HTTP 200 on BE baseline)",
+  "requests": [
+    {
+      "request_index": 1,
+      "zone": "AT",
+      "eic": "10YAT-APG------L",
+      "window": "baseline",
+      "periodStart": "202507312200",
+      "periodEnd": "202606302200",
+      "t_req_utc": "2026-09-05T11:34:11.743617+00:00",
+      "t_resp_utc": "2026-09-05T11:34:26.407724+00:00",
+      "http_status": 200,
+      "raw_filename": "AT_baseline_raw.xml",
+      "sha256": "c89f4607f36c984f8cddfc390d0054871a6d8fab9201ab76d1aad629860bfcca",
+      "bytes_count": 567572,
+      "redacted_url": "https://web-api.tp.entsoe.eu/api?documentType=A85&controlArea_Domain=10YAT-APG------L&periodStart=202507312200&periodEnd=202606302200&securityToken=%5BREDACTED%5D"
+    },
+    {
+      "request_index": 2,
+      "zone": "AT",
+      "eic": "10YAT-APG------L",
+      "window": "target",
+      "periodStart": "202606302200",
+      "periodEnd": "202607312200",
+      "t_req_utc": "2026-09-05T11:34:26.410612+00:00",
+      "t_resp_utc": "2026-09-05T11:34:34.918628+00:00",
+      "http_status": 200,
+      "raw_filename": "AT_target_raw.xml",
+      "sha256": "f8d39805d1146505d18e3d4f892d3f855e25453f36ffba64fcd7736a9fad183f",
+      "bytes_count": 55981,
+      "redacted_url": "https://web-api.tp.entsoe.eu/api?documentType=A85&controlArea_Domain=10YAT-APG------L&periodStart=202606302200&periodEnd=202607312200&securityToken=%5BREDACTED%5D"
+    },
+    {
+      "request_index": 3,
+      "zone": "BE",
+      "eic": "10YBE----------X",
+      "window": "baseline",
+      "periodStart": "202507312200",
+      "periodEnd": "202606302200",
+      "t_req_utc": "2026-09-05T11:34:34.919154+00:00",
+      "t_resp_utc": "2026-09-05T11:34:40.997750+00:00",
+      "http_status": 200,
+      "raw_filename": "BE_baseline_raw.xml",
+      "sha256": "30a7749afa6228c311f4707f9fce615f21f8b386daab6881792b3cb7ea1e4e90",
+      "bytes_count": 951,
+      "redacted_url": "https://web-api.tp.entsoe.eu/api?documentType=A85&controlArea_Domain=10YBE----------X&periodStart=202507312200&periodEnd=202606302200&securityToken=%5BREDACTED%5D",
+      "error": true,
+      "error_snippet": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Acknowledgement_MarketDocument\n\txmlns=\"urn:iec62325.351:tc57wg16:451-1:acknowledgementdocument:7:0\">\n\t<mRID>85a08d89-1bc9-4</mRID>\n\t<createdDateTime>2026-09-05T11:34:40Z</createdDateTime>\n\t<sender_MarketParticipant.mRID codingScheme=\"A01\">10X1001A1001A450</sender_MarketParticipant.mRID>\n\t<sender_MarketParticipant.marketRole.type>A32</sender_MarketParticipant.marketRole.type>\n\t<receiver_MarketParticipant.mRID codingScheme=\"A01\">10X1001A1001A450</receiver_Ma"
+    }
+  ]
+}
