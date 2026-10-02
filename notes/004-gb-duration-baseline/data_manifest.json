@@ -25,19 +25,19 @@
         }
     },
     "recurrent_telemetry": {
-        "gb_system_prices_202508_202608.csv": {
-            "sha256": "d81a76ce7ca9384c45fa74b372228953022a10b015dcbeeba12111fb1d8fbc72",
-            "size_bytes": 3939776,
+        "gb_system_prices_202509_202609.csv": {
+            "sha256": "5ea29dce59590752e1a57dc339c3dbfddb28861a60724d86daf8eb6dcc5b4a52",
+            "size_bytes": 3986170,
             "source_url": "https://data.elexon.co.uk/bmrs/api/v1/balancing/settlement/system-prices/{settlementDate} (Open Elexon Insights API)",
             "acquisition_mode": "live_open_api_query",
-            "acquired_at_utc": "2026-09-02T08:17:33.127488+00:00"
+            "acquired_at_utc": "2026-10-02T10:11:14.327477+00:00"
         },
         "gb_system_prices.feather": {
-            "sha256": "f40fbdb4bb34f7e7657b438c87e08ff1aa4b1f44c086126fd8e3cee9221a2406",
-            "size_bytes": 1610330,
+            "sha256": "fa78304eb087b115d01d8d4ae2dfc99e0d9bedb6a2c3d5ba3bf07db4b566748f",
+            "size_bytes": 1603186,
             "source_url": "Elexon Ingestion Pipeline",
             "acquisition_mode": "feather_serialization",
-            "acquired_at_utc": "2026-09-02T08:17:33.147718+00:00"
+            "acquired_at_utc": "2026-10-02T10:11:14.348721+00:00"
         }
     }
 }
