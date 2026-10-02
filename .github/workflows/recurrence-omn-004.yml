@@ -37,6 +37,9 @@ jobs:
         run: |
           python scripts/recurrence_run.py --note-id 004
 
+      - name: Refresh README from hash-checked measurement history
+        run: python scripts/update_readme.py --note-id 004
+
       - name: Create Pull Request (Human-in-the-Loop Ratification)
         uses: peter-evans/create-pull-request@v6
         with:
@@ -46,7 +49,9 @@ jobs:
           title: "recurrent-measurement(OMN-004): 13-month rolling baseline refresh"
           body-path: ${{ runner.temp }}/pr_body.md
           add-paths: |
+            README.md
             notes/004-gb-duration-baseline/results.json
             notes/004-gb-duration-baseline/data_manifest.json
             notes/004-gb-duration-baseline/history/measurement_log.json
           delete-branch: true
+
