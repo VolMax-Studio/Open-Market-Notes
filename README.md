@@ -31,7 +31,7 @@ Results hashes below track the current repository outputs. Zenodo DOI links iden
 | `OMN-001` | [Open Market Note #001 — NEM Duration Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/001-nem-duration-baseline) | Mainland Australia NEM (NSW1, QLD1, SA1, VIC1) | `7d76f292a230...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693239.svg)](https://doi.org/10.5281/zenodo.21693239) |
 | `OMN-002` | [Open Market Note #002 — ERCOT Duration Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/002-ercot-duration-baseline) | ERCOT (West, North, South, Houston) | `90e3543b5550...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693245.svg)](https://doi.org/10.5281/zenodo.21693245) |
 | `OMN-003` | [Open Market Note #003 — ENTSO-E Imbalance Price Duration Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/003-entsoe-imbalance-baseline) | ENTSO-E Imbalance (NL, BE, FR, DK1, DK2, AT) | `b1c713379887...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693254.svg)](https://doi.org/10.5281/zenodo.21693254) |
-| `OMN-004` | [Open Market Note #004 — GB BESS Duration Baseline (Elexon BMRS)](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/004-gb-duration-baseline) | Great Britain (Elexon BMRS NGET Area) | `d4c22021bf87...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693262.svg)](https://doi.org/10.5281/zenodo.21693262) |
+| `OMN-004` | [Open Market Note #004 — GB BESS Duration Baseline (Elexon BMRS)](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/004-gb-duration-baseline) | Great Britain (Elexon BMRS NGET Area) | `582a090620f1...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693262.svg)](https://doi.org/10.5281/zenodo.21693262) |
 | `OMN-005` | [Open Market Note #005 — ENTSO-E Cross-Border Physical Flow Dynamics Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/005-entsoe-crossborder-flows) | ENTSO-E CWE Interconnections (AT-DE, BE-NL, FR-BE, NL-DE) | `60314bd2764e...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693276.svg)](https://doi.org/10.5281/zenodo.21693276) |
 
 ---
@@ -94,9 +94,9 @@ Instead, they maintain a **Parametric Changelog** within each note directory. If
    * *Status:* Complete & Verified (Timestamp: `2026-07-25T14:15:00+02:00`).
 
 4. **[Note #004: GB BESS Duration Baseline (Elexon BMRS)](./notes/004-gb-duration-baseline)**
-   * *Scope:* Great Britain (NGET Grid Area) 30-minute settlement periods from 2025-09-01 to 2026-09-30.
+   * *Scope:* Great Britain (NGET Grid Area) 30-minute settlement periods from 2025-10-01 to 2026-10-31.
    * *Focus:* Elexon System Prices, pure active scarcity runs vs macro event window spans (£100/£250/MWh) and charging window availability (£25/MWh).
-   * *Status:* Latest measurement `v1.5.0` (executed at `2026-10-02T10:11:15Z`; see [measurement history](./notes/004-gb-duration-baseline/history/measurement_log.json)).
+   * *Status:* Latest measurement `v1.6.0` (executed at `2026-11-02T11:52:54Z`; see [measurement history](./notes/004-gb-duration-baseline/history/measurement_log.json)).
 
 5. **[Note #005: ENTSO-E Cross-Border Physical Flow Dynamics Baseline](./notes/005-entsoe-crossborder-flows)**
    * *Scope:* Central-Western European (CWE) bidding zone interconnections (`AT ↔ DE`, `BE ↔ NL`, `FR ↔ BE`, `NL ↔ DE`) from 1 Jun 2025 – 30 Jun 2026 (181,917 sub-hourly records).
