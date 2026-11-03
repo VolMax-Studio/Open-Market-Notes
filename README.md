@@ -28,7 +28,7 @@ Results hashes below track the current repository outputs. Zenodo DOI links iden
 
 | Note ID | Note Title | Market Scope | Results Hash (`results_sha256`) | Original release Zenodo DOI |
 | :--- | :--- | :--- | :--- | :---: |
-| `OMN-001` | [Open Market Note #001 — NEM Duration Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/001-nem-duration-baseline) | Mainland Australia NEM (NSW1, QLD1, SA1, VIC1) | `7d76f292a230...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693239.svg)](https://doi.org/10.5281/zenodo.21693239) |
+| `OMN-001` | [Open Market Note #001 — NEM Duration Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/001-nem-duration-baseline) | Mainland Australia NEM (NSW1, QLD1, SA1, VIC1) | `11a5a3dffdf0...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693239.svg)](https://doi.org/10.5281/zenodo.21693239) |
 | `OMN-002` | [Open Market Note #002 — ERCOT Duration Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/002-ercot-duration-baseline) | ERCOT (West, North, South, Houston) | `90e3543b5550...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693245.svg)](https://doi.org/10.5281/zenodo.21693245) |
 | `OMN-003` | [Open Market Note #003 — ENTSO-E Imbalance Price Duration Baseline](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/003-entsoe-imbalance-baseline) | ENTSO-E Imbalance (NL, BE, FR, DK1, DK2, AT) | `b1c713379887...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693254.svg)](https://doi.org/10.5281/zenodo.21693254) |
 | `OMN-004` | [Open Market Note #004 — GB BESS Duration Baseline (Elexon BMRS)](https://github.com/VolMax-Studio/Open-Market-Notes/tree/main/notes/004-gb-duration-baseline) | Great Britain (Elexon BMRS NGET Area) | `d4c22021bf87...` | [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21693262.svg)](https://doi.org/10.5281/zenodo.21693262) |
@@ -79,9 +79,9 @@ Instead, they maintain a **Parametric Changelog** within each note directory. If
 ## Active Notes Index
 
 1. **[Note #001: NEM Duration Baseline](./notes/001-nem-duration-baseline)**
-   * *Scope:* Mainland Australia NEM (NSW1, QLD1, SA1, VIC1) from 2025-08-01 to 2026-08-31.
+   * *Scope:* Mainland Australia NEM (NSW1, QLD1, SA1, VIC1) from 2025-09-01 to 2026-09-30.
    * *Focus:* Scarcity price duration ($300/MWh threshold) and charging window availability (8h BESS at 0.85 RTE).
-   * *Status:* Latest measurement `v1.3.0` (executed at `2026-09-20T08:56:44Z`; see [measurement history](./notes/001-nem-duration-baseline/history/measurement_log.json)).
+   * *Status:* Latest measurement `v1.4.0` (executed at `2026-10-20T09:01:22Z`; see [measurement history](./notes/001-nem-duration-baseline/history/measurement_log.json)).
 
 2. **[Note #002: ERCOT Duration Baseline](./notes/002-ercot-duration-baseline)**
    * *Scope:* ERCOT Hubs (West, North, South, Houston) from 1 Jun 2025 – 30 Jun 2026.
