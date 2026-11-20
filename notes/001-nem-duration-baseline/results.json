@@ -1,108 +1,13 @@
 {
     "Metric_1_Scarcity_Pricing_Duration": {
         "NSW1": {
-            "Total_Events": 133,
-            "Mean_Duration_Minutes": 13.83,
+            "Total_Events": 134,
+            "Mean_Duration_Minutes": 13.73,
             "Median_Duration_Minutes": 5.0,
-            "P90_Duration_Minutes": 24.0,
-            "Max_Duration_Minutes": 300,
-            "Max_Duration_Timestamp": "2025-09-01 16:55:00",
+            "P90_Duration_Minutes": 28.5,
+            "Max_Duration_Minutes": 210,
+            "Max_Duration_Timestamp": "2026-10-13 11:35:00",
             "Event_List": [
-                {
-                    "start_time": "2025-09-01 07:05:00",
-                    "duration_minutes": 5,
-                    "max_price": 400.32088
-                },
-                {
-                    "start_time": "2025-09-01 16:55:00",
-                    "duration_minutes": 300,
-                    "max_price": 599.99
-                },
-                {
-                    "start_time": "2025-09-01 22:00:00",
-                    "duration_minutes": 5,
-                    "max_price": 357.40989
-                },
-                {
-                    "start_time": "2025-09-01 22:10:00",
-                    "duration_minutes": 5,
-                    "max_price": 354.67456
-                },
-                {
-                    "start_time": "2025-09-01 22:20:00",
-                    "duration_minutes": 5,
-                    "max_price": 324.22271
-                },
-                {
-                    "start_time": "2025-09-02 06:15:00",
-                    "duration_minutes": 5,
-                    "max_price": 351.89954
-                },
-                {
-                    "start_time": "2025-09-02 17:55:00",
-                    "duration_minutes": 10,
-                    "max_price": 499.96
-                },
-                {
-                    "start_time": "2025-09-02 18:25:00",
-                    "duration_minutes": 5,
-                    "max_price": 341.94615
-                },
-                {
-                    "start_time": "2025-09-02 18:35:00",
-                    "duration_minutes": 5,
-                    "max_price": 336.46283
-                },
-                {
-                    "start_time": "2025-09-05 06:30:00",
-                    "duration_minutes": 5,
-                    "max_price": 313.87224
-                },
-                {
-                    "start_time": "2025-09-05 06:40:00",
-                    "duration_minutes": 15,
-                    "max_price": 328.70374
-                },
-                {
-                    "start_time": "2025-09-10 08:05:00",
-                    "duration_minutes": 20,
-                    "max_price": 336.10652
-                },
-                {
-                    "start_time": "2025-09-10 08:40:00",
-                    "duration_minutes": 10,
-                    "max_price": 300.19636
-                },
-                {
-                    "start_time": "2025-09-10 09:35:00",
-                    "duration_minutes": 15,
-                    "max_price": 334.31411
-                },
-                {
-                    "start_time": "2025-09-10 09:55:00",
-                    "duration_minutes": 5,
-                    "max_price": 300.0
-                },
-                {
-                    "start_time": "2025-09-11 18:05:00",
-                    "duration_minutes": 5,
-                    "max_price": 300.2
-                },
-                {
-                    "start_time": "2025-09-13 18:00:00",
-                    "duration_minutes": 5,
-                    "max_price": 303.36555
-                },
-                {
-                    "start_time": "2025-09-13 18:10:00",
-                    "duration_minutes": 5,
-                    "max_price": 309.12725
-                },
-                {
-                    "start_time": "2025-09-29 17:45:00",
-                    "duration_minutes": 5,
-                    "max_price": 357.97762
-                },
                 {
                     "start_time": "2025-10-09 15:45:00",
                     "duration_minutes": 5,
@@ -672,82 +577,117 @@
                     "start_time": "2026-09-20 21:45:00",
                     "duration_minutes": 5,
                     "max_price": 384.0879
+                },
+                {
+                    "start_time": "2026-10-09 04:25:00",
+                    "duration_minutes": 10,
+                    "max_price": 312.0
+                },
+                {
+                    "start_time": "2026-10-09 04:45:00",
+                    "duration_minutes": 10,
+                    "max_price": 341.76765
+                },
+                {
+                    "start_time": "2026-10-09 05:00:00",
+                    "duration_minutes": 35,
+                    "max_price": 992.32
+                },
+                {
+                    "start_time": "2026-10-10 07:20:00",
+                    "duration_minutes": 5,
+                    "max_price": 23200.0
+                },
+                {
+                    "start_time": "2026-10-12 14:10:00",
+                    "duration_minutes": 75,
+                    "max_price": 23107.0
+                },
+                {
+                    "start_time": "2026-10-12 15:30:00",
+                    "duration_minutes": 10,
+                    "max_price": 9998.66
+                },
+                {
+                    "start_time": "2026-10-12 15:45:00",
+                    "duration_minutes": 10,
+                    "max_price": 989.09
+                },
+                {
+                    "start_time": "2026-10-12 16:00:00",
+                    "duration_minutes": 10,
+                    "max_price": 989.09
+                },
+                {
+                    "start_time": "2026-10-12 16:50:00",
+                    "duration_minutes": 5,
+                    "max_price": 310.31044
+                },
+                {
+                    "start_time": "2026-10-13 09:05:00",
+                    "duration_minutes": 5,
+                    "max_price": 311.11
+                },
+                {
+                    "start_time": "2026-10-13 11:00:00",
+                    "duration_minutes": 5,
+                    "max_price": 302.36362
+                },
+                {
+                    "start_time": "2026-10-13 11:35:00",
+                    "duration_minutes": 210,
+                    "max_price": 441.65944
+                },
+                {
+                    "start_time": "2026-10-13 15:15:00",
+                    "duration_minutes": 10,
+                    "max_price": 314.84602
+                },
+                {
+                    "start_time": "2026-10-13 17:05:00",
+                    "duration_minutes": 5,
+                    "max_price": 308.77794
+                },
+                {
+                    "start_time": "2026-10-13 17:20:00",
+                    "duration_minutes": 5,
+                    "max_price": 300.60972
+                },
+                {
+                    "start_time": "2026-10-13 17:30:00",
+                    "duration_minutes": 5,
+                    "max_price": 328.24572
+                },
+                {
+                    "start_time": "2026-10-13 17:40:00",
+                    "duration_minutes": 5,
+                    "max_price": 445.51
+                },
+                {
+                    "start_time": "2026-10-13 17:50:00",
+                    "duration_minutes": 5,
+                    "max_price": 325.90279
+                },
+                {
+                    "start_time": "2026-10-13 18:00:00",
+                    "duration_minutes": 5,
+                    "max_price": 317.56793
+                },
+                {
+                    "start_time": "2026-10-13 19:05:00",
+                    "duration_minutes": 5,
+                    "max_price": 307.76737
                 }
             ]
         },
         "QLD1": {
-            "Total_Events": 77,
-            "Mean_Duration_Minutes": 8.77,
+            "Total_Events": 75,
+            "Mean_Duration_Minutes": 8.47,
             "Median_Duration_Minutes": 5.0,
             "P90_Duration_Minutes": 15.0,
             "Max_Duration_Minutes": 80,
             "Max_Duration_Timestamp": "2026-09-24 02:15:00",
             "Event_List": [
-                {
-                    "start_time": "2025-09-01 07:05:00",
-                    "duration_minutes": 5,
-                    "max_price": 354.60865
-                },
-                {
-                    "start_time": "2025-09-01 15:55:00",
-                    "duration_minutes": 5,
-                    "max_price": 306.88734
-                },
-                {
-                    "start_time": "2025-09-01 17:40:00",
-                    "duration_minutes": 60,
-                    "max_price": 528.73003
-                },
-                {
-                    "start_time": "2025-09-01 18:45:00",
-                    "duration_minutes": 5,
-                    "max_price": 349.73
-                },
-                {
-                    "start_time": "2025-09-01 20:40:00",
-                    "duration_minutes": 5,
-                    "max_price": 349.73005
-                },
-                {
-                    "start_time": "2025-09-01 21:25:00",
-                    "duration_minutes": 5,
-                    "max_price": 383.25698
-                },
-                {
-                    "start_time": "2025-09-01 21:35:00",
-                    "duration_minutes": 5,
-                    "max_price": 302.70572
-                },
-                {
-                    "start_time": "2025-09-02 06:15:00",
-                    "duration_minutes": 5,
-                    "max_price": 352.95328
-                },
-                {
-                    "start_time": "2025-09-02 17:55:00",
-                    "duration_minutes": 10,
-                    "max_price": 311.80382
-                },
-                {
-                    "start_time": "2025-09-03 06:25:00",
-                    "duration_minutes": 5,
-                    "max_price": 349.73
-                },
-                {
-                    "start_time": "2025-09-04 18:35:00",
-                    "duration_minutes": 20,
-                    "max_price": 431.31832
-                },
-                {
-                    "start_time": "2025-09-04 19:00:00",
-                    "duration_minutes": 5,
-                    "max_price": 431.31831
-                },
-                {
-                    "start_time": "2025-09-29 17:45:00",
-                    "duration_minutes": 5,
-                    "max_price": 338.63883
-                },
                 {
                     "start_time": "2025-10-10 17:55:00",
                     "duration_minutes": 5,
@@ -1067,157 +1007,72 @@
                     "start_time": "2026-09-24 06:10:00",
                     "duration_minutes": 5,
                     "max_price": 331.81773
+                },
+                {
+                    "start_time": "2026-10-09 05:00:00",
+                    "duration_minutes": 35,
+                    "max_price": 860.05142
+                },
+                {
+                    "start_time": "2026-10-13 12:20:00",
+                    "duration_minutes": 5,
+                    "max_price": 302.05
+                },
+                {
+                    "start_time": "2026-10-13 12:35:00",
+                    "duration_minutes": 20,
+                    "max_price": 410.0
+                },
+                {
+                    "start_time": "2026-10-13 14:35:00",
+                    "duration_minutes": 5,
+                    "max_price": 302.04
+                },
+                {
+                    "start_time": "2026-10-13 14:50:00",
+                    "duration_minutes": 5,
+                    "max_price": 302.05
+                },
+                {
+                    "start_time": "2026-10-13 15:15:00",
+                    "duration_minutes": 5,
+                    "max_price": 303.99
+                },
+                {
+                    "start_time": "2026-10-13 17:30:00",
+                    "duration_minutes": 5,
+                    "max_price": 303.99
+                },
+                {
+                    "start_time": "2026-10-13 17:40:00",
+                    "duration_minutes": 5,
+                    "max_price": 410.0
+                },
+                {
+                    "start_time": "2026-10-13 17:50:00",
+                    "duration_minutes": 5,
+                    "max_price": 303.99
+                },
+                {
+                    "start_time": "2026-10-13 18:00:00",
+                    "duration_minutes": 5,
+                    "max_price": 303.99
+                },
+                {
+                    "start_time": "2026-10-13 19:05:00",
+                    "duration_minutes": 5,
+                    "max_price": 303.88
                 }
             ]
         },
         "SA1": {
-            "Total_Events": 331,
-            "Mean_Duration_Minutes": 24.41,
+            "Total_Events": 310,
+            "Mean_Duration_Minutes": 24.47,
             "Median_Duration_Minutes": 5.0,
             "P90_Duration_Minutes": 30.0,
             "Max_Duration_Minutes": 1250,
             "Max_Duration_Timestamp": "2026-07-30 11:35:00",
             "Event_List": [
-                {
-                    "start_time": "2025-09-01 07:05:00",
-                    "duration_minutes": 10,
-                    "max_price": 377.09
-                },
-                {
-                    "start_time": "2025-09-01 11:15:00",
-                    "duration_minutes": 10,
-                    "max_price": 760.19
-                },
-                {
-                    "start_time": "2025-09-01 16:55:00",
-                    "duration_minutes": 345,
-                    "max_price": 662.21629
-                },
-                {
-                    "start_time": "2025-09-01 22:45:00",
-                    "duration_minutes": 5,
-                    "max_price": 316.42491
-                },
-                {
-                    "start_time": "2025-09-01 22:55:00",
-                    "duration_minutes": 5,
-                    "max_price": 319.25102
-                },
-                {
-                    "start_time": "2025-09-01 23:55:00",
-                    "duration_minutes": 5,
-                    "max_price": 300.0
-                },
-                {
-                    "start_time": "2025-09-02 00:45:00",
-                    "duration_minutes": 5,
-                    "max_price": 321.73274
-                },
-                {
-                    "start_time": "2025-09-03 00:50:00",
-                    "duration_minutes": 10,
-                    "max_price": 1001.0
-                },
-                {
-                    "start_time": "2025-09-03 01:05:00",
-                    "duration_minutes": 5,
-                    "max_price": 344.62
-                },
-                {
-                    "start_time": "2025-09-03 20:15:00",
-                    "duration_minutes": 5,
-                    "max_price": 370.0
-                },
-                {
-                    "start_time": "2025-09-03 20:40:00",
-                    "duration_minutes": 5,
-                    "max_price": 360.55
-                },
-                {
-                    "start_time": "2025-09-03 23:30:00",
-                    "duration_minutes": 5,
-                    "max_price": 344.62
-                },
-                {
-                    "start_time": "2025-09-04 00:35:00",
-                    "duration_minutes": 5,
-                    "max_price": 344.62
-                },
-                {
-                    "start_time": "2025-09-04 03:25:00",
-                    "duration_minutes": 5,
-                    "max_price": 302.06
-                },
-                {
-                    "start_time": "2025-09-04 04:10:00",
-                    "duration_minutes": 5,
-                    "max_price": 370.0
-                },
-                {
-                    "start_time": "2025-09-04 05:15:00",
-                    "duration_minutes": 5,
-                    "max_price": 344.62
-                },
-                {
-                    "start_time": "2025-09-04 05:35:00",
-                    "duration_minutes": 5,
-                    "max_price": 344.62
-                },
-                {
-                    "start_time": "2025-09-04 06:55:00",
-                    "duration_minutes": 5,
-                    "max_price": 370.0
-                },
-                {
-                    "start_time": "2025-09-04 07:05:00",
-                    "duration_minutes": 10,
-                    "max_price": 370.0
-                },
-                {
-                    "start_time": "2025-09-05 08:45:00",
-                    "duration_minutes": 15,
-                    "max_price": 319.93355
-                },
-                {
-                    "start_time": "2025-09-05 09:05:00",
-                    "duration_minutes": 10,
-                    "max_price": 465.82373
-                },
-                {
-                    "start_time": "2025-09-08 07:10:00",
-                    "duration_minutes": 5,
-                    "max_price": 370.0
-                },
-                {
-                    "start_time": "2025-09-08 07:20:00",
-                    "duration_minutes": 5,
-                    "max_price": 360.55
-                },
-                {
-                    "start_time": "2025-09-13 06:10:00",
-                    "duration_minutes": 5,
-                    "max_price": 305.34775
-                },
-                {
-                    "start_time": "2025-09-15 20:50:00",
-                    "duration_minutes": 10,
-                    "max_price": 815.73
-                },
-                {
-                    "start_time": "2025-09-17 18:30:00",
-                    "duration_minutes": 20,
-                    "max_price": 370.0
-                },
-                {
-                    "start_time": "2025-09-17 18:55:00",
-                    "duration_minutes": 5,
-                    "max_price": 350.2085
-                },
-                {
-                    "start_time": "2025-09-29 22:15:00",
-                    "duration_minutes": 5,
-                    "max_price": 308.81988
-                },
                 {
                     "start_time": "2025-10-03 00:15:00",
                     "duration_minutes": 5,
@@ -2732,67 +2587,52 @@
                     "start_time": "2026-09-28 08:40:00",
                     "duration_minutes": 10,
                     "max_price": 358.57
+                },
+                {
+                    "start_time": "2026-10-04 13:40:00",
+                    "duration_minutes": 5,
+                    "max_price": 321.0
+                },
+                {
+                    "start_time": "2026-10-04 14:40:00",
+                    "duration_minutes": 5,
+                    "max_price": 390.2
+                },
+                {
+                    "start_time": "2026-10-09 06:35:00",
+                    "duration_minutes": 5,
+                    "max_price": 363.15
+                },
+                {
+                    "start_time": "2026-10-09 07:15:00",
+                    "duration_minutes": 10,
+                    "max_price": 3210.98
+                },
+                {
+                    "start_time": "2026-10-09 09:05:00",
+                    "duration_minutes": 5,
+                    "max_price": 300.0
+                },
+                {
+                    "start_time": "2026-10-09 09:35:00",
+                    "duration_minutes": 5,
+                    "max_price": 349.6
+                },
+                {
+                    "start_time": "2026-10-28 06:00:00",
+                    "duration_minutes": 5,
+                    "max_price": 348.97
                 }
             ]
         },
         "VIC1": {
-            "Total_Events": 56,
-            "Mean_Duration_Minutes": 26.16,
+            "Total_Events": 49,
+            "Mean_Duration_Minutes": 22.65,
             "Median_Duration_Minutes": 10.0,
-            "P90_Duration_Minutes": 42.5,
-            "Max_Duration_Minutes": 300,
-            "Max_Duration_Timestamp": "2025-09-01 16:55:00",
+            "P90_Duration_Minutes": 38.0,
+            "Max_Duration_Minutes": 270,
+            "Max_Duration_Timestamp": "2026-07-08 16:30:00",
             "Event_List": [
-                {
-                    "start_time": "2025-09-01 07:05:00",
-                    "duration_minutes": 5,
-                    "max_price": 383.10034
-                },
-                {
-                    "start_time": "2025-09-01 16:55:00",
-                    "duration_minutes": 300,
-                    "max_price": 623.91979
-                },
-                {
-                    "start_time": "2025-09-01 22:00:00",
-                    "duration_minutes": 30,
-                    "max_price": 359.17752
-                },
-                {
-                    "start_time": "2025-09-01 22:35:00",
-                    "duration_minutes": 5,
-                    "max_price": 305.40187
-                },
-                {
-                    "start_time": "2025-09-09 17:30:00",
-                    "duration_minutes": 5,
-                    "max_price": 311.06069
-                },
-                {
-                    "start_time": "2025-09-09 17:50:00",
-                    "duration_minutes": 15,
-                    "max_price": 323.27
-                },
-                {
-                    "start_time": "2025-09-10 08:05:00",
-                    "duration_minutes": 5,
-                    "max_price": 321.86467
-                },
-                {
-                    "start_time": "2025-09-17 18:20:00",
-                    "duration_minutes": 5,
-                    "max_price": 314.8682
-                },
-                {
-                    "start_time": "2025-09-17 18:30:00",
-                    "duration_minutes": 20,
-                    "max_price": 402.54661
-                },
-                {
-                    "start_time": "2025-09-17 18:55:00",
-                    "duration_minutes": 5,
-                    "max_price": 360.07
-                },
                 {
                     "start_time": "2025-10-13 04:50:00",
                     "duration_minutes": 5,
@@ -3022,43 +2862,57 @@
                     "start_time": "2026-08-20 09:45:00",
                     "duration_minutes": 5,
                     "max_price": 301.55
+                },
+                {
+                    "start_time": "2026-10-05 06:15:00",
+                    "duration_minutes": 20,
+                    "max_price": 406.11105
+                },
+                {
+                    "start_time": "2026-10-05 06:45:00",
+                    "duration_minutes": 15,
+                    "max_price": 326.03339
+                },
+                {
+                    "start_time": "2026-10-21 08:20:00",
+                    "duration_minutes": 5,
+                    "max_price": 337.59862
                 }
             ]
         }
     },
     "Metric_2_Charging_Window_Availability": {
         "NSW1": {
-            "Total_Days": 395,
-            "Days_Met_8h_BESS": 121,
-            "Pct_Days_Met_8h_BESS": 30.63,
-            "Days_Met_4h_BESS": 286,
-            "Pct_Days_Met_4h_BESS": 72.41
+            "Total_Days": 396,
+            "Days_Met_8h_BESS": 105,
+            "Pct_Days_Met_8h_BESS": 26.52,
+            "Days_Met_4h_BESS": 265,
+            "Pct_Days_Met_4h_BESS": 66.92
         },
         "QLD1": {
-            "Total_Days": 395,
-            "Days_Met_8h_BESS": 136,
-            "Pct_Days_Met_8h_BESS": 34.43,
-            "Days_Met_4h_BESS": 323,
-            "Pct_Days_Met_4h_BESS": 81.77
+            "Total_Days": 396,
+            "Days_Met_8h_BESS": 121,
+            "Pct_Days_Met_8h_BESS": 30.56,
+            "Days_Met_4h_BESS": 306,
+            "Pct_Days_Met_4h_BESS": 77.27
         },
         "SA1": {
-            "Total_Days": 395,
-            "Days_Met_8h_BESS": 252,
-            "Pct_Days_Met_8h_BESS": 63.8,
-            "Days_Met_4h_BESS": 326,
-            "Pct_Days_Met_4h_BESS": 82.53
+            "Total_Days": 396,
+            "Days_Met_8h_BESS": 250,
+            "Pct_Days_Met_8h_BESS": 63.13,
+            "Days_Met_4h_BESS": 325,
+            "Pct_Days_Met_4h_BESS": 82.07
         },
         "VIC1": {
-            "Total_Days": 395,
-            "Days_Met_8h_BESS": 268,
-            "Pct_Days_Met_8h_BESS": 67.85,
-            "Days_Met_4h_BESS": 339,
-            "Pct_Days_Met_4h_BESS": 85.82
+            "Total_Days": 396,
+            "Days_Met_8h_BESS": 264,
+            "Pct_Days_Met_8h_BESS": 66.67,
+            "Days_Met_4h_BESS": 336,
+            "Pct_Days_Met_4h_BESS": 84.85
         }
     },
     "Metric_3_Fleet_Cycling_Feedback_Loop": {
         "Short_Medium_Duration_Group_Monthly_Average": {
-            "2025-09": 28.0191,
             "2025-10": 28.7679,
             "2025-11": 26.5738,
             "2025-12": 28.088,
@@ -3070,28 +2924,11 @@
             "2026-06": 27.3111,
             "2026-07": 32.0499,
             "2026-08": 30.5745,
-            "2026-09": 26.0436
+            "2026-09": 26.06,
+            "2026-10": 27.03
         },
         "Long_Duration_Group_Monthly_Average": {},
         "Per_Asset_Monthly_EFC": {
-            "2025-09": {
-                "HPR1": 25.0855,
-                "VBB1": 30.464,
-                "WANDB1": 29.0636,
-                "WDBESS1": 26.4659,
-                "TIB1": 34.2058,
-                "HBESS1": 29.8176,
-                "RANGEB1": 39.9605,
-                "CHBESS1": 23.5287,
-                "BLYTHB1": 27.9848,
-                "BHB1": 20.1369,
-                "BBATTERY1": 28.6536,
-                "ULPBESS1": 26.1746,
-                "WALGRV1": 36.4176,
-                "RESS1": 25.0314,
-                "RIVNB2": 19.6543,
-                "CAPBES1": 25.6602
-            },
             "2025-10": {
                 "HPR1": 22.5145,
                 "VBB1": 23.5428,
@@ -3291,22 +3128,40 @@
                 "CAPBES1": 30.4843
             },
             "2026-09": {
-                "HPR1": 19.3278,
-                "VBB1": 25.7069,
-                "WANDB1": 30.0898,
-                "WDBESS1": 28.7525,
-                "TIB1": 27.7371,
-                "HBESS1": 30.9684,
-                "RANGEB1": 25.5254,
-                "CHBESS1": 23.7448,
-                "BLYTHB1": 24.97,
-                "BHB1": 26.3279,
-                "BBATTERY1": 25.0734,
-                "ULPBESS1": 39.5496,
-                "WALGRV1": 22.4831,
-                "RESS1": 19.6957,
-                "RIVNB2": 15.4098,
-                "CAPBES1": 31.335
+                "HPR1": 19.3352,
+                "VBB1": 25.7319,
+                "WANDB1": 30.0954,
+                "WDBESS1": 28.7596,
+                "TIB1": 27.7438,
+                "HBESS1": 30.9969,
+                "RANGEB1": 25.5284,
+                "CHBESS1": 23.7499,
+                "BLYTHB1": 24.9784,
+                "BHB1": 26.3321,
+                "BBATTERY1": 25.1143,
+                "ULPBESS1": 39.6154,
+                "WALGRV1": 22.4879,
+                "RESS1": 19.6968,
+                "RIVNB2": 15.4108,
+                "CAPBES1": 31.3838
+            },
+            "2026-10": {
+                "HPR1": 23.6409,
+                "VBB1": 30.9548,
+                "WANDB1": 28.1535,
+                "WDBESS1": 25.8577,
+                "TIB1": 28.7208,
+                "HBESS1": 30.8571,
+                "RANGEB1": 28.951,
+                "CHBESS1": 24.3756,
+                "BLYTHB1": 25.651,
+                "BHB1": 25.6147,
+                "BBATTERY1": 24.7367,
+                "ULPBESS1": 30.3007,
+                "WALGRV1": 22.6382,
+                "RESS1": 27.3214,
+                "RIVNB2": 22.7541,
+                "CAPBES1": 31.9519
             }
         }
     }
